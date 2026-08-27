@@ -44,7 +44,7 @@
 </div>
 
 <script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // <--- PEGA TU NUEVA URL AQUÍ
+    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // <--- PEGA TU URL DE GOOGLE AQUÍ
     let datosEmpleado = {};
 
     const canvas = document.getElementById("pizarra");
@@ -142,17 +142,31 @@
             firma: canvas.toDataURL("image/png") 
         };
 
+        // Petición con el depurador integrado
         fetch(URL_GOOGLE_SCRIPT, {
             method: "POST",
             body: JSON.stringify(datosEnvio)
         })
-        .then(res => res.json())
-        .then(respuesta => {
-            alert("¡Pedido validado y enviado con éxito!");
-            document.location.reload(); 
+        .then(res => res.text())
+        .then(respuestaTexto => {
+            console.log("Respuesta real de Google:", respuestaTexto);
+            
+            try {
+                const respuesta = JSON.parse(respuestaTexto);
+                if (respuesta.resultado === "exito") {
+                    alert("¡Pedido validado y enviado con éxito!");
+                    document.location.reload();
+                } else {
+                    alert("Error devuelto por Google: " + (respuesta.detalles || "Desconocido"));
+                    btn.innerText = "Confirmar Pedido"; btn.disabled = false;
+                }
+            } catch (e) {
+                alert("Error crítico: Google devolvió texto plano o HTML en vez de datos. Revisa la consola (F12).");
+                btn.innerText = "Confirmar Pedido"; btn.disabled = false;
+            }
         })
         .catch(error => {
-            alert("Hubo un error al guardar.");
+            alert("Error de red al intentar guardar.");
             btn.innerText = "Confirmar Pedido"; btn.disabled = false;
         });
     }
