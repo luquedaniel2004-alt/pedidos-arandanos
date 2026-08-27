@@ -44,7 +44,7 @@
 </div>
 
 <script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // <--- PEGA TU URL DE GOOGLE AQUÍ
+    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // <--- PEGA TU NUEVA URL AQUÍ
     let datosEmpleado = {};
 
     const canvas = document.getElementById("pizarra");
@@ -95,14 +95,12 @@
 
         fetch(URL_GOOGLE_SCRIPT, {
             method: "POST",
-            body: JSON.stringify({ accion: "buscar", cedula: cedula }),
-            headers: { "Content-Type": "text/plain;charset=utf-8" }
+            body: JSON.stringify({ accion: "buscar", cedula: cedula })
         })
         .then(res => res.json())
         .then(respuesta => {
             if (respuesta.encontrado) {
                 datosEmpleado = respuesta;
-                
                 document.getElementById("seccionBusqueda").style.display = "none";
                 document.getElementById("seccionPedido").style.display = "block";
                 document.getElementById("nombreMostrado").innerText = "Hola, " + datosEmpleado.nombre;
@@ -129,7 +127,7 @@
         }
 
         if (limpiarTexto(datoIngresado) !== limpiarTexto(datosEmpleado.datoSeguridad)) {
-            alert("El dato de seguridad no coincide. Pedido bloqueado.");
+            alert("El año de nacimiento no coincide. Pedido bloqueado.");
             return;
         }
 
@@ -146,8 +144,7 @@
 
         fetch(URL_GOOGLE_SCRIPT, {
             method: "POST",
-            body: JSON.stringify(datosEnvio),
-            headers: { "Content-Type": "text/plain;charset=utf-8" }
+            body: JSON.stringify(datosEnvio)
         })
         .then(res => res.json())
         .then(respuesta => {
