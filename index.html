@@ -17,9 +17,33 @@
         canvas { border: 2px dashed #ccc; background: #fff; width: 100%; height: 150px; cursor: crosshair; margin-bottom: 10px; border-radius: 5px; }
         .hidden { display: none; }
         .info-empleado { background: #e8f8f5; padding: 10px; border-radius: 5px; color: #16a085; margin-bottom: 15px; font-weight: bold; }
+
+        /* Estilos para el indicador de carga con el arándano giratorio */
+        #loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999; color: white;
+            font-family: Arial, sans-serif; font-size: 18px; font-weight: bold;
+        }
+        .arandano-spinner {
+            font-size: 50px;
+            display: inline-block;
+            animation: girar 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes girar {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+
+<!-- PANTALLA DE CARGA (OCULTA POR DEFECTO) -->
+<div id="loader-overlay" class="hidden">
+    <div class="arandano-spinner">🫐</div>
+    <div id="loader-texto">Guardando registro, por favor espere...</div>
+</div>
 
 <div class="container">
     <!-- MENÚ PRINCIPAL -->
@@ -43,7 +67,7 @@
             <input type="number" id="cantidad-aran" placeholder="Cantidad de cajas" required>
             <canvas id="pizarra"></canvas>
             <button type="button" class="btn-volver" onclick="limpiarFirma()">Limpiar Firma</button>
-            <button type="submit" onclick="enviarArandanos()">Enviar Pedido</button>
+            <button type="submit" id="btn-enviar-aran" onclick="enviarArandanos()">Enviar Pedido</button>
         </div>
         <button class="btn-volver" onclick="volverMenu()">⬅ Volver al Menú</button>
     </div>
@@ -57,14 +81,14 @@
             <input type="text" id="anio-bloque" placeholder="Año de Bloque (ej: 2024)" required>
             <input type="number" id="canastillas" placeholder="Número de canastillas" required>
             <input type="number" step="0.01" id="peso" placeholder="Peso de canastillas (kg)" required>
-            <button type="submit" onclick="enviarPostcosecha()">Registrar Ingreso</button>
+            <button type="submit" id="btn-enviar-post" onclick="enviarPostcosecha()">Registrar Ingreso</button>
         </div>
         <button class="btn-volver" onclick="volverMenu()">⬅ Volver al Menú</button>
     </div>
 </div>
 
 <script>
-    const URL_DEL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
+    const URL_DEL_SCRIPT = "TU_URL_DE_APPS_SCRIPT_AQUI";
     let nombreGlobal = "";
 
     function mostrarSeccion(seccion) {
@@ -161,13 +185,18 @@
         ctx.beginPath();
     }
 
-    // --- ENVÍOS ---
+    // --- FUNCIONES DE ENVÍO CON BLOQUEO Y SPINNER DE ARÁNDANO ---
     function enviarArandanos() {
         const cedula = document.getElementById('cedula-aran').value;
         const cantidad = document.getElementById('cantidad-aran').value;
         const firmaData = canvas.toDataURL("image/png");
 
         if(!cantidad) { alert("Ingresa la cantidad de cajas"); return; }
+
+        // Mostrar pantalla de carga y bloquear botón
+        document.getElementById('loader-texto').innerText = "Guardando pedido de arándanos...";
+        document.getElementById('loader-overlay').classList.remove('hidden');
+        document.getElementById('btn-enviar-aran').disabled = true;
 
         const datos = {
             accion: "guardar_arandanos",
@@ -185,6 +214,10 @@
         }).then(() => {
             alert("¡Pedido de arándanos guardado con éxito!");
             location.reload();
+        }).catch(() => {
+            alert("Ocurrió un error al enviar.");
+            document.getElementById('loader-overlay').classList.add('hidden');
+            document.getElementById('btn-enviar-aran').disabled = false;
         });
     }
 
@@ -205,6 +238,11 @@
             return; 
         }
 
+        // Mostrar pantalla de carga con el arándano girando y bloquear el botón
+        document.getElementById('loader-texto').innerText = "Registrando ingreso de fruta...";
+        document.getElementById('loader-overlay').classList.remove('hidden');
+        document.getElementById('btn-enviar-post').disabled = true;
+
         const datos = {
             accion: "guardar_postcosecha",
             codigo: codigo,
@@ -222,6 +260,10 @@
         }).then(() => {
             alert("¡Ingreso de fruta registrado con éxito en Postcosecha!");
             location.reload();
+        }).catch(() => {
+            alert("Ocurrió un error al enviar.");
+            document.getElementById('loader-overlay').classList.add('hidden');
+            document.getElementById('btn-enviar-post').disabled = false;
         });
     }
 </script>
