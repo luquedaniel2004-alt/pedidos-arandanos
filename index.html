@@ -52,11 +52,11 @@
     <div id="seccion-postcosecha" class="hidden">
         <h2>Ingreso a Postcosecha</h2>
         <div>
-            <input type="password" id="codigo-post" placeholder="Código de acceso" required>
+            <input type="password" id="codigo-post" placeholder="Código de acceso (Ej: 2005)" required>
             <input type="text" id="bloque" placeholder="Bloque (ej: Bloque 3)" required>
             <input type="text" id="anio-bloque" placeholder="Año de Bloque (ej: 2024)" required>
             <input type="number" id="canastillas" placeholder="Número de canastillas" required>
-            <input type="number" step="0.01" id="peso" placeholder="Peso total (kg)" required>
+            <input type="number" step="0.01" id="peso" placeholder="Peso de canastillas (kg)" required>
             <button type="submit" onclick="enviarPostcosecha()">Registrar Ingreso</button>
         </div>
         <button class="btn-volver" onclick="volverMenu()">⬅ Volver al Menú</button>
