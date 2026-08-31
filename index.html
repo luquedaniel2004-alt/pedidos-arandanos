@@ -17,33 +17,9 @@
         canvas { border: 2px dashed #ccc; background: #fff; width: 100%; height: 150px; cursor: crosshair; margin-bottom: 10px; border-radius: 5px; }
         .hidden { display: none; }
         .info-empleado { background: #e8f8f5; padding: 10px; border-radius: 5px; color: #16a085; margin-bottom: 15px; font-weight: bold; }
-
-        /* Estilos para el indicador de carga con el arándano giratorio */
-        #loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 9999; color: white;
-            font-family: Arial, sans-serif; font-size: 18px; font-weight: bold;
-        }
-        .arandano-spinner {
-            font-size: 65px;
-            display: inline-block;
-            animation: girar 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        @keyframes girar {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
-
-<!-- PANTALLA DE CARGA -->
-<div id="loader-overlay" class="hidden">
-    <div class="arandano-spinner">🫐</div>
-    <div id="loader-texto">Guardando registro, por favor espere...</div>
-</div>
 
 <div class="container">
     <!-- MENÚ PRINCIPAL -->
@@ -88,7 +64,7 @@
 </div>
 
 <script>
-    const URL_DEL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
+    const URL_DEL_SCRIPT = "TU_URL_DE_APPS_SCRIPT_AQUI";
     let nombreGlobal = "";
     let enviando = false;
 
@@ -117,6 +93,7 @@
         document.getElementById('canastillas').value = "";
         document.getElementById('peso').value = "";
         limpiarFirma();
+        enviando = false;
     }
 
     function verificarEmpleado() {
@@ -186,7 +163,7 @@
         ctx.beginPath();
     }
 
-    // --- ENVÍOS CON CIERRE AUTOMÁTICO SEGURO ---
+    // --- ENVÍOS DIRECTOS SIN PANTALLA DE CARGA ---
     function enviarArandanos() {
         if (enviando) return;
 
@@ -198,8 +175,6 @@
 
         enviando = true;
         document.getElementById('btn-enviar-aran').disabled = true;
-        document.getElementById('loader-texto').innerText = "Guardando pedido de arándanos...";
-        document.getElementById('loader-overlay').classList.remove('hidden');
 
         const datos = {
             accion: "guardar_arandanos",
@@ -209,7 +184,6 @@
             firma: firmaData
         };
 
-        // Dispara el envío hacia Google Sheets
         fetch(URL_DEL_SCRIPT, {
             method: "POST",
             mode: "no-cors",
@@ -217,11 +191,10 @@
             body: JSON.stringify(datos)
         });
 
-        // Forzamos un tiempo de 2 segundos de animación fluida y recargamos con éxito
         setTimeout(() => {
             alert("¡Pedido de arándanos guardado con éxito!");
-            location.reload();
-        }, 2000);
+            volverMenu();
+        }, 1000);
     }
 
     function enviarPostcosecha() {
@@ -245,8 +218,6 @@
 
         enviando = true;
         document.getElementById('btn-enviar-post').disabled = true;
-        document.getElementById('loader-texto').innerText = "Registrando ingreso de fruta...";
-        document.getElementById('loader-overlay').classList.remove('hidden');
 
         const datos = {
             accion: "guardar_postcosecha",
@@ -257,7 +228,6 @@
             peso: peso
         };
 
-        // Dispara el envío hacia Google Sheets
         fetch(URL_DEL_SCRIPT, {
             method: "POST",
             mode: "no-cors",
@@ -265,11 +235,10 @@
             body: JSON.stringify(datos)
         });
 
-        // Forzamos 2 segundos exactos de animación del arándano girando y luego recarga limpia
         setTimeout(() => {
             alert("¡Ingreso de fruta registrado con éxito en Postcosecha!");
-            location.reload();
-        }, 2000);
+            volverMenu();
+        }, 1000);
     }
 </script>
 
