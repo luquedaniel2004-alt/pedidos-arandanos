@@ -121,6 +121,7 @@
             .then(data => {
                 if (data.encontrado) {
                     nombreGlobal = data.nombre;
+                    // INYECCIÓN DEL NOMBRE REAL DEL EMPLEADO EN LA PANTALLA
                     document.getElementById('nombre-empleado-aran').innerText = "Bienvenido: " + nombreGlobal;
                     document.getElementById('paso1-aran').classList.add('hidden');
                     document.getElementById('paso2-aran').classList.remove('hidden');
