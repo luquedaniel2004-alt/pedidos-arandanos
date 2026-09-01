@@ -22,7 +22,6 @@
 <body>
 
 <div class="container">
-    <!-- MENÚ PRINCIPAL -->
     <div id="menu-principal">
         <h2>C.I. Flores de Funza</h2>
         <p>Selecciona una opción para continuar:</p>
@@ -105,6 +104,7 @@
         enviando = false;
     }
 
+    // BÚSQUEDA DEL NOMBRE EN LA BASE DE DATOS
     function verificarEmpleado() {
         const cedula = document.getElementById('cedula-aran').value.trim();
         const seguridad = document.getElementById('seguridad-aran').value.trim();
@@ -114,12 +114,25 @@
             return;
         }
 
-        // Validación local fluida para evitar errores de CORS en la consola
-        nombreGlobal = "Empleado Cédula: " + cedula;
-        document.getElementById('nombre-empleado-aran').innerText = "Bienvenido, Colaborador (Cédula: " + cedula + ")";
-        document.getElementById('paso1-aran').classList.add('hidden');
-        document.getElementById('paso2-aran').classList.remove('hidden');
-        inicializarCanvas();
+        const urlConsulta = URL_DEL_SCRIPT + "?accion=buscar&cedula=" + encodeURIComponent(cedula) + "&seguridad=" + encodeURIComponent(seguridad);
+
+        fetch(urlConsulta)
+            .then(respuesta => respuesta.json())
+            .then(data => {
+                if (data.encontrado) {
+                    nombreGlobal = data.nombre;
+                    document.getElementById('nombre-empleado-aran').innerText = "Bienvenido: " + nombreGlobal;
+                    document.getElementById('paso1-aran').classList.add('hidden');
+                    document.getElementById('paso2-aran').classList.remove('hidden');
+                    inicializarCanvas();
+                } else {
+                    alert("❌ " + data.error);
+                }
+            })
+            .catch(error => {
+                alert("Error de conexión. Inténtalo de nuevo.");
+                console.error(error);
+            });
     }
 
     // --- LÓGICA DE FIRMA ---
