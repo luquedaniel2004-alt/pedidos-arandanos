@@ -11,7 +11,7 @@
         .btn-menu { background-color: #2c3e50; color: white; border: none; padding: 15px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; transition: background 0.3s; }
         .btn-menu:hover { background-color: #34495e; }
         .btn-volver { background-color: #7f8c8d; color: white; border: none; padding: 10px; width: 100%; font-size: 14px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: white; }
         button[type="submit"], button[type="button"] { background-color: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 5px; }
         button[type="submit"]:hover, button[type="button"]:hover { background-color: #219653; }
         canvas { border: 2px dashed #ccc; background: #fff; width: 100%; height: 150px; cursor: crosshair; margin-bottom: 10px; border-radius: 5px; }
@@ -57,6 +57,15 @@
             <input type="text" id="anio-bloque" placeholder="Año de Bloque (ej: 2024)" required>
             <input type="number" id="canastillas" placeholder="Número de canastillas" required>
             <input type="number" step="0.01" id="peso" placeholder="Peso de canastillas (kg)" required>
+            
+            <!-- Lista desplegable para el Tipo de Fruta -->
+            <select id="tipo-fruta" required>
+                <option value="" disabled selected>Seleccione el Tipo de Fruta</option>
+                <option value="T1">T1</option>
+                <option value="T2">T2</option>
+                <option value="T3">T3</option>
+            </select>
+
             <button type="submit" id="btn-enviar-post" onclick="enviarPostcosecha()">Registrar Ingreso</button>
         </div>
         <button class="btn-volver" onclick="volverMenu()">⬅ Volver al Menú</button>
@@ -92,6 +101,7 @@
         document.getElementById('anio-bloque').value = "";
         document.getElementById('canastillas').value = "";
         document.getElementById('peso').value = "";
+        document.getElementById('tipo-fruta').selectedIndex = 0;
         limpiarFirma();
         enviando = false;
     }
@@ -163,7 +173,7 @@
         ctx.beginPath();
     }
 
-    // --- ENVÍOS DIRECTOS SIN PANTALLA DE CARGA ---
+    // --- ENVÍOS ---
     function enviarArandanos() {
         if (enviando) return;
 
@@ -205,14 +215,15 @@
         const anioBloque = document.getElementById('anio-bloque').value;
         const canastillas = document.getElementById('canastillas').value;
         const peso = document.getElementById('peso').value;
+        const tipoFruta = document.getElementById('tipo-fruta').value;
 
         if(codigo !== "2005") {
             alert("❌ Código de acceso incorrecto. No se puede registrar.");
             return;
         }
 
-        if(!bloque || !anioBloque || !canastillas || !peso) { 
-            alert("Completa todos los campos obligatorios"); 
+        if(!bloque || !anioBloque || !canastillas || !peso || !tipoFruta) { 
+            alert("Completa todos los campos obligatorios, incluyendo el tipo de fruta"); 
             return; 
         }
 
@@ -225,7 +236,8 @@
             bloque: bloque,
             anioBloque: anioBloque,
             canastillas: canastillas,
-            peso: peso
+            peso: peso,
+            tipoFruta: tipoFruta
         };
 
         fetch(URL_DEL_SCRIPT, {
