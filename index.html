@@ -14,7 +14,7 @@
         input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: white; }
         button[type="submit"], button[type="button"] { background-color: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 5px; }
         button[type="submit"]:hover, button[type="button"]:hover { background-color: #219653; }
-        canvas { border: 2px dashed #ccc; background: #fff; width: 100%; height: 150px; cursor: crosshair; margin-bottom: 10px; border-radius: 5px; }
+        canvas { border: 2px dashed #ccc; background: #fff; width: 100%; height: 150px; cursor: crosshair; margin-bottom: 10px; border-radius: 5px; touch-action: none; }
         .hidden { display: none; }
         .info-empleado { background: #e8f8f5; padding: 10px; border-radius: 5px; color: #16a085; margin-bottom: 15px; font-weight: bold; }
     </style>
@@ -58,7 +58,6 @@
             <input type="number" id="canastillas" placeholder="Número de canastillas" required>
             <input type="number" step="0.01" id="peso" placeholder="Peso de canastillas (kg)" required>
             
-            <!-- Lista desplegable para el Tipo de Fruta -->
             <select id="tipo-fruta" required>
                 <option value="" disabled selected>Seleccione el Tipo de Fruta</option>
                 <option value="T1">T1</option>
@@ -106,26 +105,35 @@
         enviando = false;
     }
 
+    // --- VERIFICACIÓN REAL DEL EMPLEADO EN LA BASE DE DATOS ---
     function verificarEmpleado() {
-        const cedula = document.getElementById('cedula-aran').value;
-        const seguridad = document.getElementById('seguridad-aran').value;
+        const cedula = document.getElementById('cedula-aran').value.trim();
+        const seguridad = document.getElementById('seguridad-aran').value.trim();
 
         if(!cedula || !seguridad) {
             alert("Por favor completa ambos campos.");
             return;
         }
 
-        fetch(URL_DEL_SCRIPT, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ accion: "buscar", cedula: cedula })
-        });
+        const urlConsulta = `${URL_DEL_SCRIPT}?accion=buscar&cedula=${encodeURIComponent(cedula)}&seguridad=${encodeURIComponent(seguridad)}`;
 
-        nombreGlobal = "Empleado Autorizado";
-        document.getElementById('nombre-empleado-aran').innerText = "Bienvenido: " + nombreGlobal;
-        document.getElementById('paso1-aran').classList.add('hidden');
-        document.getElementById('paso2-aran').classList.remove('hidden');
+        fetch(urlConsulta)
+            .then(response => response.json())
+            .then(data => {
+                if (data.encontrado) {
+                    nombreGlobal = data.nombre;
+                    document.getElementById('nombre-empleado-aran').innerText = "Bienvenido: " + nombreGlobal;
+                    document.getElementById('paso1-aran').classList.add('hidden');
+                    document.getElementById('paso2-aran').classList.remove('hidden');
+                    inicializarCanvas();
+                } else {
+                    alert("❌ " + (data.error || "Datos incorrectos. Verifica tu cédula y año de seguridad."));
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Hubo un error al verificar los datos con la base de datos.");
+            });
     }
 
     // --- LÓGICA DE FIRMA ---
@@ -142,31 +150,37 @@
         }, 200);
     }
 
-    canvas.addEventListener('mousedown', () => dibujando = true);
-    canvas.addEventListener('mouseup', () => { dibujando = false; ctx.beginPath(); });
-    canvas.addEventListener('mousemove', dibujar);
+    canvas.addEventListener('mousedown', (e) => {
+        dibujando = true;
+        const rect = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+    canvas.addEventListener('mouseup', () => { dibujando = false; });
+    canvas.addEventListener('mousemove', (e) => {
+        if (!dibujando) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+    });
 
-    canvas.addEventListener('touchstart', (e) => { dibujando = true; e.preventDefault(); });
-    canvas.addEventListener('touchend', () => { dibujando = false; ctx.beginPath(); });
+    canvas.addEventListener('touchstart', (e) => {
+        dibujando = true;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        e.preventDefault();
+    });
+    canvas.addEventListener('touchend', () => { dibujando = false; });
     canvas.addEventListener('touchmove', (e) => {
         if (!dibujando) return;
         const rect = canvas.getBoundingClientRect();
         const touch = e.touches[0];
         ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
         ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
         e.preventDefault();
     });
-
-    function dibujar(e) {
-        if (!dibujando) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    }
 
     function limpiarFirma() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
