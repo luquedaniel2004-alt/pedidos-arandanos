@@ -3,201 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C.I. Flores de Funza - Sistema de Registro</title>
+    <title>Sistema General - Flores de Funza</title>
+    <!-- Librería de Signature Pad para la firma -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        h2 { color: #333; margin-bottom: 20px; }
-        .btn-menu { background-color: #2c3e50; color: white; border: none; padding: 15px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
-        .btn-volver { background-color: #7f8c8d; color: white; border: none; padding: 10px; width: 100%; font-size: 14px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; background: white; }
-        button[type="submit"], button[type="button"] { background-color: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 5px; }
-        canvas { border: 2px dashed #ccc; background: #fff; width: 100%; height: 150px; cursor: crosshair; margin-bottom: 10px; border-radius: 5px; touch-action: none; }
-        .hidden { display: none; }
-        .info-empleado { background: #e8f8f5; padding: 10px; border-radius: 5px; color: #16a085; margin-bottom: 15px; font-weight: bold; }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 500px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: auto; }
+        h2, h3 { text-align: center; color: #2c3e50; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #218838; }
+        .btn-secondary { background-color: #007bff; }
+        .btn-secondary:hover { background-color: #0056b3; }
+        .btn-warning { background-color: #e67e22; color: white; }
+        .btn-warning:hover { background-color: #d35400; }
+        .btn-danger { background-color: #dc3545; margin-top: 5px; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-volver { background-color: #6c757d; margin-top: 10px; }
+        .btn-volver:hover { background-color: #5a6268; }
+        
+        /* Control de pantallas / vistas */
+        .vista { display: none; }
+        .vista.activa { display: block; }
+        
+        #signature-pad { border: 2px dashed #ccc; background-color: #fafafa; width: 100%; height: 200px; border-radius: 4px; }
+        .mensaje-autorizacion { background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; }
+        .bienvenida-box { text-align: center; padding: 20px 0; }
+        .bienvenida-box p { color: #666; margin-bottom: 25px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="menu-principal">
-        <h2>C.I. Flores de Funza</h2>
-        <button class="btn-menu" onclick="mostrarSeccion('arandanos')">📦 Pedido de Arándanos</button>
-        <button class="btn-menu" onclick="mostrarSeccion('postcosecha')">🌱 Ingreso a Postcosecha</button>
+    <h2>Flores de Funza</h2>
+
+    <!-- ================= PANTALLA DE INICIO / SELECCIÓN ================= -->
+    <div id="vistaInicio" class="vista activa">
+        <div class="bienvenida-box">
+            <h3>Bienvenido</h3>
+            <p>Por favor seleccione el módulo al que desea ingresar:</p>
+            <button class="btn-secondary" onclick="irAModulo('arandanos')">🫐 Pedido de Arándanos</button>
+            <button class="btn-warning" onclick="irAModulo('postcosecha')">📦 Ingreso a Postcosecha</button>
+        </div>
     </div>
 
-    <div id="seccion-arandanos" class="hidden">
-        <h2>Pedido de Arándanos</h2>
-        <div id="paso1-aran">
-            <input type="text" id="cedula-aran" placeholder="Ingresa tu Cédula" required>
-            <input type="password" id="seguridad-aran" placeholder="Año de nacimiento (Seguridad)" required>
-            <button type="button" id="btn-buscar" onclick="verificarEmpleado()">Continuar</button>
+    <!-- ================= MÓDULO 1: PEDIDOS DE ARÁNDANOS ================= -->
+    <div id="vistaArandanos" class="vista">
+        <h3>Módulo de Arándanos</h3>
+        
+        <!-- Paso 1.1: Validar Empleado -->
+        <div id="seccionValidacion">
+            <div class="form-group">
+                <label>Cédula:</label>
+                <input type="text" id="inputCedula" placeholder="Ingresa tu cédula">
+            </div>
+            <div class="form-group">
+                <label>Año de Seguridad:</label>
+                <input type="text" id="inputSeguridad" placeholder="Año de seguridad">
+            </div>
+            <button id="btnValidar" class="btn-secondary" onclick="verificarEmpleado()">Validar Empleado</button>
         </div>
-        <div id="paso2-aran" class="hidden">
-            <div id="nombre-empleado-aran" class="info-empleado"></div>
-            <input type="number" id="cantidad-aran" placeholder="Cantidad de cajas" required>
-            <canvas id="pizarra"></canvas>
-            <button type="button" class="btn-volver" onclick="limpiarFirma()">Limpiar Firma</button>
-            <button type="submit" id="btn-enviar-aran" onclick="enviarArandanos()">Enviar Pedido</button>
+
+        <!-- Paso 1.2: Selección de Productos -->
+        <div id="seccionProductos" style="display:none;">
+            <p id="saludoEmpleado" style="font-weight: bold; color: #007bff; text-align: center; font-size: 16px;"></p>
+            
+            <div class="form-group">
+                <label>Promoción 3 Kilos ($20.000 c/u):</label>
+                <input type="number" id="inputPromoKilos" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>1 Kilo Regular ($29.000 c/u):</label>
+                <input type="number" id="inputKiloNormal" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>Mermeladas ($15.000 c/u):</label>
+                <input type="number" id="inputMermeladas" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>Frambuesas ($18.000 c/u):</label>
+                <input type="number" id="inputFrambuesas" min="0" value="0">
+            </div>
+
+            <button onclick="calcularPedidoYMostrarAutorizacion()">Continuar para Firmar</button>
         </div>
-        <button class="btn-volver" onclick="volverMenu()">⬅ Volver al Menú</button>
+
+        <!-- Paso 1.3: Firma, Autorización y Botón de Regresar a Productos -->
+        <div id="seccionFirma" style="display:none;">
+            <div id="mensajeAutorizacion" class="mensaje-autorizacion"></div>
+            <label>Firma del Empleado:</label>
+            <canvas id="signature-pad"></canvas>
+            <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar Firma</button>
+            <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Finalizar y Enviar Pedido</button>
+            
+            <!-- Botón para devolverse a cambiar cantidades sin ir al inicio -->
+            <button class="btn-volver" onclick="regresarAProductos()">Regresar y cambiar cantidades</button>
+        </div>
+
+        <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <div id="seccion-postcosecha" class="hidden">
-        <h2>Ingreso a Postcosecha</h2>
-        <div>
-            <input type="password" id="codigo-post" placeholder="Código de acceso (Ej: 2005)" required>
-            <input type="text" id="bloque" placeholder="Bloque (ej: Bloque 3)" required>
-            <input type="text" id="anio-bloque" placeholder="Año de Bloque (ej: 2024)" required>
-            <input type="number" id="canastillas" placeholder="Número de canastillas" required>
-            <input type="number" step="0.01" id="peso" placeholder="Peso de canastillas (kg)" required>
-            <select id="tipo-fruta" required>
-                <option value="" disabled selected>Seleccione el Tipo de Fruta</option>
-                <option value="T1">T1</option>
-                <option value="T2">T2</option>
-                <option value="T3">T3</option>
+    <!-- ================= MÓDULO 2: INGRESO A POSTCOSECHA ================= -->
+    <div id="vistaPostcosecha" class="vista">
+        <h3>Ingreso a Postcosecha</h3>
+        
+        <div class="form-group">
+            <label>Código de Acceso Autorizado:</label>
+            <input type="password" id="postCodigo" placeholder="Ingresa el código (2005)">
+        </div>
+        <div class="form-group">
+            <label>Bloque:</label>
+            <input type="text" id="postBloque" placeholder="Ej: Bloque A">
+        </div>
+        <div class="form-group">
+            <label>Año de Bloque:</label>
+            <input type="text" id="postAnio" placeholder="Ej: 2025">
+        </div>
+        <div class="form-group">
+            <label>Número de Canastillas:</label>
+            <input type="number" id="postCanastillas" placeholder="Cantidad">
+        </div>
+        <div class="form-group">
+            <label>Peso de Canastillas (kg):</label>
+            <input type="number" id="postPeso" placeholder="Peso total">
+        </div>
+        <div class="form-group">
+            <label>Tipo de Fruta:</label>
+            <select id="postFruta">
+                <option value="Tipo 1">Tipo 1</option>
+                <option value="Tipo 2">Tipo 2</option>
+                <option value="Tipo 3">Tipo 3</option>
             </select>
-            <button type="submit" id="btn-enviar-post" onclick="enviarPostcosecha()">Registrar Ingreso</button>
         </div>
-        <button class="btn-volver" onclick="volverMenu()">⬅ Volver al Menú</button>
+        
+        <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
+        <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 </div>
 
 <script>
-    const URL_DEL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
-    let nombreGlobal = "";
-    let enviando = false;
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
+    let nombreEmpleadoGlobal = "";
+    let canvas = document.getElementById('signature-pad');
+    let signaturePad = new SignaturePad(canvas);
+    let datosPedidoActual = {};
 
-    function mostrarSeccion(seccion) {
-        document.getElementById('menu-principal').classList.add('hidden');
-        if(seccion === 'arandanos') {
-            document.getElementById('seccion-arandanos').classList.remove('hidden');
-            inicializarCanvas();
-        } else {
-            document.getElementById('seccion-postcosecha').classList.remove('hidden');
+    function irAModulo(modulo) {
+        document.getElementById('vistaInicio').classList.remove('activa');
+        document.getElementById('vistaArandanos').classList.remove('activa');
+        document.getElementById('vistaPostcosecha').classList.remove('activa');
+
+        if (modulo === 'arandanos') {
+            document.getElementById('vistaArandanos').classList.add('activa');
+        } else if (modulo === 'postcosecha') {
+            document.getElementById('vistaPostcosecha').classList.add('activa');
         }
     }
 
-    function volverMenu() {
-        document.getElementById('seccion-arandanos').classList.add('hidden');
-        document.getElementById('seccion-postcosecha').classList.add('hidden');
-        document.getElementById('menu-principal').classList.remove('hidden');
-        document.getElementById('paso1-aran').classList.remove('hidden');
-        document.getElementById('paso2-aran').classList.add('hidden');
-        document.getElementById('cedula-aran').value = "";
-        document.getElementById('seguridad-aran').value = "";
-        document.getElementById('cantidad-aran').value = "";
-        document.getElementById('codigo-post').value = "";
-        document.getElementById('bloque').value = "";
-        document.getElementById('anio-bloque').value = "";
-        document.getElementById('canastillas').value = "";
-        document.getElementById('peso').value = "";
-        document.getElementById('tipo-fruta').selectedIndex = 0;
-        document.getElementById('btn-buscar').innerText = "Continuar";
-        document.getElementById('btn-buscar').disabled = false;
-        limpiarFirma();
-        enviando = false;
+    function volverInicio() {
+        location.reload(); 
     }
 
+    function resizeCanvas() {
+        let ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePad.clear();
+    }
+
+    // --- LÓGICA DE ARÁNDANOS ---
     function verificarEmpleado() {
-        const cedula = document.getElementById('cedula-aran').value.trim();
-        const seguridad = document.getElementById('seguridad-aran').value.trim();
+        let cedula = document.getElementById('inputCedula').value.trim();
+        let seguridad = document.getElementById('inputSeguridad').value.trim();
+        if (!cedula || !seguridad) { alert("Por favor ingresa la cédula y el año de seguridad."); return; }
 
-        if(!cedula || !seguridad) { alert("Completa ambos campos."); return; }
-
-        const btn = document.getElementById('btn-buscar');
+        let btn = document.getElementById('btnValidar');
         btn.innerText = "Buscando...";
         btn.disabled = true;
 
-        const urlConsulta = URL_DEL_SCRIPT + "?accion=buscar&cedula=" + encodeURIComponent(cedula) + "&seguridad=" + encodeURIComponent(seguridad);
-
-        fetch(urlConsulta)
+        fetch(`${URL_SCRIPT}?accion=buscar&cedula=${cedula}&seguridad=${seguridad}`)
             .then(res => res.json())
             .then(data => {
-                btn.innerText = "Continuar";
+                btn.innerText = "Validar Empleado";
                 btn.disabled = false;
                 if (data.encontrado) {
-                    nombreGlobal = data.nombre;
-                    document.getElementById('nombre-empleado-aran').innerText = "Bienvenido: " + nombreGlobal;
-                    document.getElementById('paso1-aran').classList.add('hidden');
-                    document.getElementById('paso2-aran').classList.remove('hidden');
-                    inicializarCanvas();
+                    nombreEmpleadoGlobal = data.nombre;
+                    document.getElementById('saludoEmpleado').innerText = `Bienvenido(a): ${nombreEmpleadoGlobal}`;
+                    document.getElementById('seccionValidacion').style.display = 'none';
+                    document.getElementById('seccionProductos').style.display = 'block';
                 } else {
-                    alert("❌ " + data.error);
+                    alert("Cédula o año de seguridad incorrectos.");
                 }
             })
-            .catch(() => {
-                btn.innerText = "Continuar";
+            .catch(err => {
+                console.error(err);
+                btn.innerText = "Validar Empleado";
                 btn.disabled = false;
-                alert("Error de conexión.");
+                alert("Error al conectar con el servidor.");
             });
     }
 
-    const canvas = document.getElementById('pizarra');
-    const ctx = canvas.getContext('2d');
-    let dibujando = false;
+    function calcularPedidoYMostrarAutorizacion() {
+        let promoKilos = parseInt(document.getElementById('inputPromoKilos').value) || 0;
+        let kiloNormal = parseInt(document.getElementById('inputKiloNormal').value) || 0;
+        let mermeladas = parseInt(document.getElementById('inputMermeladas').value) || 0;
+        let frambuesas = parseInt(document.getElementById('inputFrambuesas').value) || 0;
 
-    function inicializarCanvas() {
-        setTimeout(() => {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = 150;
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 2;
-        }, 100);
+        let totalPagar = (promoKilos * 20000) + (kiloNormal * 29000) + (mermeladas * 15000) + (frambuesas * 18000);
+        if (totalPagar === 0) { alert("Debes seleccionar al menos un producto."); return; }
+
+        let detalle = [];
+        if (promoKilos > 0) detalle.push(`${promoKilos} Promo 3kg`);
+        if (kiloNormal > 0) detalle.push(`${kiloNormal} Kilo regular`);
+        if (mermeladas > 0) detalle.push(`${mermeladas} Mermelada(s)`);
+        if (frambuesas > 0) detalle.push(`${frambuesas} Kilo frambuesa`);
+
+        let textoDetalleFinal = detalle.join(" + ");
+        datosPedidoActual = { detallePedido: textoDetalleFinal, totalPagar: totalPagar };
+
+        document.getElementById('mensajeAutorizacion').innerText = 
+            `Firme si autoriza el descuento de: $${totalPagar.toLocaleString()} pesos (${textoDetalleFinal}).`;
+
+        document.getElementById('seccionProductos').style.display = 'none';
+        document.getElementById('seccionFirma').style.display = 'block';
+        resizeCanvas();
     }
 
-    canvas.addEventListener('mousedown', (e) => { dibujando = true; const r = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.clientX - r.left, e.clientY - r.top); });
-    canvas.addEventListener('mouseup', () => { dibujando = false; });
-    canvas.addEventListener('mousemove', (e) => { if (!dibujando) return; const r = canvas.getBoundingClientRect(); ctx.lineTo(e.clientX - r.left, e.clientY - r.top); ctx.stroke(); });
-    canvas.addEventListener('touchstart', (e) => { dibujando = true; const r = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); e.preventDefault(); });
-    canvas.addEventListener('touchend', () => { dibujando = false; });
-    canvas.addEventListener('touchmove', (e) => { if (!dibujando) return; const r = canvas.getBoundingClientRect(); const t = e.touches[0]; ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.stroke(); e.preventDefault(); });
+    function regresarAProductos() {
+        document.getElementById('seccionFirma').style.display = 'none';
+        document.getElementById('seccionProductos').style.display = 'block';
+    }
 
-    function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); }
+    function enviarPedidoArandanos() {
+        if (signaturePad.isEmpty()) { alert("Por favor realiza la firma antes de enviar."); return; }
 
-    function enviarArandanos() {
-        if (enviando) return;
-        const cantidad = document.getElementById('cantidad-aran').value;
-        if(!cantidad) { alert("Ingresa la cantidad"); return; }
-
-        enviando = true;
-        const btn = document.getElementById('btn-enviar-aran');
-        btn.innerText = "Enviando...";
+        let btn = document.getElementById('btnEnviarPedido');
+        btn.innerText = "Validando...";
         btn.disabled = true;
 
-        const datos = { accion: "guardar_arandanos", cedula: document.getElementById('cedula-aran').value, nombre: nombreGlobal, cantidad: cantidad, firma: canvas.toDataURL("image/png") };
+        let payload = {
+            accion: "guardar_arandanos",
+            cedula: document.getElementById('inputCedula').value.trim(),
+            nombre: nombreEmpleadoGlobal,
+            detallePedido: datosPedidoActual.detallePedido,
+            totalPagar: datosPedidoActual.totalPagar,
+            firma: signaturePad.toDataURL("image/png")
+        };
 
-        fetch(URL_DEL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(datos) });
-
-        setTimeout(() => {
-            alert("¡Pedido guardado con éxito!");
-            volverMenu();
-            btn.innerText = "Enviar Pedido";
-            btn.disabled = false;
-        }, 800);
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(() => { 
+                alert("¡Pedido registrado con éxito!"); 
+                location.reload(); 
+            })
+            .catch(err => {
+                console.error(err);
+                btn.innerText = "Finalizar y Enviar Pedido";
+                btn.disabled = false;
+                alert("Hubo un fallo al guardar el pedido.");
+            });
     }
 
+    // --- LÓGICA DE POSTCOSECHA ---
     function enviarPostcosecha() {
-        if (enviando) return;
-        const codigo = document.getElementById('codigo-post').value;
-        if(codigo !== "2005") { alert("Código incorrecto."); return; }
+        let codigo = document.getElementById('postCodigo').value.trim();
+        if (codigo !== "2005") {
+            alert("Código de acceso incorrecto.");
+            return;
+        }
 
-        enviando = true;
-        const btn = document.getElementById('btn-enviar-post');
-        btn.innerText = "Registrando...";
+        let btn = document.getElementById('btnGuardarPost');
+        btn.innerText = "Validando...";
         btn.disabled = true;
 
-        const datos = { accion: "guardar_postcosecha", codigo: codigo, bloque: document.getElementById('bloque').value, anioBloque: document.getElementById('anio-bloque').value, canastillas: document.getElementById('canastillas').value, peso: document.getElementById('peso').value, tipoFruta: document.getElementById('tipo-fruta').value };
+        let payload = {
+            accion: "guardar_postcosecha",
+            codigo: codigo,
+            bloque: document.getElementById('postBloque').value.trim(),
+            anioBloque: document.getElementById('postAnio').value.trim(),
+            canastillas: document.getElementById('postCanastillas').value.trim(),
+            peso: document.getElementById('postPeso').value.trim(),
+            tipoFruta: document.getElementById('postFruta').value
+        };
 
-        fetch(URL_DEL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(datos) });
-
-        setTimeout(() => {
-            alert("¡Registrado con éxito!");
-            volverMenu();
-            btn.innerText = "Registrar Ingreso";
-            btn.disabled = false;
-        }, 800);
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(() => { 
+                alert("¡Ingreso a postcosecha guardado correctamente!"); 
+                location.reload(); 
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                btn.innerText = "Guardar Ingreso Postcosecha";
+                btn.disabled = false;
+                alert("Hubo un error al registrar en postcosecha.");
+            });
     }
 </script>
+
 </body>
 </html>
