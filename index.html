@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema General - Flores de Funza</title>
-    <!-- Librería de Signature Pad para la firma -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
@@ -24,7 +23,6 @@
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
         .btn-volver:hover { background-color: #5a6268; }
         
-        /* Control de pantallas / vistas */
         .vista { display: none; }
         .vista.activa { display: block; }
         
@@ -39,7 +37,7 @@
 <div class="container">
     <h2>Flores de Funza</h2>
 
-    <!-- ================= PANTALLA DE INICIO / SELECCIÓN ================= -->
+    <!-- INICIO -->
     <div id="vistaInicio" class="vista activa">
         <div class="bienvenida-box">
             <h3>Bienvenido</h3>
@@ -49,11 +47,10 @@
         </div>
     </div>
 
-    <!-- ================= MÓDULO 1: PEDIDOS DE ARÁNDANOS ================= -->
+    <!-- MÓDULO ARÁNDANOS -->
     <div id="vistaArandanos" class="vista">
         <h3>Módulo de Arándanos</h3>
         
-        <!-- Paso 1.1: Validar Empleado -->
         <div id="seccionValidacion">
             <div class="form-group">
                 <label>Cédula:</label>
@@ -66,7 +63,6 @@
             <button id="btnValidar" class="btn-secondary" onclick="verificarEmpleado()">Validar Empleado</button>
         </div>
 
-        <!-- Paso 1.2: Selección de Productos -->
         <div id="seccionProductos" style="display:none;">
             <p id="saludoEmpleado" style="font-weight: bold; color: #007bff; text-align: center; font-size: 16px;"></p>
             
@@ -90,22 +86,19 @@
             <button onclick="calcularPedidoYMostrarAutorizacion()">Continuar para Firmar</button>
         </div>
 
-        <!-- Paso 1.3: Firma, Autorización y Botón de Regresar a Productos -->
         <div id="seccionFirma" style="display:none;">
             <div id="mensajeAutorizacion" class="mensaje-autorizacion"></div>
             <label>Firma del Empleado:</label>
             <canvas id="signature-pad"></canvas>
             <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar Firma</button>
             <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Finalizar y Enviar Pedido</button>
-            
-            <!-- Botón para devolverse a cambiar cantidades -->
             <button class="btn-volver" onclick="regresarAProductos()">Regresar y cambiar cantidades</button>
         </div>
 
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- ================= MÓDULO 2: INGRESO A POSTCOSECHA (SIN CÓDIGO) ================= -->
+    <!-- MÓDULO POSTCOSECHA -->
     <div id="vistaPostcosecha" class="vista">
         <h3>Ingreso a Postcosecha</h3>
         
@@ -122,8 +115,12 @@
             <input type="number" id="postCanastillas" placeholder="Cantidad">
         </div>
         <div class="form-group">
-            <label>Peso de Canastillas (kg):</label>
-            <input type="number" id="postPeso" placeholder="Peso total">
+            <label>Peso Total:</label>
+            <input type="number" id="postPesoTotal" placeholder="Peso total">
+        </div>
+        <div class="form-group">
+            <label>Peso de Canastilla Vacia:</label>
+            <input type="number" id="postPesoCanastilla" placeholder="Peso individual de la canastilla">
         </div>
         <div class="form-group">
             <label>Tipo de Fruta:</label>
@@ -285,14 +282,15 @@
             });
     }
 
-    // --- LÓGICA DE POSTCOSECHA (SIN CÓDIGO) ---
+    // --- LÓGICA DE POSTCOSECHA ---
     function enviarPostcosecha() {
         let bloque = document.getElementById('postBloque').value.trim();
         let anio = document.getElementById('postAnio').value.trim();
         let canastillas = document.getElementById('postCanastillas').value.trim();
-        let peso = document.getElementById('postPeso').value.trim();
+        let pesoTotal = document.getElementById('postPesoTotal').value.trim();
+        let pesoCanastilla = document.getElementById('postPesoCanastilla').value.trim();
 
-        if (!bloque || !anio || !canastillas || !peso) {
+        if (!bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
             alert("Por favor completa todos los campos de postcosecha.");
             return;
         }
@@ -307,7 +305,8 @@
             bloque: bloque,
             anioBloque: anio,
             canastillas: canastillas,
-            peso: peso,
+            pesoTotal: pesoTotal,
+            pesoCanastilla: pesoCanastilla,
             tipoFruta: document.getElementById('postFruta').value,
             variedad: document.getElementById('postVariedad').value
         };
