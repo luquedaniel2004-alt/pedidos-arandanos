@@ -98,21 +98,17 @@
             <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar Firma</button>
             <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Finalizar y Enviar Pedido</button>
             
-            <!-- Botón para devolverse a cambiar cantidades sin ir al inicio -->
+            <!-- Botón para devolverse a cambiar cantidades -->
             <button class="btn-volver" onclick="regresarAProductos()">Regresar y cambiar cantidades</button>
         </div>
 
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- ================= MÓDULO 2: INGRESO A POSTCOSECHA ================= -->
+    <!-- ================= MÓDULO 2: INGRESO A POSTCOSECHA (SIN CÓDIGO) ================= -->
     <div id="vistaPostcosecha" class="vista">
         <h3>Ingreso a Postcosecha</h3>
         
-        <div class="form-group">
-            <label>Código de Acceso Autorizado:</label>
-            <input type="password" id="postCodigo" placeholder="Ingresa el código (2005)">
-        </div>
         <div class="form-group">
             <label>Bloque:</label>
             <input type="text" id="postBloque" placeholder="Ej: Bloque A">
@@ -135,6 +131,20 @@
                 <option value="Tipo 1">Tipo 1</option>
                 <option value="Tipo 2">Tipo 2</option>
                 <option value="Tipo 3">Tipo 3</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Variedad:</label>
+            <select id="postVariedad">
+                <option value="BILOXI">BILOXI</option>
+                <option value="SHARPBLU">SHARPBLU</option>
+                <option value="EMERALD">EMERALD</option>
+                <option value="VICTORIA">VICTORIA</option>
+                <option value="LEGACY">LEGACY</option>
+                <option value="RIBBON">RIBBON</option>
+                <option value="VENTURA">VENTURA</option>
+                <option value="ATLAS">ATLAS</option>
+                <option value="BIANCA">BIANCA</option>
             </select>
         </div>
         
@@ -241,6 +251,7 @@
         if (signaturePad.isEmpty()) { alert("Por favor realiza la firma antes de enviar."); return; }
 
         let btn = document.getElementById('btnEnviarPedido');
+        let textoOriginal = btn.innerText;
         btn.innerText = "Validando...";
         btn.disabled = true;
 
@@ -253,51 +264,72 @@
             firma: signaturePad.toDataURL("image/png")
         };
 
+        let timeout = setTimeout(() => {
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+            alert("El servidor tardó demasiado. Verifica si el pedido se registró antes de reintentar.");
+        }, 10000);
+
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(() => { 
+                clearTimeout(timeout);
                 alert("¡Pedido registrado con éxito!"); 
                 location.reload(); 
             })
             .catch(err => {
+                clearTimeout(timeout);
                 console.error(err);
-                btn.innerText = "Finalizar y Enviar Pedido";
+                btn.innerText = textoOriginal;
                 btn.disabled = false;
                 alert("Hubo un fallo al guardar el pedido.");
             });
     }
 
-    // --- LÓGICA DE POSTCOSECHA ---
+    // --- LÓGICA DE POSTCOSECHA (SIN CÓDIGO) ---
     function enviarPostcosecha() {
-        let codigo = document.getElementById('postCodigo').value.trim();
-        if (codigo !== "2005") {
-            alert("Código de acceso incorrecto.");
+        let bloque = document.getElementById('postBloque').value.trim();
+        let anio = document.getElementById('postAnio').value.trim();
+        let canastillas = document.getElementById('postCanastillas').value.trim();
+        let peso = document.getElementById('postPeso').value.trim();
+
+        if (!bloque || !anio || !canastillas || !peso) {
+            alert("Por favor completa todos los campos de postcosecha.");
             return;
         }
 
         let btn = document.getElementById('btnGuardarPost');
+        let textoOriginal = btn.innerText;
         btn.innerText = "Validando...";
         btn.disabled = true;
 
         let payload = {
             accion: "guardar_postcosecha",
-            codigo: codigo,
-            bloque: document.getElementById('postBloque').value.trim(),
-            anioBloque: document.getElementById('postAnio').value.trim(),
-            canastillas: document.getElementById('postCanastillas').value.trim(),
-            peso: document.getElementById('postPeso').value.trim(),
-            tipoFruta: document.getElementById('postFruta').value
+            bloque: bloque,
+            anioBloque: anio,
+            canastillas: canastillas,
+            peso: peso,
+            tipoFruta: document.getElementById('postFruta').value,
+            variedad: document.getElementById('postVariedad').value
         };
+
+        let timeout = setTimeout(() => {
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+            alert("El servidor tardó demasiado en responder.");
+        }, 10000);
 
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(() => { 
+                clearTimeout(timeout);
                 alert("¡Ingreso a postcosecha guardado correctamente!"); 
                 location.reload(); 
             })
             .catch(error => {
+                clearTimeout(timeout);
                 console.error("Error:", error);
-                btn.innerText = "Guardar Ingreso Postcosecha";
+                btn.innerText = textoOriginal;
                 btn.disabled = false;
-                alert("Hubo un error al registrar en postcosecha.");
+                alert("Error de conexión con Google Sheets.");
             });
     }
 </script>
