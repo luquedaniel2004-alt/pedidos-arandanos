@@ -102,6 +102,11 @@
     <div id="vistaPostcosecha" class="vista">
         <h3>Ingreso a Postcosecha</h3>
         
+        <!-- Casilla de Fecha (Prellenada con hoy, pero editable) -->
+        <div class="form-group">
+            <label>Fecha de Ingreso:</label>
+            <input type="date" id="postFecha">
+        </div>
         <div class="form-group">
             <label>Bloque:</label>
             <input type="text" id="postBloque" placeholder="Ej: Bloque A">
@@ -115,12 +120,12 @@
             <input type="number" id="postCanastillas" placeholder="Cantidad">
         </div>
         <div class="form-group">
-            <label>Peso Total:</label>
+            <label>Peso Total de Canastillas (kg):</label>
             <input type="number" id="postPesoTotal" placeholder="Peso total">
         </div>
         <div class="form-group">
-            <label>Peso de Canastilla Vacia:</label>
-            <input type="number" id="postPesoCanastilla" placeholder="Peso individual de la canastilla">
+            <label>Peso de Canastilla (kg):</label>
+            <input type="number" id="postPesoCanastilla" placeholder="Peso individual">
         </div>
         <div class="form-group">
             <label>Tipo de Fruta:</label>
@@ -157,6 +162,15 @@
     let signaturePad = new SignaturePad(canvas);
     let datosPedidoActual = {};
 
+    // Auto-asignar la fecha de hoy al abrir el módulo de postcosecha
+    window.addEventListener('DOMContentLoaded', () => {
+        let hoy = new Date().toISOString().split('T')[0];
+        let campoFecha = document.getElementById('postFecha');
+        if (campoFecha) {
+            campoFecha.value = hoy;
+        }
+    });
+
     function irAModulo(modulo) {
         document.getElementById('vistaInicio').classList.remove('activa');
         document.getElementById('vistaArandanos').classList.remove('activa');
@@ -169,9 +183,7 @@
         }
     }
 
-    function volverInicio() {
-        location.reload(); 
-    }
+    function volverInicio() { location.reload(); }
 
     function resizeCanvas() {
         let ratio = Math.max(window.devicePixelRatio || 1, 1);
@@ -282,26 +294,28 @@
             });
     }
 
-    // --- LÓGICA DE POSTCOSECHA ---
+    // --- LÓGICA DE POSTCOSECHA CON FECHA EDITABLE ---
     function enviarPostcosecha() {
+        let fecha = document.getElementById('postFecha').value;
         let bloque = document.getElementById('postBloque').value.trim();
         let anio = document.getElementById('postAnio').value.trim();
         let canastillas = document.getElementById('postCanastillas').value.trim();
         let pesoTotal = document.getElementById('postPesoTotal').value.trim();
         let pesoCanastilla = document.getElementById('postPesoCanastilla').value.trim();
 
-        if (!bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
-            alert("Por favor completa todos los campos de postcosecha.");
+        if (!fecha || !bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
+            alert("Por favor completa todos los campos, incluyendo la fecha.");
             return;
         }
 
         let btn = document.getElementById('btnGuardarPost');
         let textoOriginal = btn.innerText;
-        btn.innerText = "Validando...";
+        btn.innerText = "Guardando...";
         btn.disabled = true;
 
         let payload = {
             accion: "guardar_postcosecha",
+            fechaRegistro: fecha,
             bloque: bloque,
             anioBloque: anio,
             canastillas: canastillas,
