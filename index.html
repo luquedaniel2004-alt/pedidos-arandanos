@@ -18,6 +18,8 @@
         .btn-secondary:hover { background-color: #0056b3; }
         .btn-warning { background-color: #e67e22; color: white; }
         .btn-warning:hover { background-color: #d35400; }
+        .btn-purple { background-color: #6f42c1; color: white; }
+        .btn-purple:hover { background-color: #5a32a3; }
         .btn-danger { background-color: #dc3545; margin-top: 5px; }
         .btn-danger:hover { background-color: #c82333; }
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
@@ -37,13 +39,14 @@
 <div class="container">
     <h2>Flores de Funza</h2>
 
-    <!-- INICIO -->
+    <!-- PANTALLA DE INICIO -->
     <div id="vistaInicio" class="vista activa">
         <div class="bienvenida-box">
             <h3>Bienvenido</h3>
             <p>Por favor seleccione el módulo al que desea ingresar:</p>
             <button class="btn-secondary" onclick="irAModulo('arandanos')">🫐 Pedido de Arándanos</button>
             <button class="btn-warning" onclick="irAModulo('postcosecha')">📦 Ingreso a Postcosecha</button>
+            <button class="btn-purple" onclick="irAModulo('rendimiento')">🌱 Rendimiento de Cultivo</button>
         </div>
     </div>
 
@@ -101,8 +104,6 @@
     <!-- MÓDULO POSTCOSECHA -->
     <div id="vistaPostcosecha" class="vista">
         <h3>Ingreso a Postcosecha</h3>
-        
-        <!-- Casilla de Fecha (Prellenada con hoy, pero editable) -->
         <div class="form-group">
             <label>Fecha de Ingreso:</label>
             <input type="date" id="postFecha">
@@ -149,8 +150,38 @@
                 <option value="BIANCA">BIANCA</option>
             </select>
         </div>
-        
         <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
+        <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
+    </div>
+
+    <!-- MÓDULO RENDIMIENTO DE CULTIVO (ENFOQUE EN VALDES) -->
+    <div id="vistaRendimiento" class="vista">
+        <h3>Rendimiento de Cultivo</h3>
+        <div class="form-group">
+            <label>Fecha de Labor:</label>
+            <input type="date" id="rendFecha">
+        </div>
+        <div class="form-group">
+            <label>Seleccionar Grupo:</label>
+            <select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()">
+                <option value="">-- Seleccione un grupo --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Seleccionar Trabajador:</label>
+            <select id="rendSelectEmpleado">
+                <option value="">-- Primero seleccione un grupo --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Bloque:</label>
+            <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
+        </div>
+        <div class="form-group">
+            <label>Número de Valdes Hechos en el Día:</label>
+            <input type="number" id="rendValdes" placeholder="Ej: 12">
+        </div>
+        <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento</button>
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 </div>
@@ -158,28 +189,30 @@
 <script>
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
     let nombreEmpleadoGlobal = "";
+    let listaPersonalGlobal = [];
     let canvas = document.getElementById('signature-pad');
     let signaturePad = new SignaturePad(canvas);
     let datosPedidoActual = {};
 
-    // Auto-asignar la fecha de hoy al abrir el módulo de postcosecha
     window.addEventListener('DOMContentLoaded', () => {
         let hoy = new Date().toISOString().split('T')[0];
-        let campoFecha = document.getElementById('postFecha');
-        if (campoFecha) {
-            campoFecha.value = hoy;
-        }
+        if (document.getElementById('postFecha')) document.getElementById('postFecha').value = hoy;
+        if (document.getElementById('rendFecha')) document.getElementById('rendFecha').value = hoy;
+        cargarDatosRendimiento();
     });
 
     function irAModulo(modulo) {
         document.getElementById('vistaInicio').classList.remove('activa');
         document.getElementById('vistaArandanos').classList.remove('activa');
         document.getElementById('vistaPostcosecha').classList.remove('activa');
+        document.getElementById('vistaRendimiento').classList.remove('activa');
 
         if (modulo === 'arandanos') {
             document.getElementById('vistaArandanos').classList.add('activa');
         } else if (modulo === 'postcosecha') {
             document.getElementById('vistaPostcosecha').classList.add('activa');
+        } else if (modulo === 'rendimiento') {
+            document.getElementById('vistaRendimiento').classList.add('activa');
         }
     }
 
@@ -191,6 +224,56 @@
         canvas.height = canvas.offsetHeight * ratio;
         canvas.getContext("2d").scale(ratio, ratio);
         signaturePad.clear();
+    }
+
+    // --- CARGAR DATOS Y LLENAR SELECTOR DE GRUPOS ---
+    function cargarDatosRendimiento() {
+        fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.personal && data.personal.length > 0) {
+                    listaPersonalGlobal = data.personal;
+                    
+                    let gruposUnicos = [...new Set(listaPersonalGlobal.map(item => item.grupo))];
+                    let selectGrupo = document.getElementById('rendSelectGrupo');
+                    selectGrupo.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
+                    
+                    gruposUnicos.forEach(grupo => {
+                        let opt = document.createElement('option');
+                        opt.value = grupo;
+                        opt.textContent = grupo;
+                        selectGrupo.appendChild(opt);
+                    });
+                } else {
+                    document.getElementById('rendSelectGrupo').innerHTML = '<option value="">No hay datos en PersonalCosecha</option>';
+                }
+            })
+            .catch(err => {
+                console.error("Error al cargar personal:", err);
+                document.getElementById('rendSelectGrupo').innerHTML = '<option value="">Error al conectar</option>';
+            });
+    }
+
+    // --- FILTRAR PERSONAL AL CAMBIAR DE GRUPO ---
+    function filtrarPersonalPorGrupo() {
+        let grupoSeleccionado = document.getElementById('rendSelectGrupo').value;
+        let selectEmpleado = document.getElementById('rendSelectEmpleado');
+        
+        selectEmpleado.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
+        
+        if (!grupoSeleccionado) {
+            selectEmpleado.innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
+            return;
+        }
+
+        let filtrados = listaPersonalGlobal.filter(item => item.grupo === grupoSeleccionado);
+        
+        filtrados.forEach(emp => {
+            let opt = document.createElement('option');
+            opt.value = emp.nombre;
+            opt.textContent = emp.nombre;
+            selectEmpleado.appendChild(opt);
+        });
     }
 
     // --- LÓGICA DE ARÁNDANOS ---
@@ -276,7 +359,7 @@
         let timeout = setTimeout(() => {
             btn.innerText = textoOriginal;
             btn.disabled = false;
-            alert("El servidor tardó demasiado. Verifica si el pedido se registró antes de reintentar.");
+            alert("El servidor tardó demasiado. Verifica si el pedido se registró.");
         }, 10000);
 
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
@@ -294,7 +377,7 @@
             });
     }
 
-    // --- LÓGICA DE POSTCOSECHA CON FECHA EDITABLE ---
+    // --- LÓGICA DE POSTCOSECHA ---
     function enviarPostcosecha() {
         let fecha = document.getElementById('postFecha').value;
         let bloque = document.getElementById('postBloque').value.trim();
@@ -304,7 +387,7 @@
         let pesoCanastilla = document.getElementById('postPesoCanastilla').value.trim();
 
         if (!fecha || !bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
-            alert("Por favor completa todos los campos, incluyendo la fecha.");
+            alert("Por favor completa todos los campos.");
             return;
         }
 
@@ -343,6 +426,54 @@
                 btn.innerText = textoOriginal;
                 btn.disabled = false;
                 alert("Error de conexión con Google Sheets.");
+            });
+    }
+
+    // --- LÓGICA DE RENDIMIENTO (VALDES) ---
+    function enviarRendimiento() {
+        let fecha = document.getElementById('rendFecha').value;
+        let grupo = document.getElementById('rendSelectGrupo').value;
+        let nombre = document.getElementById('rendSelectEmpleado').value;
+        let bloque = document.getElementById('rendBloque').value.trim();
+        let valdes = document.getElementById('rendValdes').value.trim();
+
+        if (!fecha || !grupo || !nombre || !bloque || !valdes) {
+            alert("Por favor completa todos los campos del rendimiento.");
+            return;
+        }
+
+        let btn = document.getElementById('btnGuardarRend');
+        let textoOriginal = btn.innerText;
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        let payload = {
+            accion: "guardar_rendimiento",
+            fechaRegistro: fecha,
+            grupo: grupo,
+            nombre: nombre,
+            bloque: bloque,
+            valdes: valdes
+        };
+
+        let timeout = setTimeout(() => {
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+            alert("El servidor tardó demasiado en responder.");
+        }, 10000);
+
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(() => { 
+                clearTimeout(timeout);
+                alert("¡Rendimiento guardado correctamente!"); 
+                location.reload(); 
+            })
+            .catch(error => {
+                clearTimeout(timeout);
+                console.error("Error:", error);
+                btn.innerText = textoOriginal;
+                btn.disabled = false;
+                alert("Error al guardar rendimiento.");
             });
     }
 </script>
