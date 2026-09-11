@@ -24,6 +24,7 @@
         .btn-danger:hover { background-color: #c82333; }
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
         .btn-volver:hover { background-color: #5a6268; }
+        .alerta-offline { background-color: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; margin-bottom: 15px; border: 1px solid #bee5eb; }
         
         .vista { display: none; }
         .vista.activa { display: block; }
@@ -154,9 +155,11 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO RENDIMIENTO DE CULTIVO (ENFOQUE EN VALDES) -->
+    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON SOPORTE OFFLINE) -->
     <div id="vistaRendimiento" class="vista">
         <h3>Rendimiento de Cultivo</h3>
+        <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
+        
         <div class="form-group">
             <label>Fecha de Labor:</label>
             <input type="date" id="rendFecha">
@@ -181,7 +184,9 @@
             <label>Número de Valdes Hechos en el Día:</label>
             <input type="number" id="rendValdes" placeholder="Ej: 12">
         </div>
+        
         <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento</button>
+        <button id="btnSincronizar" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPendientes()">🔄 Sincronizar Registros Pendientes</button>
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 </div>
@@ -198,7 +203,9 @@
         let hoy = new Date().toISOString().split('T')[0];
         if (document.getElementById('postFecha')) document.getElementById('postFecha').value = hoy;
         if (document.getElementById('rendFecha')) document.getElementById('rendFecha').value = hoy;
+        
         cargarDatosRendimiento();
+        actualizarAlertaOffline();
     });
 
     function irAModulo(modulo) {
@@ -213,6 +220,7 @@
             document.getElementById('vistaPostcosecha').classList.add('activa');
         } else if (modulo === 'rendimiento') {
             document.getElementById('vistaRendimiento').classList.add('activa');
+            actualizarAlertaOffline();
         }
     }
 
@@ -233,7 +241,6 @@
             .then(data => {
                 if (data.personal && data.personal.length > 0) {
                     listaPersonalGlobal = data.personal;
-                    
                     let gruposUnicos = [...new Set(listaPersonalGlobal.map(item => item.grupo))];
                     let selectGrupo = document.getElementById('rendSelectGrupo');
                     selectGrupo.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
@@ -244,30 +251,21 @@
                         opt.textContent = grupo;
                         selectGrupo.appendChild(opt);
                     });
-                } else {
-                    document.getElementById('rendSelectGrupo').innerHTML = '<option value="">No hay datos en PersonalCosecha</option>';
                 }
             })
             .catch(err => {
-                console.error("Error al cargar personal:", err);
-                document.getElementById('rendSelectGrupo').innerHTML = '<option value="">Error al conectar</option>';
+                console.log("Sin internet para actualizar la lista de personal. Usando memoria local si existe.");
             });
     }
 
-    // --- FILTRAR PERSONAL AL CAMBIAR DE GRUPO ---
     function filtrarPersonalPorGrupo() {
         let grupoSeleccionado = document.getElementById('rendSelectGrupo').value;
         let selectEmpleado = document.getElementById('rendSelectEmpleado');
-        
         selectEmpleado.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
         
-        if (!grupoSeleccionado) {
-            selectEmpleado.innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
-            return;
-        }
+        if (!grupoSeleccionado) return;
 
         let filtrados = listaPersonalGlobal.filter(item => item.grupo === grupoSeleccionado);
-        
         filtrados.forEach(emp => {
             let opt = document.createElement('option');
             opt.value = emp.nombre;
@@ -276,7 +274,107 @@
         });
     }
 
-    // --- LÓGICA DE ARÁNDANOS ---
+    // --- LÓGICA DE RENDIMIENTO CON SOPORTE OFFLINE ---
+    function enviarRendimiento() {
+        let fecha = document.getElementById('rendFecha').value;
+        let grupo = document.getElementById('rendSelectGrupo').value;
+        let nombre = document.getElementById('rendSelectEmpleado').value;
+        let bloque = document.getElementById('rendBloque').value.trim();
+        let valdes = document.getElementById('rendValdes').value.trim();
+
+        if (!fecha || !grupo || !nombre || !bloque || !valdes) {
+            alert("Por favor completa todos los campos del rendimiento.");
+            return;
+        }
+
+        let nuevoDato = {
+            accion: "guardar_rendimiento",
+            fechaRegistro: fecha,
+            grupo: grupo,
+            nombre: nombre,
+            bloque: bloque,
+            valdes: valdes
+        };
+
+        let btn = document.getElementById('btnGuardarRend');
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        // Intentar enviar de inmediato a Google Sheets
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevoDato) })
+            .then(() => {
+                btn.innerText = "Guardar Rendimiento";
+                btn.disabled = false;
+                alert("¡Rendimiento guardado correctamente en la nube!");
+                document.getElementById('rendValdes').value = "";
+            })
+            .catch(error => {
+                // Si falla por falta de internet, se guarda localmente
+                console.warn("Sin conexión. Guardando en almacenamiento local.", error);
+                guardarLocalmente(nuevoDato);
+            });
+    }
+
+    function guardarLocalmente(dato) {
+        let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
+        pendientes.push(dato);
+        localStorage.setItem('rendimientosPendientes', JSON.stringify(pendientes));
+
+        let btn = document.getElementById('btnGuardarRend');
+        btn.innerText = "Guardar Rendimiento";
+        btn.disabled = false;
+
+        alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente en tu dispositivo.");
+        document.getElementById('rendValdes').value = "";
+        actualizarAlertaOffline();
+    }
+
+    function actualizarAlertaOffline() {
+        let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
+        let alerta = document.getElementById('alertaPendientes');
+        let btnSync = document.getElementById('btnSincronizar');
+
+        if (pendientes.length > 0) {
+            alerta.style.display = 'block';
+            alerta.innerText = `📦 Tienes ${pendientes.length} registros guardados sin sincronizar.`;
+            btnSync.style.display = 'block';
+        } else {
+            alerta.style.display = 'none';
+            btnSync.style.display = 'none';
+        }
+    }
+
+    function sincronizarPendientes() {
+        let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
+        if (pendientes.length === 0) return;
+
+        let btnSync = document.getElementById('btnSincronizar');
+        btnSync.innerText = "Sincronizando...";
+        btnSync.disabled = true;
+
+        let payloadLote = {
+            accion: "guardar_rendimiento_lote",
+            lote: pendientes
+        };
+
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadLote) })
+            .then(() => {
+                // Limpiar almacenamiento local al tener éxito
+                localStorage.removeItem('rendimientosPendientes');
+                btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
+                btnSync.disabled = false;
+                alert("¡Sincronización exitosa! Todos los registros pasaron a Google Sheets.");
+                actualizarAlertaOffline();
+            })
+            .catch(err => {
+                console.error("Error al sincronizar:", err);
+                btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
+                btnSync.disabled = false;
+                alert("Aún no hay conexión estable a internet. Inténtalo de nuevo más tarde.");
+            });
+    }
+
+    // --- LÓGICA DE ARÁNDANOS Y POSTCOSECHA (ESTÁNDAR) ---
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
@@ -304,7 +402,7 @@
                 console.error(err);
                 btn.innerText = "Validar Empleado";
                 btn.disabled = false;
-                alert("Error al conectar con el servidor.");
+                alert("Error de conexión.");
             });
     }
 
@@ -343,8 +441,7 @@
         if (signaturePad.isEmpty()) { alert("Por favor realiza la firma antes de enviar."); return; }
 
         let btn = document.getElementById('btnEnviarPedido');
-        let textoOriginal = btn.innerText;
-        btn.innerText = "Validando...";
+        btn.innerText = "Enviando...";
         btn.disabled = true;
 
         let payload = {
@@ -356,28 +453,18 @@
             firma: signaturePad.toDataURL("image/png")
         };
 
-        let timeout = setTimeout(() => {
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
-            alert("El servidor tardó demasiado. Verifica si el pedido se registró.");
-        }, 10000);
-
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(() => { 
-                clearTimeout(timeout);
                 alert("¡Pedido registrado con éxito!"); 
                 location.reload(); 
             })
             .catch(err => {
-                clearTimeout(timeout);
-                console.error(err);
-                btn.innerText = textoOriginal;
+                btn.innerText = "Finalizar y Enviar Pedido";
                 btn.disabled = false;
-                alert("Hubo un fallo al guardar el pedido.");
+                alert("Error de conexión al enviar pedido.");
             });
     }
 
-    // --- LÓGICA DE POSTCOSECHA ---
     function enviarPostcosecha() {
         let fecha = document.getElementById('postFecha').value;
         let bloque = document.getElementById('postBloque').value.trim();
@@ -392,7 +479,6 @@
         }
 
         let btn = document.getElementById('btnGuardarPost');
-        let textoOriginal = btn.innerText;
         btn.innerText = "Guardando...";
         btn.disabled = true;
 
@@ -408,72 +494,15 @@
             variedad: document.getElementById('postVariedad').value
         };
 
-        let timeout = setTimeout(() => {
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
-            alert("El servidor tardó demasiado en responder.");
-        }, 10000);
-
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(() => { 
-                clearTimeout(timeout);
                 alert("¡Ingreso a postcosecha guardado correctamente!"); 
                 location.reload(); 
             })
             .catch(error => {
-                clearTimeout(timeout);
-                console.error("Error:", error);
-                btn.innerText = textoOriginal;
+                btn.innerText = "Guardar Ingreso Postcosecha";
                 btn.disabled = false;
-                alert("Error de conexión con Google Sheets.");
-            });
-    }
-
-    // --- LÓGICA DE RENDIMIENTO (VALDES) ---
-    function enviarRendimiento() {
-        let fecha = document.getElementById('rendFecha').value;
-        let grupo = document.getElementById('rendSelectGrupo').value;
-        let nombre = document.getElementById('rendSelectEmpleado').value;
-        let bloque = document.getElementById('rendBloque').value.trim();
-        let valdes = document.getElementById('rendValdes').value.trim();
-
-        if (!fecha || !grupo || !nombre || !bloque || !valdes) {
-            alert("Por favor completa todos los campos del rendimiento.");
-            return;
-        }
-
-        let btn = document.getElementById('btnGuardarRend');
-        let textoOriginal = btn.innerText;
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
-        let payload = {
-            accion: "guardar_rendimiento",
-            fechaRegistro: fecha,
-            grupo: grupo,
-            nombre: nombre,
-            bloque: bloque,
-            valdes: valdes
-        };
-
-        let timeout = setTimeout(() => {
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
-            alert("El servidor tardó demasiado en responder.");
-        }, 10000);
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(() => { 
-                clearTimeout(timeout);
-                alert("¡Rendimiento guardado correctamente!"); 
-                location.reload(); 
-            })
-            .catch(error => {
-                clearTimeout(timeout);
-                console.error("Error:", error);
-                btn.innerText = textoOriginal;
-                btn.disabled = false;
-                alert("Error al guardar rendimiento.");
+                alert("Error de conexión.");
             });
     }
 </script>
