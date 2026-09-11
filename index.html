@@ -155,39 +155,68 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON SOPORTE OFFLINE) -->
+    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON PIN 2005 Y PARADAS) -->
     <div id="vistaRendimiento" class="vista">
-        <h3>Rendimiento de Cultivo</h3>
-        <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
+        <h3>Rendimiento por Paradas</h3>
         
-        <div class="form-group">
-            <label>Fecha de Labor:</label>
-            <input type="date" id="rendFecha">
+        <!-- Paso 1: Validación con PIN 2005 -->
+        <div id="seccionPinRendimiento">
+            <div class="form-group">
+                <label>PIN de Seguridad Autorizado:</label>
+                <input type="password" id="inputPinRend" placeholder="Ingresa el PIN">
+            </div>
+            <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar al Módulo</button>
+            <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
         </div>
-        <div class="form-group">
-            <label>Seleccionar Grupo:</label>
-            <select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()">
-                <option value="">-- Seleccione un grupo --</option>
-            </select>
+
+        <!-- Paso 2: Formulario de Reportes por Paradas -->
+        <div id="seccionFormRendimiento" style="display:none;">
+            <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
+            
+            <div class="form-group">
+                <label>Fecha de Labor:</label>
+                <input type="date" id="rendFecha">
+            </div>
+            
+            <div class="form-group">
+                <label>Seleccionar Parada (Horario):</label>
+                <select id="rendSelectParada">
+                    <option value="">-- Seleccione la parada --</option>
+                    <option value="1ª Parada (06:05 a 08:00)">1ª Parada (06:05 a 08:00)</option>
+                    <option value="2ª Parada (08:00 a 10:00)">2ª Parada (08:00 a 10:00)</option>
+                    <option value="3ª Parada (10:00 a 12:00)">3ª Parada (10:00 a 12:00)</option>
+                    <option value="4ª Parada (12:30 a 01:40)">4ª Parada (12:30 a 01:40)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Seleccionar Grupo:</label>
+                <select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()">
+                    <option value="">-- Seleccione un grupo --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Seleccionar Trabajador:</label>
+                <select id="rendSelectEmpleado">
+                    <option value="">-- Primero seleccione un grupo --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Bloque:</label>
+                <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
+            </div>
+
+            <div class="form-group">
+                <label>Número de Valdes en esta Parada:</label>
+                <input type="number" id="rendValdes" placeholder="Ej: 5">
+            </div>
+            
+            <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
+            <button id="btnSincronizar" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPendientes()">🔄 Sincronizar Registros Pendientes</button>
+            <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
         </div>
-        <div class="form-group">
-            <label>Seleccionar Trabajador:</label>
-            <select id="rendSelectEmpleado">
-                <option value="">-- Primero seleccione un grupo --</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Bloque:</label>
-            <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
-        </div>
-        <div class="form-group">
-            <label>Número de Valdes Hechos en el Día:</label>
-            <input type="number" id="rendValdes" placeholder="Ej: 12">
-        </div>
-        
-        <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento</button>
-        <button id="btnSincronizar" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPendientes()">🔄 Sincronizar Registros Pendientes</button>
-        <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 </div>
 
@@ -205,7 +234,6 @@
         if (document.getElementById('rendFecha')) document.getElementById('rendFecha').value = hoy;
         
         cargarDatosRendimiento();
-        actualizarAlertaOffline();
     });
 
     function irAModulo(modulo) {
@@ -220,7 +248,10 @@
             document.getElementById('vistaPostcosecha').classList.add('activa');
         } else if (modulo === 'rendimiento') {
             document.getElementById('vistaRendimiento').classList.add('activa');
-            actualizarAlertaOffline();
+            // Resetear PIN al entrar
+            document.getElementById('seccionPinRendimiento').style.display = 'block';
+            document.getElementById('seccionFormRendimiento').style.display = 'none';
+            document.getElementById('inputPinRend').value = '';
         }
     }
 
@@ -232,6 +263,18 @@
         canvas.height = canvas.offsetHeight * ratio;
         canvas.getContext("2d").scale(ratio, ratio);
         signaturePad.clear();
+    }
+
+    // --- VALIDAR PIN 2005 PARA RENDIMIENTOS ---
+    function verificarPinRendimiento() {
+        let pin = document.getElementById('inputPinRend').value.trim();
+        if (pin === "2005") {
+            document.getElementById('seccionPinRendimiento').style.display = 'none';
+            document.getElementById('seccionFormRendimiento').style.display = 'block';
+            actualizarAlertaOffline();
+        } else {
+            alert("PIN de seguridad incorrecto.");
+        }
     }
 
     // --- CARGAR DATOS Y LLENAR SELECTOR DE GRUPOS ---
@@ -274,22 +317,27 @@
         });
     }
 
-    // --- LÓGICA DE RENDIMIENTO CON SOPORTE OFFLINE ---
+    // --- LÓGICA DE RENDIMIENTO POR PARADAS CON OFFLINE ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
+        let parada = document.getElementById('rendSelectParada').value;
         let grupo = document.getElementById('rendSelectGrupo').value;
         let nombre = document.getElementById('rendSelectEmpleado').value;
         let bloque = document.getElementById('rendBloque').value.trim();
         let valdes = document.getElementById('rendValdes').value.trim();
 
-        if (!fecha || !grupo || !nombre || !bloque || !valdes) {
-            alert("Por favor completa todos los campos del rendimiento.");
+        if (!fecha || !parada || !grupo || !nombre || !bloque || !valdes) {
+            alert("Por favor completa todos los campos, incluyendo la parada.");
             return;
         }
+
+        let horaRealActual = new Date().toLocaleTimeString();
 
         let nuevoDato = {
             accion: "guardar_rendimiento",
             fechaRegistro: fecha,
+            parada: parada,
+            horaReal: horaRealActual,
             grupo: grupo,
             nombre: nombre,
             bloque: bloque,
@@ -300,17 +348,15 @@
         btn.innerText = "Guardando...";
         btn.disabled = true;
 
-        // Intentar enviar de inmediato a Google Sheets
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevoDato) })
             .then(() => {
-                btn.innerText = "Guardar Rendimiento";
+                btn.innerText = "Guardar Rendimiento de Parada";
                 btn.disabled = false;
-                alert("¡Rendimiento guardado correctamente en la nube!");
+                alert("¡Rendimiento de parada guardado correctamente!");
                 document.getElementById('rendValdes').value = "";
             })
             .catch(error => {
-                // Si falla por falta de internet, se guarda localmente
-                console.warn("Sin conexión. Guardando en almacenamiento local.", error);
+                console.warn("Sin conexión. Guardando localmente.", error);
                 guardarLocalmente(nuevoDato);
             });
     }
@@ -321,7 +367,7 @@
         localStorage.setItem('rendimientosPendientes', JSON.stringify(pendientes));
 
         let btn = document.getElementById('btnGuardarRend');
-        btn.innerText = "Guardar Rendimiento";
+        btn.innerText = "Guardar Rendimiento de Parada";
         btn.disabled = false;
 
         alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente en tu dispositivo.");
@@ -336,7 +382,7 @@
 
         if (pendientes.length > 0) {
             alerta.style.display = 'block';
-            alerta.innerText = `📦 Tienes ${pendientes.length} registros guardados sin sincronizar.`;
+            alerta.innerText = `📦 Tienes ${pendientes.length} registros de paradas guardados sin sincronizar.`;
             btnSync.style.display = 'block';
         } else {
             alerta.style.display = 'none';
@@ -359,22 +405,21 @@
 
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadLote) })
             .then(() => {
-                // Limpiar almacenamiento local al tener éxito
                 localStorage.removeItem('rendimientosPendientes');
                 btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
                 btnSync.disabled = false;
-                alert("¡Sincronización exitosa! Todos los registros pasaron a Google Sheets.");
+                alert("¡Sincronización exitosa! Todas las paradas pasaron a Google Sheets.");
                 actualizarAlertaOffline();
             })
             .catch(err => {
                 console.error("Error al sincronizar:", err);
                 btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
                 btnSync.disabled = false;
-                alert("Aún no hay conexión estable a internet. Inténtalo de nuevo más tarde.");
+                alert("Aún no hay conexión estable a internet.");
             });
     }
 
-    // --- LÓGICA DE ARÁNDANOS Y POSTCOSECHA (ESTÁNDAR) ---
+    // --- LÓGICA DE ARÁNDANOS Y POSTCOSECHA ---
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
@@ -461,7 +506,7 @@
             .catch(err => {
                 btn.innerText = "Finalizar y Enviar Pedido";
                 btn.disabled = false;
-                alert("Error de conexión al enviar pedido.");
+                alert("Error de conexión.");
             });
     }
 
