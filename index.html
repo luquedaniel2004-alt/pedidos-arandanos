@@ -155,7 +155,7 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON PIN 2005 Y PARADAS) -->
+    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON LIMPIEZA RÁPIDA SIN SALIR) -->
     <div id="vistaRendimiento" class="vista">
         <h3>Rendimiento por Paradas</h3>
         
@@ -248,7 +248,6 @@
             document.getElementById('vistaPostcosecha').classList.add('activa');
         } else if (modulo === 'rendimiento') {
             document.getElementById('vistaRendimiento').classList.add('activa');
-            // Resetear PIN al entrar
             document.getElementById('seccionPinRendimiento').style.display = 'block';
             document.getElementById('seccionFormRendimiento').style.display = 'none';
             document.getElementById('inputPinRend').value = '';
@@ -317,7 +316,7 @@
         });
     }
 
-    // --- LÓGICA DE RENDIMIENTO POR PARADAS CON OFFLINE ---
+    // --- LÓGICA DE RENDIMIENTO POR PARADAS CON OFFLINE Y LIMPIEZA ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
         let parada = document.getElementById('rendSelectParada').value;
@@ -352,8 +351,8 @@
             .then(() => {
                 btn.innerText = "Guardar Rendimiento de Parada";
                 btn.disabled = false;
-                alert("¡Rendimiento de parada guardado correctamente!");
-                document.getElementById('rendValdes').value = "";
+                alert("¡Rendimiento guardado correctamente!");
+                limpiarCamposRendimiento(); // Limpia los datos sin salir de la pantalla
             })
             .catch(error => {
                 console.warn("Sin conexión. Guardando localmente.", error);
@@ -371,8 +370,17 @@
         btn.disabled = false;
 
         alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente en tu dispositivo.");
-        document.getElementById('rendValdes').value = "";
+        limpiarCamposRendimiento(); // Limpia los datos sin salir de la pantalla
         actualizarAlertaOffline();
+    }
+
+    // Función exclusiva para limpiar las casillas de captura del supervisor
+    function limpiarCamposRendimiento() {
+        document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
+        document.getElementById('rendSelectGrupo').value = "";
+        document.getElementById('rendBloque').value = "";
+        document.getElementById('rendValdes').value = "";
+        // Nota: Mantenemos la fecha y la parada seleccionadas por comodidad, o puedes borrarlas si lo prefieres.
     }
 
     function actualizarAlertaOffline() {
