@@ -6,9 +6,38 @@
     <title>Sistema General - Flores de Funza</title>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 500px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: auto; }
-        h2, h3 { text-align: center; color: #2c3e50; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #eef2f3; 
+            /* FONDO DE PANTALLA COMPLETA CON GOOGLE DRIVE */
+            background-image: url('https://lh3.googleusercontent.com/d/1hiXn-HopXnr5Hr0mVByV4RDtIjwNUi_Q=s800');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover; 
+            margin: 0; 
+            padding: 20px; 
+        }
+
+        .container { 
+            max-width: 500px; 
+            background: rgba(255, 255, 255, 0.96); /* Tarjeta semitransparente para legibilidad */
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            margin: auto; 
+        }
+
+        .logo-superior {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .logo-superior img {
+            max-width: 130px;
+            height: auto;
+        }
+
+        h2, h3 { text-align: center; color: #2c3e50; margin-top: 5px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
         input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
@@ -31,13 +60,18 @@
         
         #signature-pad { border: 2px dashed #ccc; background-color: #fafafa; width: 100%; height: 200px; border-radius: 4px; }
         .mensaje-autorizacion { background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; }
-        .bienvenida-box { text-align: center; padding: 20px 0; }
-        .bienvenida-box p { color: #666; margin-bottom: 25px; }
+        .bienvenida-box { text-align: center; padding: 10px 0; }
+        .bienvenida-box p { color: #666; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- LOGO SUPERIOR DESDE GOOGLE DRIVE -->
+    <div class="logo-superior">
+        <img src="https://lh3.googleusercontent.com/d/1RHICmfq1ahAcpbFM8EzGTKpx_lay6Zk0=s800" alt="Logo Flores de Funza">
+    </div>
+
     <h2>Flores de Funza</h2>
 
     <!-- PANTALLA DE INICIO -->
@@ -155,11 +189,10 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON LIMPIEZA RÁPIDA SIN SALIR) -->
+    <!-- MÓDULO RENDIMIENTO DE CULTIVO -->
     <div id="vistaRendimiento" class="vista">
         <h3>Rendimiento por Paradas</h3>
         
-        <!-- Paso 1: Validación con PIN 2005 -->
         <div id="seccionPinRendimiento">
             <div class="form-group">
                 <label>PIN de Seguridad Autorizado:</label>
@@ -169,7 +202,6 @@
             <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
         </div>
 
-        <!-- Paso 2: Formulario de Reportes por Paradas -->
         <div id="seccionFormRendimiento" style="display:none;">
             <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
             
@@ -264,7 +296,6 @@
         signaturePad.clear();
     }
 
-    // --- VALIDAR PIN 2005 PARA RENDIMIENTOS ---
     function verificarPinRendimiento() {
         let pin = document.getElementById('inputPinRend').value.trim();
         if (pin === "2005") {
@@ -276,7 +307,6 @@
         }
     }
 
-    // --- CARGAR DATOS Y LLENAR SELECTOR DE GRUPOS ---
     function cargarDatosRendimiento() {
         fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`)
             .then(res => res.json())
@@ -296,7 +326,7 @@
                 }
             })
             .catch(err => {
-                console.log("Sin internet para actualizar la lista de personal. Usando memoria local si existe.");
+                console.log("Sin internet para actualizar personal. Usando memoria local si existe.");
             });
     }
 
@@ -316,7 +346,6 @@
         });
     }
 
-    // --- LÓGICA DE RENDIMIENTO POR PARADAS CON OFFLINE Y LIMPIEZA ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
         let parada = document.getElementById('rendSelectParada').value;
@@ -352,7 +381,7 @@
                 btn.innerText = "Guardar Rendimiento de Parada";
                 btn.disabled = false;
                 alert("¡Rendimiento guardado correctamente!");
-                limpiarCamposRendimiento(); // Limpia los datos sin salir de la pantalla
+                limpiarCamposRendimiento();
             })
             .catch(error => {
                 console.warn("Sin conexión. Guardando localmente.", error);
@@ -370,17 +399,15 @@
         btn.disabled = false;
 
         alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente en tu dispositivo.");
-        limpiarCamposRendimiento(); // Limpia los datos sin salir de la pantalla
+        limpiarCamposRendimiento();
         actualizarAlertaOffline();
     }
 
-    // Función exclusiva para limpiar las casillas de captura del supervisor
     function limpiarCamposRendimiento() {
         document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
         document.getElementById('rendSelectGrupo').value = "";
         document.getElementById('rendBloque').value = "";
         document.getElementById('rendValdes').value = "";
-        // Nota: Mantenemos la fecha y la parada seleccionadas por comodidad, o puedes borrarlas si lo prefieres.
     }
 
     function actualizarAlertaOffline() {
@@ -561,4 +588,4 @@
 </script>
 
 </body>
-</html>
+</html>	
