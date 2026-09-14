@@ -9,7 +9,6 @@
         body { 
             font-family: Arial, sans-serif; 
             background-color: #eef2f3; 
-            /* FONDO DE PANTALLA COMPLETA CON GOOGLE DRIVE */
             background-image: url('https://lh3.googleusercontent.com/d/1hiXn-HopXnr5Hr0mVByV4RDtIjwNUi_Q=s800');
             background-repeat: no-repeat;
             background-position: center center;
@@ -21,7 +20,7 @@
 
         .container { 
             max-width: 500px; 
-            background: rgba(255, 255, 255, 0.96); /* Tarjeta semitransparente para legibilidad */
+            background: rgba(255, 255, 255, 0.96); 
             padding: 25px; 
             border-radius: 8px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
@@ -67,7 +66,6 @@
 <body>
 
 <div class="container">
-    <!-- LOGO SUPERIOR DESDE GOOGLE DRIVE -->
     <div class="logo-superior">
         <img src="https://lh3.googleusercontent.com/d/1RHICmfq1ahAcpbFM8EzGTKpx_lay6Zk0=s800" alt="Logo Flores de Funza">
     </div>
@@ -189,7 +187,7 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO RENDIMIENTO DE CULTIVO -->
+    <!-- MÓDULO RENDIMIENTO DE CULTIVO (CON TIPO 1, 2 Y 3) -->
     <div id="vistaRendimiento" class="vista">
         <h3>Rendimiento por Paradas</h3>
         
@@ -240,9 +238,18 @@
                 <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
             </div>
 
+            <!-- NUEVOS CAMPOS DE CALIDAD -->
             <div class="form-group">
-                <label>Número de Valdes en esta Parada:</label>
-                <input type="number" id="rendValdes" placeholder="Ej: 5">
+                <label>Valdes Tipo 1:</label>
+                <input type="number" id="rendValdesT1" min="0" value="0" placeholder="Ej: 4">
+            </div>
+            <div class="form-group">
+                <label>Valdes Tipo 2:</label>
+                <input type="number" id="rendValdesT2" min="0" value="0" placeholder="Ej: 2">
+            </div>
+            <div class="form-group">
+                <label>Valdes Tipo 3:</label>
+                <input type="number" id="rendValdesT3" min="0" value="0" placeholder="Ej: 1">
             </div>
             
             <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
@@ -352,10 +359,18 @@
         let grupo = document.getElementById('rendSelectGrupo').value;
         let nombre = document.getElementById('rendSelectEmpleado').value;
         let bloque = document.getElementById('rendBloque').value.trim();
-        let valdes = document.getElementById('rendValdes').value.trim();
+        
+        let valdesT1 = parseInt(document.getElementById('rendValdesT1').value) || 0;
+        let valdesT2 = parseInt(document.getElementById('rendValdesT2').value) || 0;
+        let valdesT3 = parseInt(document.getElementById('rendValdesT3').value) || 0;
 
-        if (!fecha || !parada || !grupo || !nombre || !bloque || !valdes) {
-            alert("Por favor completa todos los campos, incluyendo la parada.");
+        if (!fecha || !parada || !grupo || !nombre || !bloque) {
+            alert("Por favor completa los datos obligatorios (Fecha, Parada, Grupo, Trabajador y Bloque).");
+            return;
+        }
+
+        if (valdesT1 === 0 && valdesT2 === 0 && valdesT3 === 0) {
+            alert("Debe ingresar al menos la cantidad de valdes en algún tipo de fruta.");
             return;
         }
 
@@ -369,7 +384,9 @@
             grupo: grupo,
             nombre: nombre,
             bloque: bloque,
-            valdes: valdes
+            valdesT1: valdesT1,
+            valdesT2: valdesT2,
+            valdesT3: valdesT3
         };
 
         let btn = document.getElementById('btnGuardarRend');
@@ -407,7 +424,9 @@
         document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
         document.getElementById('rendSelectGrupo').value = "";
         document.getElementById('rendBloque').value = "";
-        document.getElementById('rendValdes').value = "";
+        document.getElementById('rendValdesT1').value = "0";
+        document.getElementById('rendValdesT2').value = "0";
+        document.getElementById('rendValdesT3').value = "0";
     }
 
     function actualizarAlertaOffline() {
@@ -588,4 +607,4 @@
 </script>
 
 </body>
-</html>	
+</html>
