@@ -134,7 +134,7 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO POSTCOSECHA (CON SOPORTE OFFLINE) -->
+    <!-- MÓDULO POSTCOSECHA -->
     <div id="vistaPostcosecha" class="vista">
         <h3>Ingreso a Postcosecha</h3>
         
@@ -344,7 +344,7 @@
                 }
             })
             .catch(err => {
-                console.log("Sin internet para actualizar personal. Usando memoria local si existe.");
+                console.log("Sin internet para actualizar personal.");
             });
     }
 
@@ -364,7 +364,7 @@
         });
     }
 
-    // --- RENDIMIENTO OFFLINE ---
+    // --- RENDIMIENTO (ENVÍO Y SINCRONIZACIÓN REGISTRO POR REGISTRO) ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
         let parada = document.getElementById('rendSelectParada').value;
@@ -378,7 +378,7 @@
         let observaciones = document.getElementById('rendObservaciones').value.trim();
 
         if (!fecha || !parada || !grupo || !nombre || !bloque) {
-            alert("Por favor, complete los datos obligatorios (Fecha, Parada, Grupo, Trabajador y Bloque).");
+            alert("Por favor, complete los datos obligatorios.");
             return;
         }
 
@@ -415,7 +415,6 @@
                 limpiarCamposRendimiento();
             })
             .catch(error => {
-                console.warn("Sin conexión. Guardando localmente.", error);
                 guardarRendimientoLocal(nuevoDato);
             });
     }
@@ -429,7 +428,7 @@
         btn.innerText = "Guardar Rendimiento de Parada";
         btn.disabled = false;
 
-        alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente en su dispositivo.");
+        alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente.");
         limpiarCamposRendimiento();
         actualizarAlertaOffline();
     }
@@ -459,7 +458,7 @@
         }
     }
 
-    function sincronizarPendientes() {
+    async function sincronizarPendientes() {
         let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
         if (pendientes.length === 0) return;
 
@@ -467,28 +466,28 @@
         btnSync.innerText = "Sincronizando...";
         btnSync.disabled = true;
 
-        let payloadLote = {
-            accion: "guardar_rendimiento_lote",
-            lote: pendientes
-        };
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadLote) })
-            .then(() => {
-                localStorage.removeItem('rendimientosPendientes');
-                btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
-                btnSync.disabled = false;
-                alert("¡Sincronización exitosa! Todas las paradas pasaron a Google Sheets.");
-                actualizarAlertaOffline();
-            })
-            .catch(err => {
-                console.error("Error al sincronizar:", err);
-                btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
-                btnSync.disabled = false;
-                alert("Aún no hay conexión estable a internet.");
-            });
+        try {
+            for (let i = 0; i < pendientes.length; i++) {
+                await fetch(URL_SCRIPT, { 
+                    method: "POST", 
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(pendientes[i]) 
+                });
+            }
+            localStorage.removeItem('rendimientosPendientes');
+            btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
+            btnSync.disabled = false;
+            alert("¡Sincronización exitosa! Todos los registros pasaron a Google Sheets.");
+            actualizarAlertaOffline();
+        } catch (err) {
+            btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
+            btnSync.disabled = false;
+            alert("Error de conexión al sincronizar. Intente de nuevo.");
+        }
     }
 
-    // --- POSTCOSECHA OFFLINE ---
+    // --- POSTCOSECHA (ENVÍO Y SINCRONIZACIÓN REGISTRO POR REGISTRO) ---
     function enviarPostcosecha() {
         let fecha = document.getElementById('postFecha').value;
         let bloque = document.getElementById('postBloque').value.trim();
@@ -526,7 +525,6 @@
                 location.reload(); 
             })
             .catch(error => {
-                console.warn("Sin conexión en postcosecha. Guardando localmente.", error);
                 guardarPostcosechaLocal(payload);
             });
     }
@@ -540,7 +538,7 @@
         btn.innerText = "Guardar Ingreso Postcosecha";
         btn.disabled = false;
 
-        alert("⚠️ Sin conexión a internet. El ingreso a postcosecha se guardó localmente en su dispositivo.");
+        alert("⚠️ Sin conexión a internet. El ingreso a postcosecha se guardó localmente.");
         limpiarCamposPostcosecha();
         actualizarAlertaPostOffline();
     }
@@ -568,7 +566,7 @@
         }
     }
 
-    function sincronizarPostPendientes() {
+    async function sincronizarPostPendientes() {
         let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
         if (pendientes.length === 0) return;
 
@@ -576,25 +574,25 @@
         btnSync.innerText = "Sincronizando...";
         btnSync.disabled = true;
 
-        let payloadLote = {
-            accion: "guardar_postcosecha_lote",
-            lote: pendientes
-        };
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadLote) })
-            .then(() => {
-                localStorage.removeItem('postcosechaPendientes');
-                btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
-                btnSync.disabled = false;
-                alert("¡Sincronización exitosa! Todos los ingresos pasaron a Google Sheets.");
-                actualizarAlertaPostOffline();
-            })
-            .catch(err => {
-                console.error("Error al sincronizar postcosecha:", err);
-                btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
-                btnSync.disabled = false;
-                alert("Aún no hay conexión estable a internet.");
-            });
+        try {
+            for (let i = 0; i < pendientes.length; i++) {
+                await fetch(URL_SCRIPT, { 
+                    method: "POST", 
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(pendientes[i]) 
+                });
+            }
+            localStorage.removeItem('postcosechaPendientes');
+            btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
+            btnSync.disabled = false;
+            alert("¡Sincronización exitosa! Todos los ingresos pasaron a Google Sheets.");
+            actualizarAlertaPostOffline();
+        } catch (err) {
+            btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
+            btnSync.disabled = false;
+            alert("Error de conexión al sincronizar. Intente de nuevo.");
+        }
     }
 
     // --- LÓGICA DE ARÁNDANOS ---
@@ -622,7 +620,6 @@
                 }
             })
             .catch(err => {
-                console.error(err);
                 btn.innerText = "Validar Empleado";
                 btn.disabled = false;
                 alert("Error de conexión.");
