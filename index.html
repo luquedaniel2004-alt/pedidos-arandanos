@@ -208,14 +208,16 @@
                 <input type="date" id="rendFecha">
             </div>
             
+            <!-- NUEVAS 5 PARADAS ACTUALIZADAS -->
             <div class="form-group">
                 <label>Seleccionar Parada (Horario):</label>
                 <select id="rendSelectParada">
                     <option value="">-- Seleccione la parada --</option>
-                    <option value="1ª Parada (06:05 a 08:00)">1ª Parada (06:05 a 08:00)</option>
-                    <option value="2ª Parada (08:00 a 10:00)">2ª Parada (08:00 a 10:00)</option>
-                    <option value="3ª Parada (10:00 a 12:00)">3ª Parada (10:00 a 12:00)</option>
-                    <option value="4ª Parada (12:30 a 01:40)">4ª Parada (12:30 a 01:40)</option>
+                    <option value="1ª Parada (6:00 A 7:00)">1ª Parada (6:00 A 7:00)</option>
+                    <option value="2ª Parada (7:00 A 8:00)">2ª Parada (7:00 A 8:00)</option>
+                    <option value="3ª Parada (8:00 A 10:00)">3ª Parada (8:00 A 10:00)</option>
+                    <option value="4ª Parada (10:00 A 12:00)">4ª Parada (10:00 A 12:00)</option>
+                    <option value="5ª Parada (12:00 A 2:00)">5ª Parada (12:00 A 2:00)</option>
                 </select>
             </div>
 
@@ -239,15 +241,15 @@
             </div>
 
             <div class="form-group">
-                <label>Baldes Tipo 1:</label>
+                <label>Valdes Tipo 1:</label>
                 <input type="number" id="rendValdesT1" min="0" value="0" placeholder="Ej: 4">
             </div>
             <div class="form-group">
-                <label>Baldes Tipo 2:</label>
+                <label>Valdes Tipo 2:</label>
                 <input type="number" id="rendValdesT2" min="0" value="0" placeholder="Ej: 2">
             </div>
             <div class="form-group">
-                <label>Baldes Tipo 3:</label>
+                <label>Valdes Tipo 3:</label>
                 <input type="number" id="rendValdesT3" min="0" value="0" placeholder="Ej: 1">
             </div>
 
@@ -375,7 +377,7 @@
         }
 
         if (valdesT1 === 0 && valdesT2 === 0 && valdesT3 === 0) {
-            alert("Debe ingresar al menos la cantidad de Baldes en algún tipo de fruta.");
+            alert("Debe ingresar al menos la cantidad de valdes en algún tipo de fruta.");
             return;
         }
 
