@@ -134,9 +134,12 @@
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO POSTCOSECHA -->
+    <!-- MÓDULO POSTCOSECHA (CON SOPORTE OFFLINE) -->
     <div id="vistaPostcosecha" class="vista">
         <h3>Ingreso a Postcosecha</h3>
+        
+        <div id="alertaPostPendientes" class="alerta-offline" style="display:none;"></div>
+
         <div class="form-group">
             <label>Fecha de Ingreso:</label>
             <input type="date" id="postFecha">
@@ -184,6 +187,7 @@
             </select>
         </div>
         <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
+        <button id="btnSincronizarPost" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPostPendientes()">🔄 Sincronizar Postcosechas Pendientes</button>
         <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
@@ -208,7 +212,6 @@
                 <input type="date" id="rendFecha">
             </div>
             
-            <!-- NUEVAS 5 PARADAS ACTUALIZADAS -->
             <div class="form-group">
                 <label>Seleccionar Parada (Horario):</label>
                 <select id="rendSelectParada">
@@ -279,6 +282,7 @@
         if (document.getElementById('rendFecha')) document.getElementById('rendFecha').value = hoy;
         
         cargarDatosRendimiento();
+        actualizarAlertaPostOffline();
     });
 
     function irAModulo(modulo) {
@@ -291,6 +295,7 @@
             document.getElementById('vistaArandanos').classList.add('activa');
         } else if (modulo === 'postcosecha') {
             document.getElementById('vistaPostcosecha').classList.add('activa');
+            actualizarAlertaPostOffline();
         } else if (modulo === 'rendimiento') {
             document.getElementById('vistaRendimiento').classList.add('activa');
             document.getElementById('seccionPinRendimiento').style.display = 'block';
@@ -359,6 +364,7 @@
         });
     }
 
+    // --- RENDIMIENTO OFFLINE ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
         let parada = document.getElementById('rendSelectParada').value;
@@ -410,11 +416,11 @@
             })
             .catch(error => {
                 console.warn("Sin conexión. Guardando localmente.", error);
-                guardarLocalmente(nuevoDato);
+                guardarRendimientoLocal(nuevoDato);
             });
     }
 
-    function guardarLocalmente(dato) {
+    function guardarRendimientoLocal(dato) {
         let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
         pendientes.push(dato);
         localStorage.setItem('rendimientosPendientes', JSON.stringify(pendientes));
@@ -482,7 +488,116 @@
             });
     }
 
-    // --- LÓGICA DE ARÁNDANOS Y POSTCOSECHA ---
+    // --- POSTCOSECHA OFFLINE ---
+    function enviarPostcosecha() {
+        let fecha = document.getElementById('postFecha').value;
+        let bloque = document.getElementById('postBloque').value.trim();
+        let anio = document.getElementById('postAnio').value.trim();
+        let canastillas = document.getElementById('postCanastillas').value.trim();
+        let pesoTotal = document.getElementById('postPesoTotal').value.trim();
+        let pesoCanastilla = document.getElementById('postPesoCanastilla').value.trim();
+
+        if (!fecha || !bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
+            alert("Por favor, complete todos los campos.");
+            return;
+        }
+
+        let payload = {
+            accion: "guardar_postcosecha",
+            fechaRegistro: fecha,
+            bloque: bloque,
+            anioBloque: anio,
+            canastillas: canastillas,
+            pesoTotal: pesoTotal,
+            pesoCanastilla: pesoCanastilla,
+            tipoFruta: document.getElementById('postFruta').value,
+            variedad: document.getElementById('postVariedad').value
+        };
+
+        let btn = document.getElementById('btnGuardarPost');
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(() => { 
+                btn.innerText = "Guardar Ingreso Postcosecha";
+                btn.disabled = false;
+                alert("¡Ingreso a postcosecha guardado correctamente!"); 
+                location.reload(); 
+            })
+            .catch(error => {
+                console.warn("Sin conexión en postcosecha. Guardando localmente.", error);
+                guardarPostcosechaLocal(payload);
+            });
+    }
+
+    function guardarPostcosechaLocal(dato) {
+        let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
+        pendientes.push(dato);
+        localStorage.setItem('postcosechaPendientes', JSON.stringify(pendientes));
+
+        let btn = document.getElementById('btnGuardarPost');
+        btn.innerText = "Guardar Ingreso Postcosecha";
+        btn.disabled = false;
+
+        alert("⚠️ Sin conexión a internet. El ingreso a postcosecha se guardó localmente en su dispositivo.");
+        limpiarCamposPostcosecha();
+        actualizarAlertaPostOffline();
+    }
+
+    function limpiarCamposPostcosecha() {
+        document.getElementById('postBloque').value = "";
+        document.getElementById('postAnio').value = "";
+        document.getElementById('postCanastillas').value = "";
+        document.getElementById('postPesoTotal').value = "";
+        document.getElementById('postPesoCanastilla').value = "";
+    }
+
+    function actualizarAlertaPostOffline() {
+        let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
+        let alerta = document.getElementById('alertaPostPendientes');
+        let btnSync = document.getElementById('btnSincronizarPost');
+
+        if (pendientes.length > 0) {
+            alerta.style.display = 'block';
+            alerta.innerText = `📦 Tiene ${pendientes.length} ingresos a postcosecha guardados sin sincronizar.`;
+            btnSync.style.display = 'block';
+        } else {
+            alerta.style.display = 'none';
+            btnSync.style.display = 'none';
+        }
+    }
+
+    function sincronizarPostPendientes() {
+        let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
+        if (pendientes.length === 0) return;
+
+        let btnSync = document.getElementById('btnSincronizarPost');
+        btnSync.innerText = "Sincronizando...";
+        btnSync.disabled = true;
+
+        let payloadLote = {
+            accion: "guardar_postcosecha_lote",
+            lote: pendientes
+        };
+
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadLote) })
+            .then(() => {
+                localStorage.removeItem('postcosechaPendientes');
+                btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
+                btnSync.disabled = false;
+                alert("¡Sincronización exitosa! Todos los ingresos pasaron a Google Sheets.");
+                actualizarAlertaPostOffline();
+            })
+            .catch(err => {
+                console.error("Error al sincronizar postcosecha:", err);
+                btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
+                btnSync.disabled = false;
+                alert("Aún no hay conexión estable a internet.");
+            });
+    }
+
+    // --- LÓGICA DE ARÁNDANOS ---
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
@@ -568,47 +683,6 @@
             })
             .catch(err => {
                 btn.innerText = "Finalizar y Enviar Pedido";
-                btn.disabled = false;
-                alert("Error de conexión.");
-            });
-    }
-
-    function enviarPostcosecha() {
-        let fecha = document.getElementById('postFecha').value;
-        let bloque = document.getElementById('postBloque').value.trim();
-        let anio = document.getElementById('postAnio').value.trim();
-        let canastillas = document.getElementById('postCanastillas').value.trim();
-        let pesoTotal = document.getElementById('postPesoTotal').value.trim();
-        let pesoCanastilla = document.getElementById('postPesoCanastilla').value.trim();
-
-        if (!fecha || !bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
-            alert("Por favor, complete todos los campos.");
-            return;
-        }
-
-        let btn = document.getElementById('btnGuardarPost');
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
-        let payload = {
-            accion: "guardar_postcosecha",
-            fechaRegistro: fecha,
-            bloque: bloque,
-            anioBloque: anio,
-            canastillas: canastillas,
-            pesoTotal: pesoTotal,
-            pesoCanastilla: pesoCanastilla,
-            tipoFruta: document.getElementById('postFruta').value,
-            variedad: document.getElementById('postVariedad').value
-        };
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(() => { 
-                alert("¡Ingreso a postcosecha guardado correctamente!"); 
-                location.reload(); 
-            })
-            .catch(error => {
-                btn.innerText = "Guardar Ingreso Postcosecha";
                 btn.disabled = false;
                 alert("Error de conexión.");
             });
