@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -154,15 +154,15 @@
         </div>
         <div class="form-group">
             <label>Número de Canastillas:</label>
-            <input type="number" id="postCanastillas" placeholder="Cantidad">
+            <input type="number" id="postCanastillas" placeholder="Cantidad" step="any">
         </div>
         <div class="form-group">
             <label>Peso Total de Canastillas (kg):</label>
-            <input type="number" id="postPesoTotal" placeholder="Peso total">
+            <input type="number" id="postPesoTotal" placeholder="Peso total" step="0.01">
         </div>
         <div class="form-group">
             <label>Peso de Canastilla (kg):</label>
-            <input type="number" id="postPesoCanastilla" placeholder="Peso individual">
+            <input type="number" id="postPesoCanastilla" placeholder="Peso individual" step="0.01">
         </div>
         <div class="form-group">
             <label>Tipo de Fruta:</label>
@@ -212,7 +212,6 @@
                 <input type="date" id="rendFecha">
             </div>
             
-            <!-- PARADAS ACTUALIZADAS CON LA FRANJA DE 2:00 PM A 4:00 PM -->
             <div class="form-group">
                 <label>Seleccionar Parada (Horario):</label>
                 <select id="rendSelectParada">
@@ -245,17 +244,18 @@
                 <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
             </div>
 
+            <!-- CAMPOS DE VALDES CONFIGURADOS CON STEP 0.5 PARA PERMITIR DECIMALES -->
             <div class="form-group">
                 <label>Valdes Tipo 1:</label>
-                <input type="number" id="rendValdesT1" min="0" value="0" placeholder="Ej: 4">
+                <input type="number" id="rendValdesT1" min="0" step="0.5" value="0" placeholder="Ej: 1.5">
             </div>
             <div class="form-group">
                 <label>Valdes Tipo 2:</label>
-                <input type="number" id="rendValdesT2" min="0" value="0" placeholder="Ej: 2">
+                <input type="number" id="rendValdesT2" min="0" step="0.5" value="0" placeholder="Ej: 0.5">
             </div>
             <div class="form-group">
                 <label>Valdes Tipo 3:</label>
-                <input type="number" id="rendValdesT3" min="0" value="0" placeholder="Ej: 1">
+                <input type="number" id="rendValdesT3" min="0" step="0.5" value="0" placeholder="Ej: 2">
             </div>
 
             <div class="form-group">
@@ -366,7 +366,7 @@
         });
     }
 
-    // --- RENDIMIENTO (ENVÍO Y SINCRONIZACIÓN REGISTRO POR REGISTRO) ---
+    // --- RENDIMIENTO (USA parseFloat PARA PERMITIR DECIMALES COMO 0.5 o 1.5) ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
         let parada = document.getElementById('rendSelectParada').value;
@@ -374,9 +374,9 @@
         let nombre = document.getElementById('rendSelectEmpleado').value;
         let bloque = document.getElementById('rendBloque').value.trim();
         
-        let valdesT1 = parseInt(document.getElementById('rendValdesT1').value) || 0;
-        let valdesT2 = parseInt(document.getElementById('rendValdesT2').value) || 0;
-        let valdesT3 = parseInt(document.getElementById('rendValdesT3').value) || 0;
+        let valdesT1 = parseFloat(document.getElementById('rendValdesT1').value) || 0;
+        let valdesT2 = parseFloat(document.getElementById('rendValdesT2').value) || 0;
+        let valdesT3 = parseFloat(document.getElementById('rendValdesT3').value) || 0;
         let observaciones = document.getElementById('rendObservaciones').value.trim();
 
         if (!fecha || !parada || !grupo || !nombre || !bloque) {
@@ -489,14 +489,14 @@
         }
     }
 
-    // --- POSTCOSECHA (ENVÍO Y SINCRONIZACIÓN REGISTRO POR REGISTRO) ---
+    // --- POSTCOSECHA ---
     function enviarPostcosecha() {
         let fecha = document.getElementById('postFecha').value;
         let bloque = document.getElementById('postBloque').value.trim();
         let anio = document.getElementById('postAnio').value.trim();
-        let canastillas = document.getElementById('postCanastillas').value.trim();
-        let pesoTotal = document.getElementById('postPesoTotal').value.trim();
-        let pesoCanastilla = document.getElementById('postPesoCanastilla').value.trim();
+        let canastillas = parseFloat(document.getElementById('postCanastillas').value) || 0;
+        let pesoTotal = parseFloat(document.getElementById('postPesoTotal').value) || 0;
+        let pesoCanastilla = parseFloat(document.getElementById('postPesoCanastilla').value) || 0;
 
         if (!fecha || !bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
             alert("Por favor, complete todos los campos.");
