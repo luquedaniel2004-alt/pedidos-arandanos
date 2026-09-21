@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -48,6 +48,8 @@
         .btn-warning:hover { background-color: #d35400; }
         .btn-purple { background-color: #6f42c1; color: white; }
         .btn-purple:hover { background-color: #5a32a3; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-info:hover { background-color: #138496; }
         .btn-danger { background-color: #dc3545; margin-top: 5px; }
         .btn-danger:hover { background-color: #c82333; }
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
@@ -72,201 +74,244 @@
 
     <h2>Flores de Funza</h2>
 
-    <!-- PANTALLA DE INICIO -->
+    <!-- PANTALLA DE INICIO PRINCIPAL (SELECCIÓN DE FINCA) -->
     <div id="vistaInicio" class="vista activa">
         <div class="bienvenida-box">
-            <h3>Bienvenido</h3>
-            <p>Por favor, seleccione el módulo al que desea ingresar:</p>
-            <button class="btn-secondary" onclick="irAModulo('arandanos')">🫐 Pedido de Arándanos</button>
-            <button class="btn-warning" onclick="irAModulo('postcosecha')">📦 Ingreso a Postcosecha</button>
-            <button class="btn-purple" onclick="irAModulo('rendimiento')">🌱 Rendimiento de Cultivo</button>
+            <h3>Centro de Producción</h3>
+            <p>Por favor, seleccione la finca a la que desea ingresar:</p>
+            <button class="btn-secondary" onclick="cambiarVista('vistaFincaFunza')">🏡 Finca Funza</button>
+            <button class="btn-warning" onclick="cambiarVista('vistaSanFelipe')">🌻 San Felipe</button>
         </div>
     </div>
 
-    <!-- MÓDULO ARÁNDANOS -->
-    <div id="vistaArandanos" class="vista">
-        <h3>Módulo de Arándanos</h3>
-        
-        <div id="seccionValidacion">
-            <div class="form-group">
-                <label>Cédula:</label>
-                <input type="text" id="inputCedula" placeholder="Ingrese su cédula">
-            </div>
-            <div class="form-group">
-                <label>Año de Seguridad:</label>
-                <input type="text" id="inputSeguridad" placeholder="Año de seguridad">
-            </div>
-            <button id="btnValidar" class="btn-secondary" onclick="verificarEmpleado()">Validar Empleado</button>
+    <!-- SUBMENÚ FINCA FUNZA (FLORES Y ARÁNDANOS) -->
+    <div id="vistaFincaFunza" class="vista">
+        <div class="bienvenida-box">
+            <h3>Finca Funza</h3>
+            <p>Seleccione el cultivo o área de trabajo:</p>
+            <button class="btn-warning" onclick="cambiarVista('vistaFlores')">🌸 Flores</button>
+            <button class="btn-secondary" onclick="cambiarVista('vistaArandanosMenu')">🫐 Arándanos</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver a Selección de Finca</button>
         </div>
-
-        <div id="seccionProductos" style="display:none;">
-            <p id="saludoEmpleado" style="font-weight: bold; color: #007bff; text-align: center; font-size: 16px;"></p>
-            
-            <div class="form-group">
-                <label>Promoción 3 Kilos ($20.000 c/u):</label>
-                <input type="number" id="inputPromoKilos" min="0" value="0">
-            </div>
-            <div class="form-group">
-                <label>1 Kilo Regular ($29.000 c/u):</label>
-                <input type="number" id="inputKiloNormal" min="0" value="0">
-            </div>
-            <div class="form-group">
-                <label>Mermeladas ($15.000 c/u):</label>
-                <input type="number" id="inputMermeladas" min="0" value="0">
-            </div>
-            <div class="form-group">
-                <label>Frambuesas ($18.000 c/u):</label>
-                <input type="number" id="inputFrambuesas" min="0" value="0">
-            </div>
-
-            <button onclick="calcularPedidoYMostrarAutorizacion()">Continuar para Firmar</button>
-        </div>
-
-        <div id="seccionFirma" style="display:none;">
-            <div id="mensajeAutorizacion" class="mensaje-autorizacion"></div>
-            <label>Firma del Empleado:</label>
-            <canvas id="signature-pad"></canvas>
-            <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar Firma</button>
-            <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Finalizar y Enviar Pedido</button>
-            <button class="btn-volver" onclick="regresarAProductos()">Regresar y cambiar cantidades</button>
-        </div>
-
-        <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
     </div>
 
-    <!-- MÓDULO POSTCOSECHA -->
-    <div id="vistaPostcosecha" class="vista">
-        <h3>Ingreso a Postcosecha</h3>
-        
-        <div id="alertaPostPendientes" class="alerta-offline" style="display:none;"></div>
-
-        <div class="form-group">
-            <label>Fecha de Ingreso:</label>
-            <input type="date" id="postFecha">
+    <!-- MÓDULO VACÍO: FLORES (FINCA FUNZA) -->
+    <div id="vistaFlores" class="vista">
+        <h3>Módulo de Flores - Finca Funza</h3>
+        <div class="bienvenida-box">
+            <p>Módulo en desarrollo para la nueva producción de flores.</p>
         </div>
-        <div class="form-group">
-            <label>Bloque:</label>
-            <input type="text" id="postBloque" placeholder="Ej: Bloque A">
-        </div>
-        <div class="form-group">
-            <label>Año de Bloque:</label>
-            <input type="text" id="postAnio" placeholder="Ej: 2025">
-        </div>
-        <div class="form-group">
-            <label>Número de Canastillas:</label>
-            <input type="number" id="postCanastillas" placeholder="Cantidad" step="any">
-        </div>
-        <div class="form-group">
-            <label>Peso Total de Canastillas (kg):</label>
-            <input type="number" id="postPesoTotal" placeholder="Peso total" step="0.01">
-        </div>
-        <div class="form-group">
-            <label>Peso de Canastilla (kg):</label>
-            <input type="number" id="postPesoCanastilla" placeholder="Peso individual" step="0.01">
-        </div>
-        <div class="form-group">
-            <label>Tipo de Fruta:</label>
-            <select id="postFruta">
-                <option value="Tipo 1">Tipo 1</option>
-                <option value="Tipo 2">Tipo 2</option>
-                <option value="Tipo 3">Tipo 3</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Variedad:</label>
-            <select id="postVariedad">
-                <option value="BILOXI">BILOXI</option>
-                <option value="SHARPBLU">SHARPBLU</option>
-                <option value="EMERALD">EMERALD</option>
-                <option value="VICTORIA">VICTORIA</option>
-                <option value="LEGACY">LEGACY</option>
-                <option value="RIBBON">RIBBON</option>
-                <option value="VENTURA">VENTURA</option>
-                <option value="ATLAS">ATLAS</option>
-                <option value="BIANCA">BIANCA</option>
-            </select>
-        </div>
-        <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
-        <button id="btnSincronizarPost" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPostPendientes()">🔄 Sincronizar Postcosechas Pendientes</button>
-        <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
+        <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">Volver a Finca Funza</button>
     </div>
 
-    <!-- MÓDULO RENDIMIENTO DE CULTIVO -->
-    <div id="vistaRendimiento" class="vista">
-        <h3>Rendimiento por Paradas</h3>
-        
-        <div id="seccionPinRendimiento">
-            <div class="form-group">
-                <label>PIN de Seguridad Autorizado:</label>
-                <input type="password" id="inputPinRend" placeholder="Ingrese el PIN">
+    <!-- MÓDULO VACÍO: SAN FELIPE -->
+    <div id="vistaSanFelipe" class="vista">
+        <h3>Módulo Finca San Felipe</h3>
+        <div class="bienvenida-box">
+            <p>Módulo en desarrollo para el nuevo centro de producción.</p>
+        </div>
+        <button class="btn-volver" onclick="cambiarVista('vistaInicio')">Volver al Inicio</button>
+    </div>
+
+    <!-- MENÚ INTERMEDIO DE ARÁNDANOS -->
+    <div id="vistaArandanosMenu" class="vista">
+        <div class="bienvenida-box">
+            <h3>Módulo de Arándanos</h3>
+            <p>Por favor seleccione el proceso que desea realizar:</p>
+            <button class="btn-secondary" onclick="cambiarVista('vistaArandanosApp', 'arandanos')">🫐 Pedido de Arándanos</button>
+            <button class="btn-warning" onclick="cambiarVista('vistaArandanosApp', 'postcosecha')">📦 Ingreso a Postcosecha</button>
+            <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
+            <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver a Finca Funza</button>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN COMPLETA DE ARÁNDANOS -->
+    <div id="vistaArandanosApp" class="vista">
+        <!-- SUBMÓDULO: ARÁNDANOS (PEDIDOS) -->
+        <div id="subModuloArandanos" class="sub-vista" style="display:none;">
+            <h3>Pedido de Arándanos</h3>
+            <div id="seccionValidacion">
+                <div class="form-group">
+                    <label>Cédula:</label>
+                    <input type="text" id="inputCedula" placeholder="Ingrese su cédula">
+                </div>
+                <div class="form-group">
+                    <label>Año de Seguridad:</label>
+                    <input type="text" id="inputSeguridad" placeholder="Año de seguridad">
+                </div>
+                <button id="btnValidar" class="btn-secondary" onclick="verificarEmpleado()">Validar Empleado</button>
             </div>
-            <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar al Módulo</button>
-            <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
+
+            <div id="seccionProductos" style="display:none;">
+                <p id="saludoEmpleado" style="font-weight: bold; color: #007bff; text-align: center; font-size: 16px;"></p>
+                <div class="form-group">
+                    <label>Promoción 3 Kilos ($20.000 c/u):</label>
+                    <input type="number" id="inputPromoKilos" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>1 Kilo Regular ($29.000 c/u):</label>
+                    <input type="number" id="inputKiloNormal" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Mermeladas ($15.000 c/u):</label>
+                    <input type="number" id="inputMermeladas" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Frambuesas ($18.000 c/u):</label>
+                    <input type="number" id="inputFrambuesas" min="0" value="0">
+                </div>
+                <button onclick="calcularPedidoYMostrarAutorizacion()">Continuar para Firmar</button>
+            </div>
+
+            <div id="seccionFirma" style="display:none;">
+                <div id="mensajeAutorizacion" class="mensaje-autorizacion"></div>
+                <label>Firma del Empleado:</label>
+                <canvas id="signature-pad"></canvas>
+                <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar Firma</button>
+                <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Finalizar y Enviar Pedido</button>
+                <button class="btn-volver" onclick="regresarAProductos()">Regresar y cambiar cantidades</button>
+            </div>
         </div>
 
-        <div id="seccionFormRendimiento" style="display:none;">
-            <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
-            
+        <!-- SUBMÓDULO: POSTCOSECHA -->
+        <div id="subModuloPostcosecha" class="sub-vista" style="display:none;">
+            <h3>Ingreso a Postcosecha</h3>
+            <div id="alertaPostPendientes" class="alerta-offline" style="display:none;"></div>
             <div class="form-group">
-                <label>Fecha de Labor:</label>
-                <input type="date" id="rendFecha">
+                <label>Fecha de Ingreso:</label>
+                <input type="date" id="postFecha">
             </div>
-            
-            <div class="form-group">
-                <label>Seleccionar Parada (Horario):</label>
-                <select id="rendSelectParada">
-                    <option value="">-- Seleccione la parada --</option>
-                    <option value="1ª Parada (6:00 A 7:00)">1ª Parada (6:00 A 7:00)</option>
-                    <option value="2ª Parada (7:00 A 8:00)">2ª Parada (7:00 A 8:00)</option>
-                    <option value="3ª Parada (8:00 A 10:00)">3ª Parada (8:00 A 10:00)</option>
-                    <option value="4ª Parada (10:00 A 12:00)">4ª Parada (10:00 A 12:00)</option>
-                    <option value="5ª Parada (12:00 A 2:00)">5ª Parada (12:00 A 2:00)</option>
-                    <option value="6ª Parada (2:00 PM A 4:00 PM)">6ª Parada (2:00 PM A 4:00 PM)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Seleccionar Grupo:</label>
-                <select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()">
-                    <option value="">-- Seleccione un grupo --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Seleccionar Trabajador:</label>
-                <select id="rendSelectEmpleado">
-                    <option value="">-- Primero seleccione un grupo --</option>
-                </select>
-            </div>
-
             <div class="form-group">
                 <label>Bloque:</label>
-                <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
+                <input type="text" id="postBloque" placeholder="Ej: Bloque A">
             </div>
+            <div class="form-group">
+                <label>Año de Bloque:</label>
+                <input type="text" id="postAnio" placeholder="Ej: 2025">
+            </div>
+            <div class="form-group">
+                <label>Número de Canastillas:</label>
+                <input type="number" id="postCanastillas" placeholder="Cantidad" step="any">
+            </div>
+            <div class="form-group">
+                <label>Peso Total de Canastillas (kg):</label>
+                <input type="number" id="postPesoTotal" placeholder="Peso total" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Peso de Canastilla (kg):</label>
+                <input type="number" id="postPesoCanastilla" placeholder="Peso individual" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Tipo de Fruta:</label>
+                <select id="postFruta">
+                    <option value="Tipo 1">Tipo 1</option>
+                    <option value="Tipo 2">Tipo 2</option>
+                    <option value="Tipo 3">Tipo 3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Variedad:</label>
+                <select id="postVariedad">
+                    <option value="BILOXI">BILOXI</option>
+                    <option value="SHARPBLU">SHARPBLU</option>
+                    <option value="EMERALD">EMERALD</option>
+                    <option value="VICTORIA">VICTORIA</option>
+                    <option value="LEGACY">LEGACY</option>
+                    <option value="RIBBON">RIBBON</option>
+                    <option value="VENTURA">VENTURA</option>
+                    <option value="ATLAS">ATLAS</option>
+                    <option value="BIANCA">BIANCA</option>
+                </select>
+            </div>
+            <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
+            <button id="btnSincronizarPost" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPostPendientes()">🔄 Sincronizar Postcosechas Pendientes</button>
+        </div>
 
-            <!-- CAMPOS DE VALDES CONFIGURADOS CON STEP 0.5 PARA PERMITIR DECIMALES -->
-            <div class="form-group">
-                <label>Valdes Tipo 1:</label>
-                <input type="number" id="rendValdesT1" min="0" step="0.5" value="0" placeholder="Ej: 1.5">
+        <!-- SUBMÓDULO: RENDIMIENTO -->
+        <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
+            <h3>Rendimiento por Paradas</h3>
+            <div id="seccionPinRendimiento">
+                <div class="form-group">
+                    <label>PIN de Seguridad Autorizado:</label>
+                    <input type="password" id="inputPinRend" placeholder="Ingrese el PIN">
+                </div>
+                <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar al Módulo</button>
             </div>
-            <div class="form-group">
-                <label>Valdes Tipo 2:</label>
-                <input type="number" id="rendValdesT2" min="0" step="0.5" value="0" placeholder="Ej: 0.5">
+            <div id="seccionFormRendimiento" style="display:none;">
+                <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
+                <div class="form-group">
+                    <label>Fecha de Labor:</label>
+                    <input type="date" id="rendFecha">
+                </div>
+                <div class="form-group">
+                    <label>Seleccionar Parada (Horario):</label>
+                    <select id="rendSelectParada">
+                        <option value="">-- Seleccione la parada --</option>
+                        <option value="1ª Parada (6:00 A 7:00)">1ª Parada (6:00 A 7:00)</option>
+                        <option value="2ª Parada (7:00 A 8:00)">2ª Parada (7:00 A 8:00)</option>
+                        <option value="3ª Parada (8:00 A 10:00)">3ª Parada (8:00 A 10:00)</option>
+                        <option value="4ª Parada (10:00 A 12:00)">4ª Parada (10:00 A 12:00)</option>
+                        <option value="5ª Parada (12:00 A 2:00)">5ª Parada (12:00 A 2:00)</option>
+                        <option value="6ª Parada (2:00 PM A 4:00 PM)">6ª Parada (2:00 PM A 4:00 PM)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Seleccionar Grupo:</label>
+                    <select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()">
+                        <option value="">-- Seleccione un grupo --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Seleccionar Trabajador:</label>
+                    <select id="rendSelectEmpleado">
+                        <option value="">-- Primero seleccione un grupo --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bloque:</label>
+                    <input type="text" id="rendBloque" placeholder="Ej: Bloque A">
+                </div>
+                <div class="form-group">
+                    <label>Valdes Tipo 1:</label>
+                    <input type="number" id="rendValdesT1" min="0" step="0.5" value="0" placeholder="Ej: 1.5">
+                </div>
+                <div class="form-group">
+                    <label>Valdes Tipo 2:</label>
+                    <input type="number" id="rendValdesT2" min="0" step="0.5" value="0" placeholder="Ej: 0.5">
+                </div>
+                <div class="form-group">
+                    <label>Valdes Tipo 3:</label>
+                    <input type="number" id="rendValdesT3" min="0" step="0.5" value="0" placeholder="Ej: 2">
+                </div>
+                <div class="form-group">
+                    <label>Observaciones (Opcional):</label>
+                    <textarea id="rendObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad o nota..."></textarea>
+                </div>
+                <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
+                <button id="btnSincronizar" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPendientes()">🔄 Sincronizar Registros Pendientes</button>
             </div>
-            <div class="form-group">
-                <label>Valdes Tipo 3:</label>
-                <input type="number" id="rendValdesT3" min="0" step="0.5" value="0" placeholder="Ej: 2">
-            </div>
+        </div>
 
+        <!-- SUBMÓDULO: HORAS FRÍO -->
+        <div id="subModuloHorasFrio" class="sub-vista" style="display:none;">
+            <h3>Registro de Horas Frío Diarias</h3>
+            <div id="alertaFrioPendientes" class="alerta-offline" style="display:none;"></div>
+            
             <div class="form-group">
-                <label>Observaciones (Opcional):</label>
-                <textarea id="rendObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad o nota..."></textarea>
+                <label>Fecha de Registro:</label>
+                <input type="date" id="frioFecha">
+            </div>
+            <div class="form-group">
+                <label>Horas Frío Acumuladas / Del Día:</label>
+                <input type="number" id="frioCantidad" placeholder="Ej: 4.5" step="0.1" min="0">
             </div>
             
-            <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
-            <button id="btnSincronizar" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPendientes()">🔄 Sincronizar Registros Pendientes</button>
-            <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
+            <button id="btnGuardarFrio" class="btn-info" onclick="enviarHorasFrio()">Guardar Horas Frío</button>
+            <button id="btnSincronizarFrio" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarFrioPendientes()">🔄 Sincronizar Horas Frío Pendientes</button>
         </div>
+
+        <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver al Menú de Arándanos</button>
     </div>
 </div>
 
@@ -282,31 +327,45 @@
         let hoy = new Date().toISOString().split('T')[0];
         if (document.getElementById('postFecha')) document.getElementById('postFecha').value = hoy;
         if (document.getElementById('rendFecha')) document.getElementById('rendFecha').value = hoy;
+        if (document.getElementById('frioFecha')) document.getElementById('frioFecha').value = hoy;
         
         cargarDatosRendimiento();
         actualizarAlertaPostOffline();
+        actualizarAlertaFrioOffline();
     });
 
-    function irAModulo(modulo) {
+    function cambiarVista(idVista, subModulo = '') {
         document.getElementById('vistaInicio').classList.remove('activa');
-        document.getElementById('vistaArandanos').classList.remove('activa');
-        document.getElementById('vistaPostcosecha').classList.remove('activa');
-        document.getElementById('vistaRendimiento').classList.remove('activa');
+        document.getElementById('vistaFincaFunza').classList.remove('activa');
+        document.getElementById('vistaFlores').classList.remove('activa');
+        document.getElementById('vistaSanFelipe').classList.remove('activa');
+        document.getElementById('vistaArandanosMenu').classList.remove('activa');
+        document.getElementById('vistaArandanosApp').classList.remove('activa');
 
-        if (modulo === 'arandanos') {
-            document.getElementById('vistaArandanos').classList.add('activa');
-        } else if (modulo === 'postcosecha') {
-            document.getElementById('vistaPostcosecha').classList.add('activa');
-            actualizarAlertaPostOffline();
-        } else if (modulo === 'rendimiento') {
-            document.getElementById('vistaRendimiento').classList.add('activa');
-            document.getElementById('seccionPinRendimiento').style.display = 'block';
-            document.getElementById('seccionFormRendimiento').style.display = 'none';
-            document.getElementById('inputPinRend').value = '';
+        document.getElementById(idVista).classList.add('activa');
+
+        if (idVista === 'vistaArandanosApp') {
+            document.getElementById('subModuloArandanos').style.display = 'none';
+            document.getElementById('subModuloPostcosecha').style.display = 'none';
+            document.getElementById('subModuloRendimiento').style.display = 'none';
+            document.getElementById('subModuloHorasFrio').style.display = 'none';
+
+            if (subModulo === 'arandanos') {
+                document.getElementById('subModuloArandanos').style.display = 'block';
+            } else if (subModulo === 'postcosecha') {
+                document.getElementById('subModuloPostcosecha').style.display = 'block';
+                actualizarAlertaPostOffline();
+            } else if (subModulo === 'rendimiento') {
+                document.getElementById('subModuloRendimiento').style.display = 'block';
+                document.getElementById('seccionPinRendimiento').style.display = 'block';
+                document.getElementById('seccionFormRendimiento').style.display = 'none';
+                document.getElementById('inputPinRend').value = '';
+            } else if (subModulo === 'horasfrio') {
+                document.getElementById('subModuloHorasFrio').style.display = 'block';
+                actualizarAlertaFrioOffline();
+            }
         }
     }
-
-    function volverInicio() { location.reload(); }
 
     function resizeCanvas() {
         let ratio = Math.max(window.devicePixelRatio || 1, 1);
@@ -366,7 +425,7 @@
         });
     }
 
-    // --- RENDIMIENTO (USA parseFloat PARA PERMITIR DECIMALES COMO 0.5 o 1.5) ---
+    // --- RENDIMIENTO OFFLINE ---
     function enviarRendimiento() {
         let fecha = document.getElementById('rendFecha').value;
         let parada = document.getElementById('rendSelectParada').value;
@@ -489,7 +548,7 @@
         }
     }
 
-    // --- POSTCOSECHA ---
+    // --- POSTCOSECHA OFFLINE ---
     function enviarPostcosecha() {
         let fecha = document.getElementById('postFecha').value;
         let bloque = document.getElementById('postBloque').value.trim();
@@ -524,7 +583,7 @@
                 btn.innerText = "Guardar Ingreso Postcosecha";
                 btn.disabled = false;
                 alert("¡Ingreso a postcosecha guardado correctamente!"); 
-                location.reload(); 
+                cambiarVista('vistaArandanosMenu');
             })
             .catch(error => {
                 guardarPostcosechaLocal(payload);
@@ -597,7 +656,98 @@
         }
     }
 
-    // --- LÓGICA DE ARÁNDANOS ---
+    // --- HORAS FRÍO OFFLINE ---
+    function enviarHorasFrio() {
+        let fecha = document.getElementById('frioFecha').value;
+        let horasFrio = parseFloat(document.getElementById('frioCantidad').value);
+
+        if (!fecha || isNaN(horasFrio)) {
+            alert("Por favor, complete la fecha y la cantidad de horas frío.");
+            return;
+        }
+
+        let payload = {
+            accion: "guardar_horas_frio",
+            fechaRegistro: fecha,
+            horasFrio: horasFrio
+        };
+
+        let btn = document.getElementById('btnGuardarFrio');
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(() => {
+                btn.innerText = "Guardar Horas Frío";
+                btn.disabled = false;
+                alert("¡Horas frío guardadas correctamente!");
+                document.getElementById('frioCantidad').value = "";
+                cambiarVista('vistaArandanosMenu');
+            })
+            .catch(error => {
+                guardarFrioLocal(payload);
+            });
+    }
+
+    function guardarFrioLocal(dato) {
+        let pendientes = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+        pendientes.push(dato);
+        localStorage.setItem('frioPendientes', JSON.stringify(pendientes));
+
+        let btn = document.getElementById('btnGuardarFrio');
+        btn.innerText = "Guardar Horas Frío";
+        btn.disabled = false;
+
+        alert("⚠️ Sin conexión a internet. Las horas frío se guardaron localmente.");
+        document.getElementById('frioCantidad').value = "";
+        actualizarAlertaFrioOffline();
+    }
+
+    function actualizarAlertaFrioOffline() {
+        let pendientes = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+        let alerta = document.getElementById('alertaFrioPendientes');
+        let btnSync = document.getElementById('btnSincronizarFrio');
+
+        if (pendientes.length > 0) {
+            alerta.style.display = 'block';
+            alerta.innerText = `📦 Tiene ${pendientes.length} registros de horas frío guardados sin sincronizar.`;
+            btnSync.style.display = 'block';
+        } else {
+            alerta.style.display = 'none';
+            btnSync.style.display = 'none';
+        }
+    }
+
+    async function sincronizarFrioPendientes() {
+        let pendientes = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+        if (pendientes.length === 0) return;
+
+        let btnSync = document.getElementById('btnSincronizarFrio');
+        btnSync.innerText = "Sincronizando...";
+        btnSync.disabled = true;
+
+        try {
+            for (let i = 0; i < pendientes.length; i++) {
+                await fetch(URL_SCRIPT, { 
+                    method: "POST", 
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(pendientes[i]) 
+                });
+            }
+            localStorage.removeItem('frioPendientes');
+            btnSync.innerText = "🔄 Sincronizar Horas Frío Pendientes";
+            btnSync.disabled = false;
+            alert("¡Sincronización exitosa! Todos los registros pasaron a Google Sheets.");
+            actualizarAlertaFrioOffline();
+        } catch (err) {
+            btnSync.innerText = "🔄 Sincronizar Horas Frío Pendientes";
+            btnSync.disabled = false;
+            alert("Error de conexión al sincronizar. Intente de nuevo.");
+        }
+    }
+
+    // --- LÓGICA DE ARÁNDANOS (PEDIDOS) ---
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
@@ -678,7 +828,7 @@
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(() => { 
                 alert("¡Pedido registrado con éxito!"); 
-                location.reload(); 
+                cambiarVista('vistaArandanosMenu');
             })
             .catch(err => {
                 btn.innerText = "Finalizar y Enviar Pedido";
