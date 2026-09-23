@@ -54,7 +54,9 @@
         .btn-danger:hover { background-color: #c82333; }
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
         .btn-volver:hover { background-color: #5a6268; }
-        .alerta-offline { background-color: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; margin-bottom: 15px; border: 1px solid #bee5eb; }
+        
+        .alerta-offline { background-color: #d1ecf1; color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; }
+        .alerta-offline button { width: auto; margin: 8px auto 0 auto; display: block; padding: 8px 15px; background-color: #17a2b8; }
         
         .vista { display: none; }
         .vista.activa { display: block; }
@@ -63,6 +65,12 @@
         .mensaje-autorizacion { background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; }
         .bienvenida-box { text-align: center; padding: 10px 0; }
         .bienvenida-box p { color: #666; margin-bottom: 20px; }
+
+        /* Estilos de la Ventana Modal para detalles */
+        #modalDetalles { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .modal-contenido { background: #fff; padding: 20px; border-radius: 8px; max-height: 80vh; overflow-y: auto; margin-top: 10vh; max-width: 450px; margin-left: auto; margin-right: auto; }
+        .item-detalle { background: #f8f9fa; padding: 10px; border-left: 4px solid #17a2b8; margin-bottom: 10px; border-radius: 4px; font-size: 14px; }
+        .item-detalle strong { color: #333; }
     </style>
 </head>
 <body>
@@ -74,17 +82,17 @@
 
     <h2>Flores de Funza</h2>
 
-    <!-- PANTALLA DE INICIO PRINCIPAL (SELECCIÓN DE FINCA) -->
+    <!-- PANTALLA DE INICIO PRINCIPAL -->
     <div id="vistaInicio" class="vista activa">
         <div class="bienvenida-box">
             <h3>Centro de Producción</h3>
             <p>Por favor, seleccione la finca a la que desea ingresar:</p>
             <button class="btn-secondary" onclick="cambiarVista('vistaFincaFunza')">🏡 Finca Funza</button>
-            <button class="btn-warning" onclick="cambiarVista('vistaSanFelipe')">🌻 San Felipe</button>
+            <button class="btn-warning" onclick="cambiarVista('vistaSanFelipeMenu')">🌻 San Felipe</button>
         </div>
     </div>
 
-    <!-- SUBMENÚ FINCA FUNZA (FLORES Y ARÁNDANOS) -->
+    <!-- SUBMENÚ FINCA FUNZA -->
     <div id="vistaFincaFunza" class="vista">
         <div class="bienvenida-box">
             <h3>Finca Funza</h3>
@@ -95,25 +103,95 @@
         </div>
     </div>
 
-    <!-- MÓDULO VACÍO: FLORES (FINCA FUNZA) -->
     <div id="vistaFlores" class="vista">
         <h3>Módulo de Flores - Finca Funza</h3>
-        <div class="bienvenida-box">
-            <p>Módulo en desarrollo para la nueva producción de flores.</p>
-        </div>
+        <div class="bienvenida-box"><p>Módulo en desarrollo para la nueva producción de flores.</p></div>
         <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">Volver a Finca Funza</button>
     </div>
 
-    <!-- MÓDULO VACÍO: SAN FELIPE -->
-    <div id="vistaSanFelipe" class="vista">
-        <h3>Módulo Finca San Felipe</h3>
+    <!-- MENÚ SAN FELIPE -->
+    <div id="vistaSanFelipeMenu" class="vista">
         <div class="bienvenida-box">
-            <p>Módulo en desarrollo para el nuevo centro de producción.</p>
+            <h3>Finca San Felipe</h3>
+            <p>Por favor seleccione el módulo al que desea ingresar:</p>
+            <button class="btn-warning" onclick="cambiarVista('vistaCausasNacional')">📋 Causas de Nacional</button>
+            <button class="btn-purple" onclick="cambiarVista('vistaSanFelipeRendimiento')">🌱 Rendimientos (San Felipe)</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver al Inicio</button>
         </div>
-        <button class="btn-volver" onclick="cambiarVista('vistaInicio')">Volver al Inicio</button>
     </div>
 
-    <!-- MENÚ INTERMEDIO DE ARÁNDANOS -->
+    <div id="vistaCausasNacional" class="vista">
+        <h3>Causas de Nacional - San Felipe</h3>
+        <div class="bienvenida-box"><p>Módulo en desarrollo para el registro de causas de nacional.</p></div>
+        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">Volver a San Felipe</button>
+    </div>
+
+    <!-- MÓDULO RENDIMIENTOS SAN FELIPE -->
+    <div id="vistaSanFelipeRendimiento" class="vista">
+        <h3>Rendimientos - San Felipe</h3>
+        
+        <div id="alertaSanFelipePendientes" class="alerta-offline" style="display:none;"></div>
+        
+        <div class="form-group">
+            <label>Fecha de Labor:</label>
+            <input type="date" id="sfFecha">
+        </div>
+
+        <div class="form-group">
+            <label>Seleccionar Supervisor/a:</label>
+            <select id="sfSelectSupervisora" onchange="filtrarPersonalSanFelipe()">
+                <option value="">-- Seleccione supervisor/a --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Seleccionar Trabajador/a:</label>
+            <select id="sfSelectEmpleado">
+                <option value="">-- Primero seleccione una supervisora --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Bloque:</label>
+            <input type="text" id="sfBloque" placeholder="Ej: Bloque A">
+        </div>
+
+        <div class="form-group">
+            <label>Hora de Inicio:</label>
+            <input type="time" id="sfHoraInicio">
+        </div>
+
+        <div class="form-group">
+            <label>Hora Final:</label>
+            <input type="time" id="sfHoraFinal">
+        </div>
+
+        <div class="form-group">
+            <label>Seleccionar Labor:</label>
+            <select id="sfSelectLabor">
+                <option value="">-- Seleccione la labor --</option>
+                <option value="Corte">Corte</option>
+                <option value="Encanaste">Encanaste</option>
+                <option value="Descabece">Descabece</option>
+                <option value="Peinada">Peinada</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Rendimiento (Cantidad):</label>
+            <input type="number" id="sfRendimiento" min="0" step="any" placeholder="Ingrese cantidad">
+        </div>
+
+        <div class="form-group">
+            <label>Observaciones (Opcional):</label>
+            <textarea id="sfObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad..."></textarea>
+        </div>
+        
+        <button id="btnGuardarSfRend" class="btn-purple" onclick="enviarRendimientoSanFelipe()">Guardar Rendimiento San Felipe</button>
+        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️ Volver a San Felipe</button>
+    </div>
+
+    <!-- MENÚ ARÁNDANOS -->
     <div id="vistaArandanosMenu" class="vista">
         <div class="bienvenida-box">
             <h3>Módulo de Arándanos</h3>
@@ -126,9 +204,8 @@
         </div>
     </div>
 
-    <!-- APLICACIÓN COMPLETA DE ARÁNDANOS -->
+    <!-- APLICACIÓN ARÁNDANOS -->
     <div id="vistaArandanosApp" class="vista">
-        <!-- SUBMÓDULO: ARÁNDANOS (PEDIDOS) -->
         <div id="subModuloArandanos" class="sub-vista" style="display:none;">
             <h3>Pedido de Arándanos</h3>
             <div id="seccionValidacion">
@@ -174,7 +251,6 @@
             </div>
         </div>
 
-        <!-- SUBMÓDULO: POSTCOSECHA -->
         <div id="subModuloPostcosecha" class="sub-vista" style="display:none;">
             <h3>Ingreso a Postcosecha</h3>
             <div id="alertaPostPendientes" class="alerta-offline" style="display:none;"></div>
@@ -225,10 +301,8 @@
                 </select>
             </div>
             <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
-            <button id="btnSincronizarPost" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPostPendientes()">🔄 Sincronizar Postcosechas Pendientes</button>
         </div>
 
-        <!-- SUBMÓDULO: RENDIMIENTO -->
         <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
             <h3>Rendimiento por Paradas</h3>
             <div id="seccionPinRendimiento">
@@ -289,11 +363,9 @@
                     <textarea id="rendObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad o nota..."></textarea>
                 </div>
                 <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
-                <button id="btnSincronizar" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarPendientes()">🔄 Sincronizar Registros Pendientes</button>
             </div>
         </div>
 
-        <!-- SUBMÓDULO: HORAS FRÍO -->
         <div id="subModuloHorasFrio" class="sub-vista" style="display:none;">
             <h3>Registro de Horas Frío Diarias</h3>
             <div id="alertaFrioPendientes" class="alerta-offline" style="display:none;"></div>
@@ -308,10 +380,18 @@
             </div>
             
             <button id="btnGuardarFrio" class="btn-info" onclick="enviarHorasFrio()">Guardar Horas Frío</button>
-            <button id="btnSincronizarFrio" class="btn-secondary" style="display:none; background-color: #17a2b8;" onclick="sincronizarFrioPendientes()">🔄 Sincronizar Horas Frío Pendientes</button>
         </div>
 
         <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver al Menú de Arándanos</button>
+    </div>
+</div>
+
+<!-- VENTANA MODAL PARA VER DETALLES PENDIENTES -->
+<div id="modalDetalles">
+    <div class="modal-contenido">
+        <h3 id="modalTitulo" style="margin-top:0; border-bottom:1px solid #ddd; padding-bottom:10px;">Detalles</h3>
+        <div id="listaDetallesPendientes"></div>
+        <button class="btn-volver" onclick="cerrarModal()">Ocultar y Volver</button>
     </div>
 </div>
 
@@ -319,6 +399,7 @@
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
     let nombreEmpleadoGlobal = "";
     let listaPersonalGlobal = [];
+    let listaPersonalSFGlobal = [];
     let canvas = document.getElementById('signature-pad');
     let signaturePad = new SignaturePad(canvas);
     let datosPedidoActual = {};
@@ -328,21 +409,30 @@
         if (document.getElementById('postFecha')) document.getElementById('postFecha').value = hoy;
         if (document.getElementById('rendFecha')) document.getElementById('rendFecha').value = hoy;
         if (document.getElementById('frioFecha')) document.getElementById('frioFecha').value = hoy;
+        if (document.getElementById('sfFecha')) document.getElementById('sfFecha').value = hoy;
         
         cargarDatosRendimiento();
-        actualizarAlertaPostOffline();
-        actualizarAlertaFrioOffline();
+        cargarDatosSanFelipe();
+        actualizarTodasLasAlertasOffline();
+
+        // INICIAR SINCRONIZACIÓN AUTOMÁTICA
+        autoSincronizarRegistros(); 
+        setInterval(autoSincronizarRegistros, 30000); // Revisa y sincroniza cada 30 segundos
+        window.addEventListener('online', autoSincronizarRegistros); // Sincroniza apenas vuelva el internet
     });
 
     function cambiarVista(idVista, subModulo = '') {
         document.getElementById('vistaInicio').classList.remove('activa');
         document.getElementById('vistaFincaFunza').classList.remove('activa');
         document.getElementById('vistaFlores').classList.remove('activa');
-        document.getElementById('vistaSanFelipe').classList.remove('activa');
+        document.getElementById('vistaSanFelipeMenu').classList.remove('activa');
+        document.getElementById('vistaCausasNacional').classList.remove('activa');
+        document.getElementById('vistaSanFelipeRendimiento').classList.remove('activa');
         document.getElementById('vistaArandanosMenu').classList.remove('activa');
         document.getElementById('vistaArandanosApp').classList.remove('activa');
 
         document.getElementById(idVista).classList.add('activa');
+        actualizarTodasLasAlertasOffline();
 
         if (idVista === 'vistaArandanosApp') {
             document.getElementById('subModuloArandanos').style.display = 'none';
@@ -354,7 +444,6 @@
                 document.getElementById('subModuloArandanos').style.display = 'block';
             } else if (subModulo === 'postcosecha') {
                 document.getElementById('subModuloPostcosecha').style.display = 'block';
-                actualizarAlertaPostOffline();
             } else if (subModulo === 'rendimiento') {
                 document.getElementById('subModuloRendimiento').style.display = 'block';
                 document.getElementById('seccionPinRendimiento').style.display = 'block';
@@ -362,7 +451,6 @@
                 document.getElementById('inputPinRend').value = '';
             } else if (subModulo === 'horasfrio') {
                 document.getElementById('subModuloHorasFrio').style.display = 'block';
-                actualizarAlertaFrioOffline();
             }
         }
     }
@@ -380,425 +468,330 @@
         if (pin === "2005") {
             document.getElementById('seccionPinRendimiento').style.display = 'none';
             document.getElementById('seccionFormRendimiento').style.display = 'block';
-            actualizarAlertaOffline();
+            actualizarTodasLasAlertasOffline();
         } else {
             alert("PIN de seguridad incorrecto.");
         }
     }
 
+    // --- CARGAR PERSONAL (OFFLINE CACHÉ INSTANTÁNEO) ---
     function cargarDatosRendimiento() {
-        fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.personal && data.personal.length > 0) {
-                    listaPersonalGlobal = data.personal;
-                    let gruposUnicos = [...new Set(listaPersonalGlobal.map(item => item.grupo))];
-                    let selectGrupo = document.getElementById('rendSelectGrupo');
-                    selectGrupo.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
-                    
-                    gruposUnicos.forEach(grupo => {
-                        let opt = document.createElement('option');
-                        opt.value = grupo;
-                        opt.textContent = grupo;
-                        selectGrupo.appendChild(opt);
-                    });
-                }
-            })
-            .catch(err => {
-                console.log("Sin internet para actualizar personal.");
-            });
+        let localPersonal = localStorage.getItem('cachePersonalArandanos');
+        if (localPersonal) procesarGruposArandanos(JSON.parse(localPersonal));
+
+        fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`).then(res => res.json()).then(data => {
+            if (data.personal && data.personal.length > 0) {
+                localStorage.setItem('cachePersonalArandanos', JSON.stringify(data.personal));
+                procesarGruposArandanos(data.personal);
+            }
+        }).catch(err => { console.log("Sin internet: usando caché local de arándanos."); });
     }
 
-    function filtrarPersonalPorGrupo() {
-        let grupoSeleccionado = document.getElementById('rendSelectGrupo').value;
-        let selectEmpleado = document.getElementById('rendSelectEmpleado');
-        selectEmpleado.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
-        
-        if (!grupoSeleccionado) return;
-
-        let filtrados = listaPersonalGlobal.filter(item => item.grupo === grupoSeleccionado);
-        filtrados.forEach(emp => {
-            let opt = document.createElement('option');
-            opt.value = emp.nombre;
-            opt.textContent = emp.nombre;
-            selectEmpleado.appendChild(opt);
+    function procesarGruposArandanos(personal) {
+        listaPersonalGlobal = personal;
+        let gruposUnicos = [...new Set(listaPersonalGlobal.map(item => item.grupo))];
+        let selectGrupo = document.getElementById('rendSelectGrupo');
+        selectGrupo.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
+        gruposUnicos.forEach(grupo => {
+            let opt = document.createElement('option'); opt.value = grupo; opt.textContent = grupo; selectGrupo.appendChild(opt);
         });
     }
 
-    // --- RENDIMIENTO OFFLINE ---
-    function enviarRendimiento() {
-        let fecha = document.getElementById('rendFecha').value;
-        let parada = document.getElementById('rendSelectParada').value;
+    function filtrarPersonalPorGrupo() {
         let grupo = document.getElementById('rendSelectGrupo').value;
-        let nombre = document.getElementById('rendSelectEmpleado').value;
-        let bloque = document.getElementById('rendBloque').value.trim();
-        
+        let select = document.getElementById('rendSelectEmpleado');
+        select.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
+        if (!grupo) return;
+        listaPersonalGlobal.filter(item => item.grupo === grupo).forEach(emp => {
+            let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt);
+        });
+    }
+
+    function cargarDatosSanFelipe() {
+        let localSF = localStorage.getItem('cachePersonalSanFelipe');
+        if (localSF) procesarSupervisoraSanFelipe(JSON.parse(localSF));
+
+        fetch(`${URL_SCRIPT}?accion=obtener_personal_sanfelipe`).then(res => res.json()).then(data => {
+            if (data.personalSF && data.personalSF.length > 0) {
+                localStorage.setItem('cachePersonalSanFelipe', JSON.stringify(data.personalSF));
+                procesarSupervisoraSanFelipe(data.personalSF);
+            }
+        }).catch(err => { console.log("Sin internet: usando caché local de San Felipe."); });
+    }
+
+    function procesarSupervisoraSanFelipe(personalSF) {
+        listaPersonalSFGlobal = personalSF;
+        let supervisorasUnicas = [...new Set(listaPersonalSFGlobal.map(item => item.supervisora))];
+        let selectSupervisora = document.getElementById('sfSelectSupervisora');
+        selectSupervisora.innerHTML = '<option value="">-- Seleccione supervisor/a --</option>';
+        supervisorasUnicas.forEach(sup => {
+            let opt = document.createElement('option'); opt.value = sup; opt.textContent = sup; selectSupervisora.appendChild(opt);
+        });
+    }
+
+    function filtrarPersonalSanFelipe() {
+        let supervisora = document.getElementById('sfSelectSupervisora').value;
+        let select = document.getElementById('sfSelectEmpleado');
+        select.innerHTML = '<option value="">-- Seleccione un trabajador/a --</option>';
+        if (!supervisora) return;
+        listaPersonalSFGlobal.filter(item => item.supervisora === supervisora).forEach(emp => {
+            let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt);
+        });
+    }
+
+    // --- FUNCIONES DE GUARDADO (Intenta enviar, si falla guarda local) ---
+    function guardarDatos(urlScript, payload, btnId, msgExito, keyLocalStorage, fnLimpiar) {
+        let btn = document.getElementById(btnId);
+        btn.innerText = "Guardando...";
+        btn.disabled = true;
+
+        fetch(urlScript, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(() => {
+                btn.innerText = "Guardar";
+                btn.disabled = false;
+                alert(msgExito);
+                if(fnLimpiar) fnLimpiar();
+            })
+            .catch(error => {
+                let pendientes = JSON.parse(localStorage.getItem(keyLocalStorage)) || [];
+                pendientes.push(payload);
+                localStorage.setItem(keyLocalStorage, JSON.stringify(pendientes));
+
+                btn.innerText = "Guardar";
+                btn.disabled = false;
+                alert("⚠️ Guardado localmente. Se subirá automáticamente cuando haya internet.");
+                if(fnLimpiar) fnLimpiar();
+                actualizarTodasLasAlertasOffline();
+            });
+    }
+
+    function enviarRendimientoSanFelipe() {
+        let datos = {
+            accion: "guardar_rendimiento_sanfelipe",
+            fechaRegistro: document.getElementById('sfFecha').value,
+            supervisora: document.getElementById('sfSelectSupervisora').value,
+            nombre: document.getElementById('sfSelectEmpleado').value,
+            bloque: document.getElementById('sfBloque').value.trim(),
+            horaInicio: document.getElementById('sfHoraInicio').value,
+            horaFinal: document.getElementById('sfHoraFinal').value,
+            labor: document.getElementById('sfSelectLabor').value,
+            rendimiento: parseFloat(document.getElementById('sfRendimiento').value),
+            observaciones: document.getElementById('sfObservaciones').value.trim()
+        };
+        if (!datos.fechaRegistro || !datos.supervisora || !datos.nombre || !datos.bloque || !datos.horaInicio || !datos.horaFinal || !datos.labor || isNaN(datos.rendimiento)) {
+            alert("Complete todos los campos obligatorios."); return;
+        }
+        guardarDatos(URL_SCRIPT, datos, 'btnGuardarSfRend', "¡Rendimiento San Felipe guardado!", 'sfPendientes', () => {
+            document.getElementById('sfSelectSupervisora').value = "";
+            document.getElementById('sfSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione una supervisora --</option>';
+            document.getElementById('sfBloque').value = "";
+            document.getElementById('sfHoraInicio').value = "";
+            document.getElementById('sfHoraFinal').value = "";
+            document.getElementById('sfSelectLabor').value = "";
+            document.getElementById('sfRendimiento').value = "";
+            document.getElementById('sfObservaciones').value = "";
+        });
+    }
+
+    function enviarRendimiento() {
         let valdesT1 = parseFloat(document.getElementById('rendValdesT1').value) || 0;
         let valdesT2 = parseFloat(document.getElementById('rendValdesT2').value) || 0;
         let valdesT3 = parseFloat(document.getElementById('rendValdesT3').value) || 0;
-        let observaciones = document.getElementById('rendObservaciones').value.trim();
 
-        if (!fecha || !parada || !grupo || !nombre || !bloque) {
-            alert("Por favor, complete los datos obligatorios.");
-            return;
-        }
-
-        if (valdesT1 === 0 && valdesT2 === 0 && valdesT3 === 0) {
-            alert("Debe ingresar al menos la cantidad de valdes en algún tipo de fruta.");
-            return;
-        }
-
-        let horaRealActual = new Date().toLocaleTimeString();
-
-        let nuevoDato = {
+        let datos = {
             accion: "guardar_rendimiento",
-            fechaRegistro: fecha,
-            parada: parada,
-            horaReal: horaRealActual,
-            grupo: grupo,
-            nombre: nombre,
-            bloque: bloque,
-            valdesT1: valdesT1,
-            valdesT2: valdesT2,
-            valdesT3: valdesT3,
-            observaciones: observaciones
+            fechaRegistro: document.getElementById('rendFecha').value,
+            parada: document.getElementById('rendSelectParada').value,
+            horaReal: new Date().toLocaleTimeString(),
+            grupo: document.getElementById('rendSelectGrupo').value,
+            nombre: document.getElementById('rendSelectEmpleado').value,
+            bloque: document.getElementById('rendBloque').value.trim(),
+            valdesT1: valdesT1, valdesT2: valdesT2, valdesT3: valdesT3,
+            observaciones: document.getElementById('rendObservaciones').value.trim()
         };
-
-        let btn = document.getElementById('btnGuardarRend');
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevoDato) })
-            .then(() => {
-                btn.innerText = "Guardar Rendimiento de Parada";
-                btn.disabled = false;
-                alert("¡Rendimiento guardado correctamente!");
-                limpiarCamposRendimiento();
-            })
-            .catch(error => {
-                guardarRendimientoLocal(nuevoDato);
-            });
-    }
-
-    function guardarRendimientoLocal(dato) {
-        let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
-        pendientes.push(dato);
-        localStorage.setItem('rendimientosPendientes', JSON.stringify(pendientes));
-
-        let btn = document.getElementById('btnGuardarRend');
-        btn.innerText = "Guardar Rendimiento de Parada";
-        btn.disabled = false;
-
-        alert("⚠️ Sin conexión a internet. El rendimiento se guardó localmente.");
-        limpiarCamposRendimiento();
-        actualizarAlertaOffline();
-    }
-
-    function limpiarCamposRendimiento() {
-        document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
-        document.getElementById('rendSelectGrupo').value = "";
-        document.getElementById('rendBloque').value = "";
-        document.getElementById('rendValdesT1').value = "0";
-        document.getElementById('rendValdesT2').value = "0";
-        document.getElementById('rendValdesT3').value = "0";
-        document.getElementById('rendObservaciones').value = "";
-    }
-
-    function actualizarAlertaOffline() {
-        let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
-        let alerta = document.getElementById('alertaPendientes');
-        let btnSync = document.getElementById('btnSincronizar');
-
-        if (pendientes.length > 0) {
-            alerta.style.display = 'block';
-            alerta.innerText = `📦 Tiene ${pendientes.length} registros de paradas guardados sin sincronizar.`;
-            btnSync.style.display = 'block';
-        } else {
-            alerta.style.display = 'none';
-            btnSync.style.display = 'none';
+        if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) {
+            alert("Complete todos los campos."); return;
         }
-    }
-
-    async function sincronizarPendientes() {
-        let pendientes = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
-        if (pendientes.length === 0) return;
-
-        let btnSync = document.getElementById('btnSincronizar');
-        btnSync.innerText = "Sincronizando...";
-        btnSync.disabled = true;
-
-        try {
-            for (let i = 0; i < pendientes.length; i++) {
-                await fetch(URL_SCRIPT, { 
-                    method: "POST", 
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(pendientes[i]) 
-                });
-            }
-            localStorage.removeItem('rendimientosPendientes');
-            btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
-            btnSync.disabled = false;
-            alert("¡Sincronización exitosa! Todos los registros pasaron a Google Sheets.");
-            actualizarAlertaOffline();
-        } catch (err) {
-            btnSync.innerText = "🔄 Sincronizar Registros Pendientes";
-            btnSync.disabled = false;
-            alert("Error de conexión al sincronizar. Intente de nuevo.");
+        if (valdesT1===0 && valdesT2===0 && valdesT3===0) {
+            alert("Debe ingresar valdes."); return;
         }
+        guardarDatos(URL_SCRIPT, datos, 'btnGuardarRend', "¡Rendimiento de Arándanos guardado!", 'rendimientosPendientes', () => {
+            document.getElementById('rendSelectGrupo').value = "";
+            document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
+            document.getElementById('rendBloque').value = "";
+            document.getElementById('rendValdesT1').value = "0";
+            document.getElementById('rendValdesT2').value = "0";
+            document.getElementById('rendValdesT3').value = "0";
+            document.getElementById('rendObservaciones').value = "";
+        });
     }
 
-    // --- POSTCOSECHA OFFLINE ---
     function enviarPostcosecha() {
-        let fecha = document.getElementById('postFecha').value;
-        let bloque = document.getElementById('postBloque').value.trim();
-        let anio = document.getElementById('postAnio').value.trim();
-        let canastillas = parseFloat(document.getElementById('postCanastillas').value) || 0;
-        let pesoTotal = parseFloat(document.getElementById('postPesoTotal').value) || 0;
-        let pesoCanastilla = parseFloat(document.getElementById('postPesoCanastilla').value) || 0;
-
-        if (!fecha || !bloque || !anio || !canastillas || !pesoTotal || !pesoCanastilla) {
-            alert("Por favor, complete todos los campos.");
-            return;
-        }
-
-        let payload = {
+        let datos = {
             accion: "guardar_postcosecha",
-            fechaRegistro: fecha,
-            bloque: bloque,
-            anioBloque: anio,
-            canastillas: canastillas,
-            pesoTotal: pesoTotal,
-            pesoCanastilla: pesoCanastilla,
+            fechaRegistro: document.getElementById('postFecha').value,
+            bloque: document.getElementById('postBloque').value.trim(),
+            anioBloque: document.getElementById('postAnio').value.trim(),
+            canastillas: parseFloat(document.getElementById('postCanastillas').value) || 0,
+            pesoTotal: parseFloat(document.getElementById('postPesoTotal').value) || 0,
+            pesoCanastilla: parseFloat(document.getElementById('postPesoCanastilla').value) || 0,
             tipoFruta: document.getElementById('postFruta').value,
             variedad: document.getElementById('postVariedad').value
         };
-
-        let btn = document.getElementById('btnGuardarPost');
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(() => { 
-                btn.innerText = "Guardar Ingreso Postcosecha";
-                btn.disabled = false;
-                alert("¡Ingreso a postcosecha guardado correctamente!"); 
-                cambiarVista('vistaArandanosMenu');
-            })
-            .catch(error => {
-                guardarPostcosechaLocal(payload);
-            });
-    }
-
-    function guardarPostcosechaLocal(dato) {
-        let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
-        pendientes.push(dato);
-        localStorage.setItem('postcosechaPendientes', JSON.stringify(pendientes));
-
-        let btn = document.getElementById('btnGuardarPost');
-        btn.innerText = "Guardar Ingreso Postcosecha";
-        btn.disabled = false;
-
-        alert("⚠️ Sin conexión a internet. El ingreso a postcosecha se guardó localmente.");
-        limpiarCamposPostcosecha();
-        actualizarAlertaPostOffline();
-    }
-
-    function limpiarCamposPostcosecha() {
-        document.getElementById('postBloque').value = "";
-        document.getElementById('postAnio').value = "";
-        document.getElementById('postCanastillas').value = "";
-        document.getElementById('postPesoTotal').value = "";
-        document.getElementById('postPesoCanastilla').value = "";
-    }
-
-    function actualizarAlertaPostOffline() {
-        let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
-        let alerta = document.getElementById('alertaPostPendientes');
-        let btnSync = document.getElementById('btnSincronizarPost');
-
-        if (pendientes.length > 0) {
-            alerta.style.display = 'block';
-            alerta.innerText = `📦 Tiene ${pendientes.length} ingresos a postcosecha guardados sin sincronizar.`;
-            btnSync.style.display = 'block';
-        } else {
-            alerta.style.display = 'none';
-            btnSync.style.display = 'none';
+        if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque || !datos.canastillas || !datos.pesoTotal || !datos.pesoCanastilla) {
+            alert("Complete todos los campos."); return;
         }
+        guardarDatos(URL_SCRIPT, datos, 'btnGuardarPost', "¡Ingreso a postcosecha guardado!", 'postcosechaPendientes', () => {
+            document.getElementById('postBloque').value = "";
+            document.getElementById('postAnio').value = "";
+            document.getElementById('postCanastillas').value = "";
+            document.getElementById('postPesoTotal').value = "";
+            document.getElementById('postPesoCanastilla').value = "";
+            cambiarVista('vistaArandanosMenu');
+        });
     }
 
-    async function sincronizarPostPendientes() {
-        let pendientes = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
-        if (pendientes.length === 0) return;
-
-        let btnSync = document.getElementById('btnSincronizarPost');
-        btnSync.innerText = "Sincronizando...";
-        btnSync.disabled = true;
-
-        try {
-            for (let i = 0; i < pendientes.length; i++) {
-                await fetch(URL_SCRIPT, { 
-                    method: "POST", 
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(pendientes[i]) 
-                });
-            }
-            localStorage.removeItem('postcosechaPendientes');
-            btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
-            btnSync.disabled = false;
-            alert("¡Sincronización exitosa! Todos los ingresos pasaron a Google Sheets.");
-            actualizarAlertaPostOffline();
-        } catch (err) {
-            btnSync.innerText = "🔄 Sincronizar Postcosechas Pendientes";
-            btnSync.disabled = false;
-            alert("Error de conexión al sincronizar. Intente de nuevo.");
-        }
-    }
-
-    // --- HORAS FRÍO OFFLINE ---
     function enviarHorasFrio() {
-        let fecha = document.getElementById('frioFecha').value;
-        let horasFrio = parseFloat(document.getElementById('frioCantidad').value);
-
-        if (!fecha || isNaN(horasFrio)) {
-            alert("Por favor, complete la fecha y la cantidad de horas frío.");
-            return;
-        }
-
-        let payload = {
+        let datos = {
             accion: "guardar_horas_frio",
-            fechaRegistro: fecha,
-            horasFrio: horasFrio
+            fechaRegistro: document.getElementById('frioFecha').value,
+            horasFrio: parseFloat(document.getElementById('frioCantidad').value)
         };
-
-        let btn = document.getElementById('btnGuardarFrio');
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
-
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(() => {
-                btn.innerText = "Guardar Horas Frío";
-                btn.disabled = false;
-                alert("¡Horas frío guardadas correctamente!");
-                document.getElementById('frioCantidad').value = "";
-                cambiarVista('vistaArandanosMenu');
-            })
-            .catch(error => {
-                guardarFrioLocal(payload);
-            });
-    }
-
-    function guardarFrioLocal(dato) {
-        let pendientes = JSON.parse(localStorage.getItem('frioPendientes')) || [];
-        pendientes.push(dato);
-        localStorage.setItem('frioPendientes', JSON.stringify(pendientes));
-
-        let btn = document.getElementById('btnGuardarFrio');
-        btn.innerText = "Guardar Horas Frío";
-        btn.disabled = false;
-
-        alert("⚠️ Sin conexión a internet. Las horas frío se guardaron localmente.");
-        document.getElementById('frioCantidad').value = "";
-        actualizarAlertaFrioOffline();
-    }
-
-    function actualizarAlertaFrioOffline() {
-        let pendientes = JSON.parse(localStorage.getItem('frioPendientes')) || [];
-        let alerta = document.getElementById('alertaFrioPendientes');
-        let btnSync = document.getElementById('btnSincronizarFrio');
-
-        if (pendientes.length > 0) {
-            alerta.style.display = 'block';
-            alerta.innerText = `📦 Tiene ${pendientes.length} registros de horas frío guardados sin sincronizar.`;
-            btnSync.style.display = 'block';
-        } else {
-            alerta.style.display = 'none';
-            btnSync.style.display = 'none';
+        if (!datos.fechaRegistro || isNaN(datos.horasFrio)) {
+            alert("Complete los campos de horas frío."); return;
         }
+        guardarDatos(URL_SCRIPT, datos, 'btnGuardarFrio', "¡Horas frío guardadas!", 'frioPendientes', () => {
+            document.getElementById('frioCantidad').value = "";
+            cambiarVista('vistaArandanosMenu');
+        });
     }
 
-    async function sincronizarFrioPendientes() {
-        let pendientes = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+    // --- SISTEMA DE SINCRONIZACIÓN AUTOMÁTICA (FANTASMA) ---
+    async function autoSincronizarRegistros() {
+        if (!navigator.onLine) return; // Si no hay internet, no hace nada
+
+        await sincronizarColaOculta('sfPendientes');
+        await sincronizarColaOculta('rendimientosPendientes');
+        await sincronizarColaOculta('postcosechaPendientes');
+        await sincronizarColaOculta('frioPendientes');
+
+        actualizarTodasLasAlertasOffline();
+    }
+
+    async function sincronizarColaOculta(storageKey) {
+        let pendientes = JSON.parse(localStorage.getItem(storageKey)) || [];
         if (pendientes.length === 0) return;
 
-        let btnSync = document.getElementById('btnSincronizarFrio');
-        btnSync.innerText = "Sincronizando...";
-        btnSync.disabled = true;
-
-        try {
-            for (let i = 0; i < pendientes.length; i++) {
-                await fetch(URL_SCRIPT, { 
-                    method: "POST", 
-                    mode: "no-cors", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(pendientes[i]) 
-                });
+        let fallidos = [];
+        for (let i = 0; i < pendientes.length; i++) {
+            try {
+                await fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pendientes[i]) });
+            } catch (err) {
+                fallidos.push(pendientes[i]); // Si falla por mala señal, lo guarda de nuevo
             }
-            localStorage.removeItem('frioPendientes');
-            btnSync.innerText = "🔄 Sincronizar Horas Frío Pendientes";
-            btnSync.disabled = false;
-            alert("¡Sincronización exitosa! Todos los registros pasaron a Google Sheets.");
-            actualizarAlertaFrioOffline();
-        } catch (err) {
-            btnSync.innerText = "🔄 Sincronizar Horas Frío Pendientes";
-            btnSync.disabled = false;
-            alert("Error de conexión al sincronizar. Intente de nuevo.");
+        }
+        
+        if (fallidos.length === 0) {
+            localStorage.removeItem(storageKey);
+        } else {
+            localStorage.setItem(storageKey, JSON.stringify(fallidos));
         }
     }
 
-    // --- LÓGICA DE ARÁNDANOS (PEDIDOS) ---
+    // --- GESTIÓN DE ALERTAS Y VENTANA MODAL (VER DETALLES) ---
+    function actualizarTodasLasAlertasOffline() {
+        configurarAlerta('sfPendientes', 'alertaSanFelipePendientes', 'Rendimientos San Felipe', 'sanfelipe');
+        configurarAlerta('rendimientosPendientes', 'alertaPendientes', 'Rendimientos Arándanos', 'rendarandanos');
+        configurarAlerta('postcosechaPendientes', 'alertaPostPendientes', 'Postcosecha', 'postcosecha');
+        configurarAlerta('frioPendientes', 'alertaFrioPendientes', 'Horas Frío', 'frio');
+    }
+
+    function configurarAlerta(storageKey, elementId, modulo, tipo) {
+        let pendientes = JSON.parse(localStorage.getItem(storageKey)) || [];
+        let alerta = document.getElementById(elementId);
+        if (alerta) {
+            if (pendientes.length > 0) {
+                alerta.style.display = 'block';
+                alerta.innerHTML = `
+                    📦 <b>${pendientes.length}</b> registro(s) de ${modulo} en cola.<br>
+                    <span style="font-size:12px; color:#555;">(Se subirán en segundo plano al conectar a internet)</span>
+                    <button type="button" onclick="mostrarModalDetalles('${tipo}')">👀 Ver detalles</button>`;
+            } else {
+                alerta.style.display = 'none';
+            }
+        }
+    }
+
+    function mostrarModalDetalles(tipo) {
+        let titulo = ""; let html = ""; let datos = [];
+        
+        if (tipo === 'sanfelipe') {
+            titulo = "San Felipe (Pendientes)";
+            datos = JSON.parse(localStorage.getItem('sfPendientes')) || [];
+            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Labor: ${d.labor} | Cantidad: ${d.rendimiento}</div>`; });
+        } else if (tipo === 'rendarandanos') {
+            titulo = "Rendimiento Arándanos (Pendientes)";
+            datos = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
+            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Parada: ${d.parada}</div>`; });
+        } else if (tipo === 'postcosecha') {
+            titulo = "Postcosecha (Pendientes)";
+            datos = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
+            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Bloque: ${d.bloque}</strong><br>${d.canastillas} Canastillas | Peso total: ${d.pesoTotal} kg</div>`; });
+        } else if (tipo === 'frio') {
+            titulo = "Horas Frío (Pendientes)";
+            datos = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Fecha: ${d.fechaRegistro}</strong><br>Horas registradas: ${d.horasFrio}</div>`; });
+        }
+
+        if (datos.length === 0) html = "<p style='text-align:center;'>No hay registros pendientes en este módulo.</p>";
+
+        document.getElementById('modalTitulo').innerText = titulo;
+        document.getElementById('listaDetallesPendientes').innerHTML = html;
+        document.getElementById('modalDetalles').style.display = 'block';
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalDetalles').style.display = 'none';
+    }
+
+    // --- LÓGICA DE PEDIDOS DE ARÁNDANOS ---
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
         if (!cedula || !seguridad) { alert("Por favor, ingrese la cédula y el año de seguridad."); return; }
 
         let btn = document.getElementById('btnValidar');
-        btn.innerText = "Buscando...";
-        btn.disabled = true;
+        btn.innerText = "Buscando..."; btn.disabled = true;
 
         fetch(`${URL_SCRIPT}?accion=buscar&cedula=${cedula}&seguridad=${seguridad}`)
-            .then(res => res.json())
-            .then(data => {
-                btn.innerText = "Validar Empleado";
-                btn.disabled = false;
+            .then(res => res.json()).then(data => {
+                btn.innerText = "Validar Empleado"; btn.disabled = false;
                 if (data.encontrado) {
                     nombreEmpleadoGlobal = data.nombre;
                     document.getElementById('saludoEmpleado').innerText = `Bienvenido(a): ${nombreEmpleadoGlobal}`;
                     document.getElementById('seccionValidacion').style.display = 'none';
                     document.getElementById('seccionProductos').style.display = 'block';
-                } else {
-                    alert("Cédula o año de seguridad incorrectos.");
-                }
-            })
-            .catch(err => {
-                btn.innerText = "Validar Empleado";
-                btn.disabled = false;
-                alert("Error de conexión.");
-            });
+                } else { alert("Cédula o año de seguridad incorrectos."); }
+            }).catch(err => { btn.innerText = "Validar Empleado"; btn.disabled = false; alert("Error de conexión."); });
     }
 
     function calcularPedidoYMostrarAutorizacion() {
-        let promoKilos = parseInt(document.getElementById('inputPromoKilos').value) || 0;
-        let kiloNormal = parseInt(document.getElementById('inputKiloNormal').value) || 0;
-        let mermeladas = parseInt(document.getElementById('inputMermeladas').value) || 0;
-        let frambuesas = parseInt(document.getElementById('inputFrambuesas').value) || 0;
+        let p3k = parseInt(document.getElementById('inputPromoKilos').value) || 0;
+        let p1k = parseInt(document.getElementById('inputKiloNormal').value) || 0;
+        let merm = parseInt(document.getElementById('inputMermeladas').value) || 0;
+        let framb = parseInt(document.getElementById('inputFrambuesas').value) || 0;
+        let total = (p3k * 20000) + (p1k * 29000) + (merm * 15000) + (framb * 18000);
+        
+        if (total === 0) { alert("Debe seleccionar al menos un producto."); return; }
 
-        let totalPagar = (promoKilos * 20000) + (kiloNormal * 29000) + (mermeladas * 15000) + (frambuesas * 18000);
-        if (totalPagar === 0) { alert("Debe seleccionar al menos un producto."); return; }
+        let det = [];
+        if (p3k > 0) det.push(`${p3k} Promo 3kg`);
+        if (p1k > 0) det.push(`${p1k} Kilo regular`);
+        if (merm > 0) det.push(`${merm} Mermelada(s)`);
+        if (framb > 0) det.push(`${framb} Kilo frambuesa`);
 
-        let detalle = [];
-        if (promoKilos > 0) detalle.push(`${promoKilos} Promo 3kg`);
-        if (kiloNormal > 0) detalle.push(`${kiloNormal} Kilo regular`);
-        if (mermeladas > 0) detalle.push(`${mermeladas} Mermelada(s)`);
-        if (frambuesas > 0) detalle.push(`${frambuesas} Kilo frambuesa`);
-
-        let textoDetalleFinal = detalle.join(" + ");
-        datosPedidoActual = { detallePedido: textoDetalleFinal, totalPagar: totalPagar };
-
-        document.getElementById('mensajeAutorizacion').innerText = 
-            `Firme si autoriza el descuento de: $${totalPagar.toLocaleString()} pesos (${textoDetalleFinal}).`;
-
+        datosPedidoActual = { detallePedido: det.join(" + "), totalPagar: total };
+        document.getElementById('mensajeAutorizacion').innerText = `Firme si autoriza el descuento de: $${total.toLocaleString()} pesos (${datosPedidoActual.detallePedido}).`;
         document.getElementById('seccionProductos').style.display = 'none';
         document.getElementById('seccionFirma').style.display = 'block';
         resizeCanvas();
@@ -810,11 +803,9 @@
     }
 
     function enviarPedidoArandanos() {
-        if (signaturePad.isEmpty()) { alert("Por favor, realice la firma antes de enviar."); return; }
-
+        if (signaturePad.isEmpty()) { alert("Realice la firma antes de enviar."); return; }
         let btn = document.getElementById('btnEnviarPedido');
-        btn.innerText = "Enviando...";
-        btn.disabled = true;
+        btn.innerText = "Enviando..."; btn.disabled = true;
 
         let payload = {
             accion: "guardar_arandanos",
@@ -826,15 +817,8 @@
         };
 
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(() => { 
-                alert("¡Pedido registrado con éxito!"); 
-                cambiarVista('vistaArandanosMenu');
-            })
-            .catch(err => {
-                btn.innerText = "Finalizar y Enviar Pedido";
-                btn.disabled = false;
-                alert("Error de conexión.");
-            });
+            .then(() => { alert("¡Pedido registrado con éxito!"); cambiarVista('vistaArandanosMenu'); })
+            .catch(err => { btn.innerText = "Finalizar y Enviar Pedido"; btn.disabled = false; alert("Error de conexión."); });
     }
 </script>
 
