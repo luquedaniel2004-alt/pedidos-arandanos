@@ -9,22 +9,25 @@
         body { 
             font-family: Arial, sans-serif; 
             background-color: #eef2f3; 
-            background-image: url('https://lh3.googleusercontent.com/d/1hiXn-HopXnr5Hr0mVByV4RDtIjwNUi_Q=s800');
             background-repeat: no-repeat;
             background-position: center center;
             background-attachment: fixed;
             background-size: cover; 
             margin: 0; 
             padding: 20px; 
+            transition: background-image 0.5s ease-in-out; 
         }
 
         .container { 
             max-width: 500px; 
-            background: rgba(255, 255, 255, 0.96); 
+            /* Caja blanca semi-transparente para que la foto de fondo se vea mejor */
+            background: rgba(255, 255, 255, 0.86); 
+            backdrop-filter: blur(4px); /* Efecto difuminado moderno sutil */
             padding: 25px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            border-radius: 10px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25); 
             margin: auto; 
+            transition: all 0.3s ease;
         }
 
         .logo-superior {
@@ -32,15 +35,19 @@
             margin-bottom: 10px;
         }
         .logo-superior img {
-            max-width: 130px;
+            max-width: 140px;
             height: auto;
+            transition: opacity 0.3s ease; 
         }
 
-        h2, h3 { text-align: center; color: #2c3e50; margin-top: 5px; }
+        h2, h3 { text-align: center; color: #2c3e50; margin-top: 5px; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input, select, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
-        button { background-color: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        
+        /* Inputs y elementos un poco más translúcidos para destacar el fondo */
+        input, select, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #bbb; border-radius: 4px; font-family: Arial, sans-serif; background: rgba(255, 255, 255, 0.95); }
+        
+        button { background-color: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         button:hover { background-color: #218838; }
         .btn-secondary { background-color: #007bff; }
         .btn-secondary:hover { background-color: #0056b3; }
@@ -55,20 +62,29 @@
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
         .btn-volver:hover { background-color: #5a6268; }
         
-        .alerta-offline { background-color: #d1ecf1; color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; }
+        .alerta-offline { background-color: rgba(209, 236, 241, 0.95); color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; }
         .alerta-offline button { width: auto; margin: 8px auto 0 auto; display: block; padding: 8px 15px; background-color: #17a2b8; }
         
         .vista { display: none; }
-        .vista.activa { display: block; }
+        .vista.activa { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         
         #signature-pad { border: 2px dashed #ccc; background-color: #fafafa; width: 100%; height: 200px; border-radius: 4px; }
-        .mensaje-autorizacion { background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; }
+        .mensaje-autorizacion { background-color: rgba(255, 243, 205, 0.95); color: #856404; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; }
+        
         .bienvenida-box { text-align: center; padding: 10px 0; }
-        .bienvenida-box p { color: #666; margin-bottom: 20px; }
+        .bienvenida-box p { color: #444; margin-bottom: 20px; font-weight: 500; }
 
-        /* Estilos de la Ventana Modal para detalles */
+        /* Tarjetas de Selección de Finca */
+        .grid-fincas { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .tarjeta-finca { flex: 1; background: rgba(255, 255, 255, 0.92); padding: 20px 10px; border-radius: 10px; border: 2px solid #ddd; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tarjeta-finca:hover { border-color: #28a745; transform: scale(1.02); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .tarjeta-finca span { font-size: 45px; display: block; margin-bottom: 10px; }
+        .tarjeta-finca h4 { margin: 0; color: #2c3e50; font-size: 16px; }
+
+        /* Estilos Ventana Modal */
         #modalDetalles { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; padding: 20px; box-sizing: border-box; }
-        .modal-contenido { background: #fff; padding: 20px; border-radius: 8px; max-height: 80vh; overflow-y: auto; margin-top: 10vh; max-width: 450px; margin-left: auto; margin-right: auto; }
+        .modal-contenido { background: rgba(255, 255, 255, 0.96); padding: 20px; border-radius: 8px; max-height: 80vh; overflow-y: auto; margin-top: 10vh; max-width: 450px; margin-left: auto; margin-right: auto; }
         .item-detalle { background: #f8f9fa; padding: 10px; border-left: 4px solid #17a2b8; margin-bottom: 10px; border-radius: 4px; font-size: 14px; }
         .item-detalle strong { color: #333; }
     </style>
@@ -77,18 +93,27 @@
 
 <div class="container">
     <div class="logo-superior">
-        <img src="https://lh3.googleusercontent.com/d/1RHICmfq1ahAcpbFM8EzGTKpx_lay6Zk0=s800" alt="Logo Flores de Funza">
+        <img id="logoPrincipal" src="https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800" alt="Logo de la Finca">
     </div>
 
-    <h2>Flores de Funza</h2>
+    <h2>Sistema de Producción</h2>
 
     <!-- PANTALLA DE INICIO PRINCIPAL -->
     <div id="vistaInicio" class="vista activa">
         <div class="bienvenida-box">
-            <h3>Centro de Producción</h3>
-            <p>Por favor, seleccione la finca a la que desea ingresar:</p>
-            <button class="btn-secondary" onclick="cambiarVista('vistaFincaFunza')">🏡 Finca Funza</button>
-            <button class="btn-warning" onclick="cambiarVista('vistaSanFelipeMenu')">🌻 San Felipe</button>
+            <h3>Selección de Finca</h3>
+            <p>Por favor, seleccione el área a la que desea ingresar:</p>
+            
+            <div class="grid-fincas">
+                <div class="tarjeta-finca" onclick="cambiarVista('vistaFincaFunza')">
+                    <span>🏡</span>
+                    <h4>Finca Funza</h4>
+                </div>
+                <div class="tarjeta-finca" onclick="cambiarVista('vistaSanFelipeMenu')">
+                    <span>🌻</span>
+                    <h4>San Felipe</h4>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -99,7 +124,7 @@
             <p>Seleccione el cultivo o área de trabajo:</p>
             <button class="btn-warning" onclick="cambiarVista('vistaFlores')">🌸 Flores</button>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosMenu')">🫐 Arándanos</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver a Selección de Finca</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver al Inicio</button>
         </div>
     </div>
 
@@ -397,12 +422,36 @@
 
 <script>
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
+    
+    // ==========================================
+    // CONFIGURACIÓN DE IMÁGENES POR TEMA (FINCA)
+    // ==========================================
+    const IMAGENES_TEMA = {
+        inicio: {
+            logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", // Logo Funza
+            fondo: "https://lh3.googleusercontent.com/d/1WcnOojQHCdWDuW55xban73yzszt8A4jM=s800"  // Fondo General Corregido
+        },
+        funza: {
+            logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", // Logo Funza
+            fondo: "https://lh3.googleusercontent.com/d/1UszOWvTG2d1Ql401chp8IQt0ng5Z7wU0=s800" // Fondo Funza
+        },
+        arandanos: {
+            logo: "https://lh3.googleusercontent.com/d/1RHICmfq1ahAcpbFM8EzGTKpx_lay6Zk0=s800", // Logo Original Arándanos
+            fondo: "https://lh3.googleusercontent.com/d/1aiYp9CN6SZ4ujY47kNGi686XWeP92n_Q=s800" // Fondo Arándanos
+        },
+        sanfelipe: {
+            logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", // Logo Funza
+            fondo: "https://lh3.googleusercontent.com/d/1BZuezMAv8Q9sDlopm3DCZ4jHCeVlu71k=s800" // Fondo San Felipe
+        }
+    };
+
     let nombreEmpleadoGlobal = "";
     let listaPersonalGlobal = [];
     let listaPersonalSFGlobal = [];
     let canvas = document.getElementById('signature-pad');
     let signaturePad = new SignaturePad(canvas);
     let datosPedidoActual = {};
+    let sincronizandoAhora = false;
 
     window.addEventListener('DOMContentLoaded', () => {
         let hoy = new Date().toISOString().split('T')[0];
@@ -414,12 +463,26 @@
         cargarDatosRendimiento();
         cargarDatosSanFelipe();
         actualizarTodasLasAlertasOffline();
+        aplicarTema('inicio'); 
 
-        // INICIAR SINCRONIZACIÓN AUTOMÁTICA
         autoSincronizarRegistros(); 
-        setInterval(autoSincronizarRegistros, 30000); // Revisa y sincroniza cada 30 segundos
-        window.addEventListener('online', autoSincronizarRegistros); // Sincroniza apenas vuelva el internet
+        setInterval(autoSincronizarRegistros, 30000); 
+        window.addEventListener('online', autoSincronizarRegistros); 
     });
+
+    function aplicarTema(seccion) {
+        let temaSeleccionado = IMAGENES_TEMA[seccion];
+        if (temaSeleccionado) {
+            document.body.style.backgroundImage = `url('${temaSeleccionado.fondo}')`;
+            
+            let imgLogo = document.getElementById('logoPrincipal');
+            imgLogo.style.opacity = 0; 
+            setTimeout(() => {
+                imgLogo.src = temaSeleccionado.logo;
+                imgLogo.style.opacity = 1; 
+            }, 300);
+        }
+    }
 
     function cambiarVista(idVista, subModulo = '') {
         document.getElementById('vistaInicio').classList.remove('activa');
@@ -434,24 +497,25 @@
         document.getElementById(idVista).classList.add('activa');
         actualizarTodasLasAlertasOffline();
 
+        if (idVista === 'vistaInicio') aplicarTema('inicio');
+        else if (idVista === 'vistaFincaFunza' || idVista === 'vistaFlores') aplicarTema('funza');
+        else if (idVista === 'vistaSanFelipeMenu' || idVista === 'vistaCausasNacional' || idVista === 'vistaSanFelipeRendimiento') aplicarTema('sanfelipe');
+        else if (idVista === 'vistaArandanosMenu' || idVista === 'vistaArandanosApp') aplicarTema('arandanos');
+
         if (idVista === 'vistaArandanosApp') {
             document.getElementById('subModuloArandanos').style.display = 'none';
             document.getElementById('subModuloPostcosecha').style.display = 'none';
             document.getElementById('subModuloRendimiento').style.display = 'none';
             document.getElementById('subModuloHorasFrio').style.display = 'none';
 
-            if (subModulo === 'arandanos') {
-                document.getElementById('subModuloArandanos').style.display = 'block';
-            } else if (subModulo === 'postcosecha') {
-                document.getElementById('subModuloPostcosecha').style.display = 'block';
-            } else if (subModulo === 'rendimiento') {
+            if (subModulo === 'arandanos') document.getElementById('subModuloArandanos').style.display = 'block';
+            else if (subModulo === 'postcosecha') document.getElementById('subModuloPostcosecha').style.display = 'block';
+            else if (subModulo === 'rendimiento') {
                 document.getElementById('subModuloRendimiento').style.display = 'block';
                 document.getElementById('seccionPinRendimiento').style.display = 'block';
                 document.getElementById('seccionFormRendimiento').style.display = 'none';
                 document.getElementById('inputPinRend').value = '';
-            } else if (subModulo === 'horasfrio') {
-                document.getElementById('subModuloHorasFrio').style.display = 'block';
-            }
+            } else if (subModulo === 'horasfrio') document.getElementById('subModuloHorasFrio').style.display = 'block';
         }
     }
 
@@ -474,17 +538,15 @@
         }
     }
 
-    // --- CARGAR PERSONAL (OFFLINE CACHÉ INSTANTÁNEO) ---
     function cargarDatosRendimiento() {
         let localPersonal = localStorage.getItem('cachePersonalArandanos');
         if (localPersonal) procesarGruposArandanos(JSON.parse(localPersonal));
-
         fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`).then(res => res.json()).then(data => {
             if (data.personal && data.personal.length > 0) {
                 localStorage.setItem('cachePersonalArandanos', JSON.stringify(data.personal));
                 procesarGruposArandanos(data.personal);
             }
-        }).catch(err => { console.log("Sin internet: usando caché local de arándanos."); });
+        }).catch(err => { console.log("Caché arándanos."); });
     }
 
     function procesarGruposArandanos(personal) {
@@ -492,9 +554,7 @@
         let gruposUnicos = [...new Set(listaPersonalGlobal.map(item => item.grupo))];
         let selectGrupo = document.getElementById('rendSelectGrupo');
         selectGrupo.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
-        gruposUnicos.forEach(grupo => {
-            let opt = document.createElement('option'); opt.value = grupo; opt.textContent = grupo; selectGrupo.appendChild(opt);
-        });
+        gruposUnicos.forEach(grupo => { let opt = document.createElement('option'); opt.value = grupo; opt.textContent = grupo; selectGrupo.appendChild(opt); });
     }
 
     function filtrarPersonalPorGrupo() {
@@ -502,21 +562,18 @@
         let select = document.getElementById('rendSelectEmpleado');
         select.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
         if (!grupo) return;
-        listaPersonalGlobal.filter(item => item.grupo === grupo).forEach(emp => {
-            let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt);
-        });
+        listaPersonalGlobal.filter(item => item.grupo === grupo).forEach(emp => { let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt); });
     }
 
     function cargarDatosSanFelipe() {
         let localSF = localStorage.getItem('cachePersonalSanFelipe');
         if (localSF) procesarSupervisoraSanFelipe(JSON.parse(localSF));
-
         fetch(`${URL_SCRIPT}?accion=obtener_personal_sanfelipe`).then(res => res.json()).then(data => {
             if (data.personalSF && data.personalSF.length > 0) {
                 localStorage.setItem('cachePersonalSanFelipe', JSON.stringify(data.personalSF));
                 procesarSupervisoraSanFelipe(data.personalSF);
             }
-        }).catch(err => { console.log("Sin internet: usando caché local de San Felipe."); });
+        }).catch(err => { console.log("Caché San Felipe."); });
     }
 
     function procesarSupervisoraSanFelipe(personalSF) {
@@ -524,9 +581,7 @@
         let supervisorasUnicas = [...new Set(listaPersonalSFGlobal.map(item => item.supervisora))];
         let selectSupervisora = document.getElementById('sfSelectSupervisora');
         selectSupervisora.innerHTML = '<option value="">-- Seleccione supervisor/a --</option>';
-        supervisorasUnicas.forEach(sup => {
-            let opt = document.createElement('option'); opt.value = sup; opt.textContent = sup; selectSupervisora.appendChild(opt);
-        });
+        supervisorasUnicas.forEach(sup => { let opt = document.createElement('option'); opt.value = sup; opt.textContent = sup; selectSupervisora.appendChild(opt); });
     }
 
     function filtrarPersonalSanFelipe() {
@@ -534,22 +589,16 @@
         let select = document.getElementById('sfSelectEmpleado');
         select.innerHTML = '<option value="">-- Seleccione un trabajador/a --</option>';
         if (!supervisora) return;
-        listaPersonalSFGlobal.filter(item => item.supervisora === supervisora).forEach(emp => {
-            let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt);
-        });
+        listaPersonalSFGlobal.filter(item => item.supervisora === supervisora).forEach(emp => { let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt); });
     }
 
-    // --- FUNCIONES DE GUARDADO (Intenta enviar, si falla guarda local) ---
     function guardarDatos(urlScript, payload, btnId, msgExito, keyLocalStorage, fnLimpiar) {
         let btn = document.getElementById(btnId);
-        btn.innerText = "Guardando...";
-        btn.disabled = true;
+        btn.innerText = "Guardando..."; btn.disabled = true;
 
         fetch(urlScript, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
             .then(() => {
-                btn.innerText = "Guardar";
-                btn.disabled = false;
-                alert(msgExito);
+                btn.innerText = "Guardar"; btn.disabled = false; alert(msgExito);
                 if(fnLimpiar) fnLimpiar();
             })
             .catch(error => {
@@ -557,8 +606,7 @@
                 pendientes.push(payload);
                 localStorage.setItem(keyLocalStorage, JSON.stringify(pendientes));
 
-                btn.innerText = "Guardar";
-                btn.disabled = false;
+                btn.innerText = "Guardar"; btn.disabled = false;
                 alert("⚠️ Guardado localmente. Se subirá automáticamente cuando haya internet.");
                 if(fnLimpiar) fnLimpiar();
                 actualizarTodasLasAlertasOffline();
@@ -609,12 +657,9 @@
             valdesT1: valdesT1, valdesT2: valdesT2, valdesT3: valdesT3,
             observaciones: document.getElementById('rendObservaciones').value.trim()
         };
-        if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) {
-            alert("Complete todos los campos."); return;
-        }
-        if (valdesT1===0 && valdesT2===0 && valdesT3===0) {
-            alert("Debe ingresar valdes."); return;
-        }
+        if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) { alert("Complete todos los campos."); return; }
+        if (valdesT1===0 && valdesT2===0 && valdesT3===0) { alert("Debe ingresar valdes."); return; }
+        
         guardarDatos(URL_SCRIPT, datos, 'btnGuardarRend', "¡Rendimiento de Arándanos guardado!", 'rendimientosPendientes', () => {
             document.getElementById('rendSelectGrupo').value = "";
             document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
@@ -638,16 +683,11 @@
             tipoFruta: document.getElementById('postFruta').value,
             variedad: document.getElementById('postVariedad').value
         };
-        if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque || !datos.canastillas || !datos.pesoTotal || !datos.pesoCanastilla) {
-            alert("Complete todos los campos."); return;
-        }
+        if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque || !datos.canastillas || !datos.pesoTotal || !datos.pesoCanastilla) { alert("Complete todos los campos."); return; }
         guardarDatos(URL_SCRIPT, datos, 'btnGuardarPost', "¡Ingreso a postcosecha guardado!", 'postcosechaPendientes', () => {
-            document.getElementById('postBloque').value = "";
-            document.getElementById('postAnio').value = "";
-            document.getElementById('postCanastillas').value = "";
-            document.getElementById('postPesoTotal').value = "";
-            document.getElementById('postPesoCanastilla').value = "";
-            cambiarVista('vistaArandanosMenu');
+            document.getElementById('postBloque').value = ""; document.getElementById('postAnio').value = "";
+            document.getElementById('postCanastillas').value = ""; document.getElementById('postPesoTotal').value = "";
+            document.getElementById('postPesoCanastilla').value = ""; cambiarVista('vistaArandanosMenu');
         });
     }
 
@@ -657,48 +697,38 @@
             fechaRegistro: document.getElementById('frioFecha').value,
             horasFrio: parseFloat(document.getElementById('frioCantidad').value)
         };
-        if (!datos.fechaRegistro || isNaN(datos.horasFrio)) {
-            alert("Complete los campos de horas frío."); return;
-        }
+        if (!datos.fechaRegistro || isNaN(datos.horasFrio)) { alert("Complete los campos de horas frío."); return; }
         guardarDatos(URL_SCRIPT, datos, 'btnGuardarFrio', "¡Horas frío guardadas!", 'frioPendientes', () => {
-            document.getElementById('frioCantidad').value = "";
-            cambiarVista('vistaArandanosMenu');
+            document.getElementById('frioCantidad').value = ""; cambiarVista('vistaArandanosMenu');
         });
     }
 
-    // --- SISTEMA DE SINCRONIZACIÓN AUTOMÁTICA (FANTASMA) ---
     async function autoSincronizarRegistros() {
-        if (!navigator.onLine) return; // Si no hay internet, no hace nada
-
+        if (!navigator.onLine || sincronizandoAhora) return; 
+        sincronizandoAhora = true; 
         await sincronizarColaOculta('sfPendientes');
         await sincronizarColaOculta('rendimientosPendientes');
         await sincronizarColaOculta('postcosechaPendientes');
         await sincronizarColaOculta('frioPendientes');
-
         actualizarTodasLasAlertasOffline();
+        sincronizandoAhora = false; 
     }
 
     async function sincronizarColaOculta(storageKey) {
         let pendientes = JSON.parse(localStorage.getItem(storageKey)) || [];
         if (pendientes.length === 0) return;
-
+        localStorage.removeItem(storageKey);
         let fallidos = [];
         for (let i = 0; i < pendientes.length; i++) {
-            try {
-                await fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pendientes[i]) });
-            } catch (err) {
-                fallidos.push(pendientes[i]); // Si falla por mala señal, lo guarda de nuevo
-            }
+            try { await fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pendientes[i]) });
+            } catch (err) { fallidos.push(pendientes[i]); }
         }
-        
-        if (fallidos.length === 0) {
-            localStorage.removeItem(storageKey);
-        } else {
-            localStorage.setItem(storageKey, JSON.stringify(fallidos));
+        if (fallidos.length > 0) {
+            let pendientesNuevos = JSON.parse(localStorage.getItem(storageKey)) || [];
+            localStorage.setItem(storageKey, JSON.stringify(fallidos.concat(pendientesNuevos)));
         }
     }
 
-    // --- GESTIÓN DE ALERTAS Y VENTANA MODAL (VER DETALLES) ---
     function actualizarTodasLasAlertasOffline() {
         configurarAlerta('sfPendientes', 'alertaSanFelipePendientes', 'Rendimientos San Felipe', 'sanfelipe');
         configurarAlerta('rendimientosPendientes', 'alertaPendientes', 'Rendimientos Arándanos', 'rendarandanos');
@@ -712,54 +742,40 @@
         if (alerta) {
             if (pendientes.length > 0) {
                 alerta.style.display = 'block';
-                alerta.innerHTML = `
-                    📦 <b>${pendientes.length}</b> registro(s) de ${modulo} en cola.<br>
-                    <span style="font-size:12px; color:#555;">(Se subirán en segundo plano al conectar a internet)</span>
+                alerta.innerHTML = `📦 <b>${pendientes.length}</b> registro(s) de ${modulo} en cola.<br>
+                    <span style="font-size:12px; color:#555;">(Se subirán en segundo plano al conectar)</span>
                     <button type="button" onclick="mostrarModalDetalles('${tipo}')">👀 Ver detalles</button>`;
-            } else {
-                alerta.style.display = 'none';
-            }
+            } else { alerta.style.display = 'none'; }
         }
     }
 
     function mostrarModalDetalles(tipo) {
         let titulo = ""; let html = ""; let datos = [];
-        
         if (tipo === 'sanfelipe') {
-            titulo = "San Felipe (Pendientes)";
-            datos = JSON.parse(localStorage.getItem('sfPendientes')) || [];
-            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Labor: ${d.labor} | Cantidad: ${d.rendimiento}</div>`; });
+            titulo = "San Felipe (Pendientes)"; datos = JSON.parse(localStorage.getItem('sfPendientes')) || [];
+            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Labor: ${d.labor} | Cant: ${d.rendimiento}</div>`; });
         } else if (tipo === 'rendarandanos') {
-            titulo = "Rendimiento Arándanos (Pendientes)";
-            datos = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
+            titulo = "Rendimiento Arándanos (Pendientes)"; datos = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
             datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Parada: ${d.parada}</div>`; });
         } else if (tipo === 'postcosecha') {
-            titulo = "Postcosecha (Pendientes)";
-            datos = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
+            titulo = "Postcosecha (Pendientes)"; datos = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
             datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Bloque: ${d.bloque}</strong><br>${d.canastillas} Canastillas | Peso total: ${d.pesoTotal} kg</div>`; });
         } else if (tipo === 'frio') {
-            titulo = "Horas Frío (Pendientes)";
-            datos = JSON.parse(localStorage.getItem('frioPendientes')) || [];
-            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Fecha: ${d.fechaRegistro}</strong><br>Horas registradas: ${d.horasFrio}</div>`; });
+            titulo = "Horas Frío (Pendientes)"; datos = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+            datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Fecha: ${d.fechaRegistro}</strong><br>Horas: ${d.horasFrio}</div>`; });
         }
-
-        if (datos.length === 0) html = "<p style='text-align:center;'>No hay registros pendientes en este módulo.</p>";
-
+        if (datos.length === 0) html = "<p style='text-align:center;'>No hay registros pendientes.</p>";
         document.getElementById('modalTitulo').innerText = titulo;
         document.getElementById('listaDetallesPendientes').innerHTML = html;
         document.getElementById('modalDetalles').style.display = 'block';
     }
 
-    function cerrarModal() {
-        document.getElementById('modalDetalles').style.display = 'none';
-    }
+    function cerrarModal() { document.getElementById('modalDetalles').style.display = 'none'; }
 
-    // --- LÓGICA DE PEDIDOS DE ARÁNDANOS ---
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
         if (!cedula || !seguridad) { alert("Por favor, ingrese la cédula y el año de seguridad."); return; }
-
         let btn = document.getElementById('btnValidar');
         btn.innerText = "Buscando..."; btn.disabled = true;
 
@@ -781,14 +797,10 @@
         let merm = parseInt(document.getElementById('inputMermeladas').value) || 0;
         let framb = parseInt(document.getElementById('inputFrambuesas').value) || 0;
         let total = (p3k * 20000) + (p1k * 29000) + (merm * 15000) + (framb * 18000);
-        
         if (total === 0) { alert("Debe seleccionar al menos un producto."); return; }
-
         let det = [];
-        if (p3k > 0) det.push(`${p3k} Promo 3kg`);
-        if (p1k > 0) det.push(`${p1k} Kilo regular`);
-        if (merm > 0) det.push(`${merm} Mermelada(s)`);
-        if (framb > 0) det.push(`${framb} Kilo frambuesa`);
+        if (p3k > 0) det.push(`${p3k} Promo 3kg`); if (p1k > 0) det.push(`${p1k} Kilo regular`);
+        if (merm > 0) det.push(`${merm} Mermelada(s)`); if (framb > 0) det.push(`${framb} Kilo frambuesa`);
 
         datosPedidoActual = { detallePedido: det.join(" + "), totalPagar: total };
         document.getElementById('mensajeAutorizacion').innerText = `Firme si autoriza el descuento de: $${total.toLocaleString()} pesos (${datosPedidoActual.detallePedido}).`;
@@ -797,10 +809,7 @@
         resizeCanvas();
     }
 
-    function regresarAProductos() {
-        document.getElementById('seccionFirma').style.display = 'none';
-        document.getElementById('seccionProductos').style.display = 'block';
-    }
+    function regresarAProductos() { document.getElementById('seccionFirma').style.display = 'none'; document.getElementById('seccionProductos').style.display = 'block'; }
 
     function enviarPedidoArandanos() {
         if (signaturePad.isEmpty()) { alert("Realice la firma antes de enviar."); return; }
@@ -808,12 +817,9 @@
         btn.innerText = "Enviando..."; btn.disabled = true;
 
         let payload = {
-            accion: "guardar_arandanos",
-            cedula: document.getElementById('inputCedula').value.trim(),
-            nombre: nombreEmpleadoGlobal,
-            detallePedido: datosPedidoActual.detallePedido,
-            totalPagar: datosPedidoActual.totalPagar,
-            firma: signaturePad.toDataURL("image/png")
+            accion: "guardar_arandanos", cedula: document.getElementById('inputCedula').value.trim(),
+            nombre: nombreEmpleadoGlobal, detallePedido: datosPedidoActual.detallePedido,
+            totalPagar: datosPedidoActual.totalPagar, firma: signaturePad.toDataURL("image/png")
         };
 
         fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
