@@ -219,7 +219,7 @@
                 <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar al Módulo</button>
             </div>
             <div id="seccionFormRendimiento" style="display:none;">
-                <div id="alertaPendientes" class="alerta-offline" style="display:none;"></div>
+                <div id="alertaRendPendientes" class="alerta-offline" style="display:none;"></div>
                 <div class="form-group"><label>Fecha de Labor:</label><input type="date" id="rendFecha"></div>
                 <div class="form-group"><label>Seleccionar Parada (Horario):</label><select id="rendSelectParada"><option value="">-- Seleccione la parada --</option><option value="1ª Parada (6:00 A 7:00)">1ª Parada (6:00 A 7:00)</option><option value="2ª Parada (7:00 A 8:00)">2ª Parada (7:00 A 8:00)</option><option value="3ª Parada (8:00 A 10:00)">3ª Parada (8:00 A 10:00)</option><option value="4ª Parada (10:00 A 12:00)">4ª Parada (10:00 A 12:00)</option><option value="5ª Parada (12:00 A 2:00)">5ª Parada (12:00 A 2:00)</option><option value="6ª Parada (2:00 PM A 4:00 PM)">6ª Parada (2:00 PM A 4:00 PM)</option></select></div>
                 <div class="form-group"><label>Seleccionar Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
@@ -288,7 +288,6 @@
         window.addEventListener('online', autoSincronizarRegistros); 
     });
 
-    // Función auxiliar para convertir comas (,) en puntos (.) antes de mandar a Google
     function parsearNumero(valor) {
         if (!valor) return 0;
         let limpio = String(valor).trim().replace(',', '.');
@@ -581,7 +580,7 @@
 
     function actualizarTodasLasAlertasOffline() {
         configurarAlerta('sfPendientes', 'alertaSanFelipePendientes', 'Rendimientos San Felipe', 'sanfelipe');
-        configurarAlerta('rendimientosPendientes', 'alertaPendientes', 'Rendimientos Arándanos', 'rendarandanos');
+        configurarAlerta('rendimientosPendientes', 'alertaRendPendientes', 'Rendimientos Arándanos', 'rendarandanos');
         configurarAlerta('postcosechaPendientes', 'alertaPostPendientes', 'Postcosecha', 'postcosecha');
         configurarAlerta('frioPendientes', 'alertaFrioPendientes', 'Horas Frío', 'frio');
     }
