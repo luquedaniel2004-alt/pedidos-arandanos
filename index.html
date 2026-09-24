@@ -153,7 +153,7 @@
         <div class="form-group"><label>Hora de Inicio:</label><input type="time" id="sfHoraInicio"></div>
         <div class="form-group"><label>Hora Final:</label><input type="time" id="sfHoraFinal"></div>
         <div class="form-group"><label>Seleccionar Labor:</label><select id="sfSelectLabor"><option value="">-- Seleccione la labor --</option><option value="Corte">Corte</option><option value="Encanaste">Encanaste</option><option value="Descabece">Descabece</option><option value="Peinada">Peinada</option></select></div>
-        <div class="form-group"><label>Rendimiento (Cantidad):</label><input type="number" id="sfRendimiento" min="0" step="any" placeholder="Ingrese cantidad"></div>
+        <div class="form-group"><label>Rendimiento (Cantidad):</label><input type="text" id="sfRendimiento" placeholder="Ej: 15,5 o 15.5"></div>
         <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="sfObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad..."></textarea></div>
         
         <button id="btnGuardarSfRend" class="btn-purple" onclick="enviarRendimientoSanFelipe()">Guardar Rendimiento San Felipe</button>
@@ -168,7 +168,7 @@
             <button class="btn-warning" onclick="cambiarVista('vistaArandanosApp', 'postcosecha')">📦 Ingreso a Postcosecha</button>
             <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
             <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver a Finca Funza</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver al Inicio de Funza</button>
         </div>
     </div>
 
@@ -204,9 +204,9 @@
             <div class="form-group"><label>Fecha de Ingreso:</label><input type="date" id="postFecha"></div>
             <div class="form-group"><label>Bloque:</label><input type="text" id="postBloque" placeholder="Ej: Bloque A"></div>
             <div class="form-group"><label>Año de Bloque:</label><input type="text" id="postAnio" placeholder="Ej: 2025"></div>
-            <div class="form-group"><label>Número de Canastillas:</label><input type="number" id="postCanastillas" placeholder="Cantidad" step="any"></div>
-            <div class="form-group"><label>Peso Total de Canastillas (kg):</label><input type="number" id="postPesoTotal" placeholder="Peso total" step="0.01"></div>
-            <div class="form-group"><label>Peso de Canastilla (kg):</label><input type="number" id="postPesoCanastilla" placeholder="Peso individual" step="0.01"></div>
+            <div class="form-group"><label>Número de Canastillas:</label><input type="text" id="postCanastillas" placeholder="Ej: 12,5 o 12.5"></div>
+            <div class="form-group"><label>Peso Total de Canastillas (kg):</label><input type="text" id="postPesoTotal" placeholder="Ej: 150,2 o 150.2"></div>
+            <div class="form-group"><label>Peso de Canastilla (kg):</label><input type="text" id="postPesoCanastilla" placeholder="Ej: 2,5 o 2.5"></div>
             <div class="form-group"><label>Tipo de Fruta:</label><select id="postFruta"><option value="Tipo 1">Tipo 1</option><option value="Tipo 2">Tipo 2</option><option value="Tipo 3">Tipo 3</option></select></div>
             <div class="form-group"><label>Variedad:</label><select id="postVariedad"><option value="BILOXI">BILOXI</option><option value="SHARPBLU">SHARPBLU</option><option value="EMERALD">EMERALD</option><option value="VICTORIA">VICTORIA</option><option value="LEGACY">LEGACY</option><option value="RIBBON">RIBBON</option><option value="VENTURA">VENTURA</option><option value="ATLAS">ATLAS</option><option value="BIANCA">BIANCA</option></select></div>
             <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
@@ -225,9 +225,9 @@
                 <div class="form-group"><label>Seleccionar Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
                 <div class="form-group"><label>Seleccionar Trabajador:</label><select id="rendSelectEmpleado"><option value="">-- Primero seleccione un grupo --</option></select></div>
                 <div class="form-group"><label>Bloque:</label><input type="text" id="rendBloque" placeholder="Ej: Bloque A"></div>
-                <div class="form-group"><label>Valdes Tipo 1:</label><input type="number" id="rendValdesT1" min="0" step="0.5" value="0" placeholder="Ej: 1.5"></div>
-                <div class="form-group"><label>Valdes Tipo 2:</label><input type="number" id="rendValdesT2" min="0" step="0.5" value="0" placeholder="Ej: 0.5"></div>
-                <div class="form-group"><label>Valdes Tipo 3:</label><input type="number" id="rendValdesT3" min="0" step="0.5" value="0" placeholder="Ej: 2"></div>
+                <div class="form-group"><label>Valdes Tipo 1:</label><input type="text" id="rendValdesT1" value="0" placeholder="Ej: 1,5 o 1.5"></div>
+                <div class="form-group"><label>Valdes Tipo 2:</label><input type="text" id="rendValdesT2" value="0" placeholder="Ej: 0,5 o 0.5"></div>
+                <div class="form-group"><label>Valdes Tipo 3:</label><input type="text" id="rendValdesT3" value="0" placeholder="Ej: 2,0 o 2.0"></div>
                 <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="rendObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad o nota..."></textarea></div>
                 <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
             </div>
@@ -237,7 +237,7 @@
             <h3>Registro de Horas Frío Diarias</h3>
             <div id="alertaFrioPendientes" class="alerta-offline" style="display:none;"></div>
             <div class="form-group"><label>Fecha de Registro:</label><input type="date" id="frioFecha"></div>
-            <div class="form-group"><label>Horas Frío Acumuladas / Del Día:</label><input type="number" id="frioCantidad" placeholder="Ej: 4.5" step="0.1" min="0"></div>
+            <div class="form-group"><label>Horas Frío Acumuladas / Del Día:</label><input type="text" id="frioCantidad" placeholder="Ej: 4,5 o 4.5"></div>
             <button id="btnGuardarFrio" class="btn-info" onclick="enviarHorasFrio()">Guardar Horas Frío</button>
         </div>
 
@@ -287,6 +287,14 @@
         setInterval(autoSincronizarRegistros, 20000); 
         window.addEventListener('online', autoSincronizarRegistros); 
     });
+
+    // Función auxiliar para convertir comas (,) en puntos (.) antes de mandar a Google
+    function parsearNumero(valor) {
+        if (!valor) return 0;
+        let limpio = String(valor).trim().replace(',', '.');
+        let num = parseFloat(limpio);
+        return isNaN(num) ? 0 : num;
+    }
 
     function aplicarTema(seccion) {
         let tema = IMAGENES_TEMA[seccion];
@@ -365,8 +373,10 @@
         listaPersonalGlobal = personal;
         let gruposUnicos = [...new Set(listaPersonalGlobal.map(item => item.grupo))];
         let select = document.getElementById('rendSelectGrupo');
+        let grupoActual = select.value;
         select.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
         gruposUnicos.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.textContent = g; select.appendChild(opt); });
+        if (grupoActual) select.value = grupoActual;
     }
 
     function filtrarPersonalPorGrupo() {
@@ -394,8 +404,10 @@
         listaPersonalSFGlobal = personalSF;
         let supervisoras = [...new Set(listaPersonalSFGlobal.map(item => item.supervisora))];
         let select = document.getElementById('sfSelectSupervisora');
+        let supActual = select.value;
         select.innerHTML = '<option value="">-- Seleccione supervisor/a --</option>';
         supervisoras.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.textContent = s; select.appendChild(opt); });
+        if (supActual) select.value = supActual;
     }
 
     function filtrarPersonalSanFelipe() {
@@ -408,7 +420,6 @@
         });
     }
 
-    // --- FUNCIÓN BLINDADA DE GUARDADO ---
     async function guardarDatosSeguro(payload, btnId, msgExito, keyLocalStorage, fnLimpiar) {
         let btn = document.getElementById(btnId);
         btn.innerText = "Guardando..."; btn.disabled = true;
@@ -417,29 +428,26 @@
             try {
                 let respuesta = await fetch(URL_SCRIPT, {
                     method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }, // Permite leer la respuesta formal de Google
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payload)
                 });
                 let resultado = await respuesta.json();
                 
                 if (resultado.resultado === "exito") {
                     btn.innerText = "Guardar"; btn.disabled = false;
-                    alert(msgExito + " (Sincronizado al instante con Google)");
+                    alert(msgExito);
                     if (fnLimpiar) fnLimpiar();
                     return;
                 }
-            } catch (err) {
-                // Si falla por red, continúa abajo para guardarlo localmente
-            }
+            } catch (err) {}
         }
 
-        // Si no hay internet o falló el envío, se guarda en la memoria del celular
         let pendientes = JSON.parse(localStorage.getItem(keyLocalStorage)) || [];
         pendientes.push(payload);
         localStorage.setItem(keyLocalStorage, JSON.stringify(pendientes));
 
         btn.innerText = "Guardar"; btn.disabled = false;
-        alert("⚠️ Sin conexión a Google. Se guardó localmente en el celular y se subirá automáticamente al recuperar internet.");
+        alert("⚠️ Sin conexión a Google. Se guardó localmente en el celular y se subirá automáticamente.");
         if (fnLimpiar) fnLimpiar();
         actualizarTodasLasAlertasOffline();
     }
@@ -454,28 +462,24 @@
             horaInicio: document.getElementById('sfHoraInicio').value,
             horaFinal: document.getElementById('sfHoraFinal').value,
             labor: document.getElementById('sfSelectLabor').value,
-            rendimiento: parseFloat(document.getElementById('sfRendimiento').value),
+            rendimiento: parsearNumero(document.getElementById('sfRendimiento').value),
             observaciones: document.getElementById('sfObservaciones').value.trim()
         };
         if (!datos.fechaRegistro || !datos.supervisora || !datos.nombre || !datos.bloque || !datos.horaInicio || !datos.horaFinal || !datos.labor || isNaN(datos.rendimiento)) {
             alert("Complete todos los campos obligatorios."); return;
         }
+        
         guardarDatosSeguro(datos, 'btnGuardarSfRend', "¡Rendimiento San Felipe guardado!", 'sfPendientes', () => {
-            document.getElementById('sfSelectSupervisora').value = "";
-            document.getElementById('sfSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione una supervisora --</option>';
-            document.getElementById('sfBloque').value = "";
-            document.getElementById('sfHoraInicio').value = "";
-            document.getElementById('sfHoraFinal').value = "";
-            document.getElementById('sfSelectLabor').value = "";
+            document.getElementById('sfSelectEmpleado').value = "";
             document.getElementById('sfRendimiento').value = "";
             document.getElementById('sfObservaciones').value = "";
         });
     }
 
     function enviarRendimiento() {
-        let t1 = parseFloat(document.getElementById('rendValdesT1').value) || 0;
-        let t2 = parseFloat(document.getElementById('rendValdesT2').value) || 0;
-        let t3 = parseFloat(document.getElementById('rendValdesT3').value) || 0;
+        let t1 = parsearNumero(document.getElementById('rendValdesT1').value);
+        let t2 = parsearNumero(document.getElementById('rendValdesT2').value);
+        let t3 = parsearNumero(document.getElementById('rendValdesT3').value);
 
         let datos = {
             accion: "guardar_rendimiento",
@@ -492,9 +496,7 @@
         if (t1===0 && t2===0 && t3===0) { alert("Debe ingresar valdes."); return; }
         
         guardarDatosSeguro(datos, 'btnGuardarRend', "¡Rendimiento de Arándanos guardado!", 'rendimientosPendientes', () => {
-            document.getElementById('rendSelectGrupo').value = "";
-            document.getElementById('rendSelectEmpleado').innerHTML = '<option value="">-- Primero seleccione un grupo --</option>';
-            document.getElementById('rendBloque').value = "";
+            document.getElementById('rendSelectEmpleado').value = "";
             document.getElementById('rendValdesT1').value = "0";
             document.getElementById('rendValdesT2').value = "0";
             document.getElementById('rendValdesT3').value = "0";
@@ -508,17 +510,18 @@
             fechaRegistro: document.getElementById('postFecha').value,
             bloque: document.getElementById('postBloque').value.trim(),
             anioBloque: document.getElementById('postAnio').value.trim(),
-            canastillas: parseFloat(document.getElementById('postCanastillas').value) || 0,
-            pesoTotal: parseFloat(document.getElementById('postPesoTotal').value) || 0,
-            pesoCanastilla: parseFloat(document.getElementById('postPesoCanastilla').value) || 0,
+            canastillas: parsearNumero(document.getElementById('postCanastillas').value),
+            pesoTotal: parsearNumero(document.getElementById('postPesoTotal').value),
+            pesoCanastilla: parsearNumero(document.getElementById('postPesoCanastilla').value),
             tipoFruta: document.getElementById('postFruta').value,
             variedad: document.getElementById('postVariedad').value
         };
         if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque || !datos.canastillas || !datos.pesoTotal || !datos.pesoCanastilla) { alert("Complete todos los campos."); return; }
+        
         guardarDatosSeguro(datos, 'btnGuardarPost', "¡Ingreso a postcosecha guardado!", 'postcosechaPendientes', () => {
-            document.getElementById('postBloque').value = ""; document.getElementById('postAnio').value = "";
-            document.getElementById('postCanastillas').value = ""; document.getElementById('postPesoTotal').value = "";
-            document.getElementById('postPesoCanastilla').value = ""; cambiarVista('vistaArandanosMenu');
+            document.getElementById('postCanastillas').value = ""; 
+            document.getElementById('postPesoTotal').value = "";
+            document.getElementById('postPesoCanastilla').value = "";
         });
     }
 
@@ -526,15 +529,14 @@
         let datos = {
             accion: "guardar_horas_frio",
             fechaRegistro: document.getElementById('frioFecha').value,
-            horasFrio: parseFloat(document.getElementById('frioCantidad').value)
+            horasFrio: parsearNumero(document.getElementById('frioCantidad').value)
         };
         if (!datos.fechaRegistro || isNaN(datos.horasFrio)) { alert("Complete las horas frío."); return; }
         guardarDatosSeguro(datos, 'btnGuardarFrio', "¡Horas frío guardadas!", 'frioPendientes', () => {
-            document.getElementById('frioCantidad').value = ""; cambiarVista('vistaArandanosMenu');
+            document.getElementById('frioCantidad').value = ""; 
         });
     }
 
-    // --- SINCRONIZACIÓN AUTOMÁTICA BLINDADA ---
     async function autoSincronizarRegistros() {
         if (!navigator.onLine || sincronizandoAhora) return; 
         sincronizandoAhora = true; 
@@ -563,14 +565,13 @@
                 let resultado = await respuesta.json();
                 
                 if (resultado.resultado !== "exito") {
-                    fallidos.push(pendientes[i]); // Si Google no confirmó el éxito, se mantiene en la cola
+                    fallidos.push(pendientes[i]);
                 }
             } catch (err) {
-                fallidos.push(pendientes[i]); // Si hubo corte de internet, se queda en la cola
+                fallidos.push(pendientes[i]);
             }
         }
         
-        // Actualizamos la memoria local únicamente con los que no pudieron subir
         if (fallidos.length > 0) {
             localStorage.setItem(storageKey, JSON.stringify(fallidos));
         } else {
