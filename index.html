@@ -59,7 +59,7 @@
         .btn-volver { background-color: #6c757d; margin-top: 10px; }
         .btn-volver:hover { background-color: #5a6268; }
         
-        .alerta-offline { background-color: rgba(209, 236, 241, 0.95); color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; }
+        .alerta-offline { background-color: rgba(209, 236, 241, 0.95); color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; font-weight: bold;}
         .alerta-offline button { width: auto; margin: 8px auto 0 auto; display: block; padding: 8px 15px; background-color: #17a2b8; }
         
         .vista { display: none; }
@@ -82,9 +82,18 @@
         .modal-contenido { background: rgba(255, 255, 255, 0.96); padding: 20px; border-radius: 8px; max-height: 80vh; overflow-y: auto; margin-top: 10vh; max-width: 450px; margin-left: auto; margin-right: auto; }
         .item-detalle { background: #f8f9fa; padding: 10px; border-left: 4px solid #17a2b8; margin-bottom: 10px; border-radius: 4px; font-size: 14px; }
         .item-detalle strong { color: #333; }
+        
+        /* Pequeña alerta estilo tostada para avisar que se guardó rápido */
+        #toast-guardado { visibility: hidden; min-width: 250px; background-color: #28a745; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1001; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #toast-guardado.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
+
+<!-- Notificación emergente rápida -->
+<div id="toast-guardado">✅ ¡Guardado en la cola local!</div>
 
 <div class="container">
     <div class="logo-superior">
@@ -284,9 +293,14 @@
         aplicarTema('inicio'); 
 
         autoSincronizarRegistros(); 
-        setInterval(autoSincronizarRegistros, 20000); 
+        setInterval(autoSincronizarRegistros, 10000); // Revisa cada 10 segundos en segundo plano
         window.addEventListener('online', autoSincronizarRegistros); 
     });
+
+    // Generar un ID único para evitar que Google guarde el mismo registro 2 veces
+    function generarIdUnico() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
 
     function parsearNumero(valor) {
         if (!valor) return 0;
@@ -338,6 +352,12 @@
                 document.getElementById('inputPinRend').value = '';
             } else if (subModulo === 'horasfrio') document.getElementById('subModuloHorasFrio').style.display = 'block';
         }
+    }
+
+    function mostrarToast() {
+        let toast = document.getElementById("toast-guardado");
+        toast.className = "show";
+        setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 2800);
     }
 
     function resizeCanvas() {
@@ -419,36 +439,19 @@
         });
     }
 
-    async function guardarDatosSeguro(payload, btnId, msgExito, keyLocalStorage, fnLimpiar) {
-        let btn = document.getElementById(btnId);
-        btn.innerText = "Guardando..."; btn.disabled = true;
-
-        if (navigator.onLine) {
-            try {
-                let respuesta = await fetch(URL_SCRIPT, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payload)
-                });
-                let resultado = await respuesta.json();
-                
-                if (resultado.resultado === "exito") {
-                    btn.innerText = "Guardar"; btn.disabled = false;
-                    alert(msgExito);
-                    if (fnLimpiar) fnLimpiar();
-                    return;
-                }
-            } catch (err) {}
-        }
-
+    // NUEVO MÉTODO OFFLINE-FIRST ULTRA RÁPIDO
+    function guardarDatosUltraRapido(payload, keyLocalStorage, fnLimpiar) {
+        payload.idRegistro = generarIdUnico(); // Firma el registro para que no se duplique en Google
+        
         let pendientes = JSON.parse(localStorage.getItem(keyLocalStorage)) || [];
         pendientes.push(payload);
         localStorage.setItem(keyLocalStorage, JSON.stringify(pendientes));
 
-        btn.innerText = "Guardar"; btn.disabled = false;
-        alert("⚠️ Sin conexión a Google. Se guardó localmente en el celular y se subirá automáticamente.");
+        mostrarToast(); // Muestra el mensaje visual de guardado rápido
         if (fnLimpiar) fnLimpiar();
+        
         actualizarTodasLasAlertasOffline();
+        autoSincronizarRegistros(); // Activa la sincronización en segundo plano sin trabar la app
     }
 
     function enviarRendimientoSanFelipe() {
@@ -468,10 +471,11 @@
             alert("Complete todos los campos obligatorios."); return;
         }
         
-        guardarDatosSeguro(datos, 'btnGuardarSfRend', "¡Rendimiento San Felipe guardado!", 'sfPendientes', () => {
+        guardarDatosUltraRapido(datos, 'sfPendientes', () => {
             document.getElementById('sfSelectEmpleado').value = "";
             document.getElementById('sfRendimiento').value = "";
             document.getElementById('sfObservaciones').value = "";
+            document.getElementById('sfSelectEmpleado').focus();
         });
     }
 
@@ -494,12 +498,13 @@
         if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) { alert("Complete los campos."); return; }
         if (t1===0 && t2===0 && t3===0) { alert("Debe ingresar valdes."); return; }
         
-        guardarDatosSeguro(datos, 'btnGuardarRend', "¡Rendimiento de Arándanos guardado!", 'rendimientosPendientes', () => {
+        guardarDatosUltraRapido(datos, 'rendimientosPendientes', () => {
             document.getElementById('rendSelectEmpleado').value = "";
             document.getElementById('rendValdesT1').value = "0";
             document.getElementById('rendValdesT2').value = "0";
             document.getElementById('rendValdesT3').value = "0";
             document.getElementById('rendObservaciones').value = "";
+            document.getElementById('rendSelectEmpleado').focus();
         });
     }
 
@@ -517,10 +522,11 @@
         };
         if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque || !datos.canastillas || !datos.pesoTotal || !datos.pesoCanastilla) { alert("Complete todos los campos."); return; }
         
-        guardarDatosSeguro(datos, 'btnGuardarPost', "¡Ingreso a postcosecha guardado!", 'postcosechaPendientes', () => {
+        guardarDatosUltraRapido(datos, 'postcosechaPendientes', () => {
             document.getElementById('postCanastillas').value = ""; 
             document.getElementById('postPesoTotal').value = "";
             document.getElementById('postPesoCanastilla').value = "";
+            document.getElementById('postCanastillas').focus();
         });
     }
 
@@ -531,7 +537,7 @@
             horasFrio: parsearNumero(document.getElementById('frioCantidad').value)
         };
         if (!datos.fechaRegistro || isNaN(datos.horasFrio)) { alert("Complete las horas frío."); return; }
-        guardarDatosSeguro(datos, 'btnGuardarFrio', "¡Horas frío guardadas!", 'frioPendientes', () => {
+        guardarDatosUltraRapido(datos, 'frioPendientes', () => {
             document.getElementById('frioCantidad').value = ""; 
         });
     }
@@ -563,11 +569,12 @@
                 });
                 let resultado = await respuesta.json();
                 
+                // Solo si Google nos responde que guardó el registro (o que lo ignoró porque estaba duplicado) lo sacamos de la cola
                 if (resultado.resultado !== "exito") {
                     fallidos.push(pendientes[i]);
                 }
             } catch (err) {
-                fallidos.push(pendientes[i]);
+                fallidos.push(pendientes[i]); // Sin red, se queda en la cola
             }
         }
         
@@ -591,9 +598,9 @@
         if (alerta) {
             if (pendientes.length > 0) {
                 alerta.style.display = 'block';
-                alerta.innerHTML = `📦 <b>${pendientes.length}</b> registro(s) de ${modulo} en cola.<br>
-                    <span style="font-size:12px; color:#555;">(Se subirán automáticamente al tener internet estable)</span>
-                    <button type="button" onclick="mostrarModalDetalles('${tipo}')">👀 Ver detalles</button>`;
+                alerta.innerHTML = `📦 <b>${pendientes.length}</b> registro(s) de ${modulo} guardados localmente.<br>
+                    <span style="font-size:12px; color:#555;">(Subiendo a la nube automáticamente...)</span>
+                    <button type="button" onclick="mostrarModalDetalles('${tipo}')">👀 Ver detalles en cola</button>`;
             } else { alerta.style.display = 'none'; }
         }
     }
@@ -601,19 +608,19 @@
     function mostrarModalDetalles(tipo) {
         let titulo = ""; let html = ""; let datos = [];
         if (tipo === 'sanfelipe') {
-            titulo = "San Felipe (Pendientes)"; datos = JSON.parse(localStorage.getItem('sfPendientes')) || [];
+            titulo = "San Felipe (En Cola Local)"; datos = JSON.parse(localStorage.getItem('sfPendientes')) || [];
             datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Labor: ${d.labor} | Cant: ${d.rendimiento}</div>`; });
         } else if (tipo === 'rendarandanos') {
-            titulo = "Rendimiento Arándanos (Pendientes)"; datos = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
+            titulo = "Rendimiento Arándanos (En Cola Local)"; datos = JSON.parse(localStorage.getItem('rendimientosPendientes')) || [];
             datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | ${d.nombre}</strong><br>Bloque: ${d.bloque} | Parada: ${d.parada}</div>`; });
         } else if (tipo === 'postcosecha') {
-            titulo = "Postcosecha (Pendientes)"; datos = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
+            titulo = "Postcosecha (En Cola Local)"; datos = JSON.parse(localStorage.getItem('postcosechaPendientes')) || [];
             datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Bloque: ${d.bloque}</strong><br>${d.canastillas} Canastillas | Peso: ${d.pesoTotal} kg</div>`; });
         } else if (tipo === 'frio') {
-            titulo = "Horas Frío (Pendientes)"; datos = JSON.parse(localStorage.getItem('frioPendientes')) || [];
+            titulo = "Horas Frío (En Cola Local)"; datos = JSON.parse(localStorage.getItem('frioPendientes')) || [];
             datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1} | Fecha: ${d.fechaRegistro}</strong><br>Horas: ${d.horasFrio}</div>`; });
         }
-        if (datos.length === 0) html = "<p style='text-align:center;'>No hay registros pendientes.</p>";
+        if (datos.length === 0) html = "<p style='text-align:center;'>Todos los registros se han sincronizado con éxito.</p>";
         document.getElementById('modalTitulo').innerText = titulo;
         document.getElementById('listaDetallesPendientes').innerHTML = html;
         document.getElementById('modalDetalles').style.display = 'block';
@@ -621,6 +628,7 @@
 
     function cerrarModal() { document.getElementById('modalDetalles').style.display = 'none'; }
 
+    // (El resto de las funciones de validación de pedidos se mantienen intactas)
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
@@ -670,9 +678,9 @@
             totalPagar: datosPedidoActual.totalPagar, firma: signaturePad.toDataURL("image/png")
         };
 
-        fetch(URL_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(() => { alert("¡Pedido registrado con éxito!"); cambiarVista('vistaArandanosMenu'); })
-            .catch(err => { btn.innerText = "Finalizar y Enviar Pedido"; btn.disabled = false; alert("Error de conexión."); });
+        guardarDatosUltraRapido(payload, 'arandanosPendientes', () => {
+            alert("¡Pedido guardado en cola!"); cambiarVista('vistaArandanosMenu');
+        });
     }
 </script>
 
