@@ -46,6 +46,7 @@
         
         button { background-color: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         button:hover { background-color: #218838; }
+        button:disabled { background-color: #999; cursor: not-allowed; }
         .btn-secondary { background-color: #007bff; }
         .btn-secondary:hover { background-color: #0056b3; }
         .btn-warning { background-color: #e67e22; color: white; }
@@ -293,11 +294,10 @@
         aplicarTema('inicio'); 
 
         autoSincronizarRegistros(); 
-        setInterval(autoSincronizarRegistros, 10000); // Revisa cada 10 segundos en segundo plano
+        setInterval(autoSincronizarRegistros, 10000); 
         window.addEventListener('online', autoSincronizarRegistros); 
     });
 
-    // Generar un ID único para evitar que Google guarde el mismo registro 2 veces
     function generarIdUnico() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
@@ -439,19 +439,33 @@
         });
     }
 
-    // NUEVO MÉTODO OFFLINE-FIRST ULTRA RÁPIDO
-    function guardarDatosUltraRapido(payload, keyLocalStorage, fnLimpiar) {
-        payload.idRegistro = generarIdUnico(); // Firma el registro para que no se duplique en Google
+    // MÉTODO OFFLINE-FIRST CON BLOQUEO ANTI-SPAM DE BOTÓN
+    function guardarDatosUltraRapido(payload, keyLocalStorage, fnLimpiar, idBoton) {
+        // Bloquear el botón para evitar clics múltiples
+        if (idBoton) {
+            let btn = document.getElementById(idBoton);
+            if(btn) {
+                let textoOriginal = btn.innerText;
+                btn.disabled = true;
+                btn.innerText = "Guardando...";
+                setTimeout(() => { 
+                    btn.disabled = false; 
+                    btn.innerText = textoOriginal; 
+                }, 2000);
+            }
+        }
+
+        payload.idRegistro = generarIdUnico(); 
         
         let pendientes = JSON.parse(localStorage.getItem(keyLocalStorage)) || [];
         pendientes.push(payload);
         localStorage.setItem(keyLocalStorage, JSON.stringify(pendientes));
 
-        mostrarToast(); // Muestra el mensaje visual de guardado rápido
+        mostrarToast(); 
         if (fnLimpiar) fnLimpiar();
         
         actualizarTodasLasAlertasOffline();
-        autoSincronizarRegistros(); // Activa la sincronización en segundo plano sin trabar la app
+        autoSincronizarRegistros(); 
     }
 
     function enviarRendimientoSanFelipe() {
@@ -476,7 +490,7 @@
             document.getElementById('sfRendimiento').value = "";
             document.getElementById('sfObservaciones').value = "";
             document.getElementById('sfSelectEmpleado').focus();
-        });
+        }, 'btnGuardarSfRend');
     }
 
     function enviarRendimiento() {
@@ -505,7 +519,7 @@
             document.getElementById('rendValdesT3').value = "0";
             document.getElementById('rendObservaciones').value = "";
             document.getElementById('rendSelectEmpleado').focus();
-        });
+        }, 'btnGuardarRend');
     }
 
     function enviarPostcosecha() {
@@ -527,7 +541,7 @@
             document.getElementById('postPesoTotal').value = "";
             document.getElementById('postPesoCanastilla').value = "";
             document.getElementById('postCanastillas').focus();
-        });
+        }, 'btnGuardarPost');
     }
 
     function enviarHorasFrio() {
@@ -539,7 +553,7 @@
         if (!datos.fechaRegistro || isNaN(datos.horasFrio)) { alert("Complete las horas frío."); return; }
         guardarDatosUltraRapido(datos, 'frioPendientes', () => {
             document.getElementById('frioCantidad').value = ""; 
-        });
+        }, 'btnGuardarFrio');
     }
 
     async function autoSincronizarRegistros() {
@@ -569,12 +583,11 @@
                 });
                 let resultado = await respuesta.json();
                 
-                // Solo si Google nos responde que guardó el registro (o que lo ignoró porque estaba duplicado) lo sacamos de la cola
                 if (resultado.resultado !== "exito") {
                     fallidos.push(pendientes[i]);
                 }
             } catch (err) {
-                fallidos.push(pendientes[i]); // Sin red, se queda en la cola
+                fallidos.push(pendientes[i]); 
             }
         }
         
@@ -628,7 +641,6 @@
 
     function cerrarModal() { document.getElementById('modalDetalles').style.display = 'none'; }
 
-    // (El resto de las funciones de validación de pedidos se mantienen intactas)
     function verificarEmpleado() {
         let cedula = document.getElementById('inputCedula').value.trim();
         let seguridad = document.getElementById('inputSeguridad').value.trim();
@@ -669,9 +681,7 @@
 
     function enviarPedidoArandanos() {
         if (signaturePad.isEmpty()) { alert("Realice la firma antes de enviar."); return; }
-        let btn = document.getElementById('btnEnviarPedido');
-        btn.innerText = "Enviando..."; btn.disabled = true;
-
+        
         let payload = {
             accion: "guardar_arandanos", cedula: document.getElementById('inputCedula').value.trim(),
             nombre: nombreEmpleadoGlobal, detallePedido: datosPedidoActual.detallePedido,
@@ -680,7 +690,7 @@
 
         guardarDatosUltraRapido(payload, 'arandanosPendientes', () => {
             alert("¡Pedido guardado en cola!"); cambiarVista('vistaArandanosMenu');
-        });
+        }, 'btnEnviarPedido');
     }
 </script>
 
