@@ -6,7 +6,7 @@
     <title>Sistema General - Flores de Funza</title>
     <!-- Librería para la firma -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-    <!-- NUEVO: Librería para el escáner de códigos de barras/QR -->
+    <!-- Librería para el escáner de códigos de barras/QR -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
@@ -129,19 +129,20 @@
         </div>
     </div>
 
-    <!-- NUEVO MÓDULO: CAUSAS NACIONAL SAN FELIPE (SOLOMIO) -->
+    <!-- MÓDULO: CAUSAS NACIONAL SAN FELIPE (SOLOMIO) -->
     <div id="vistaCausasNacional" class="vista">
         <h3>Causas Nacional - San Felipe</h3>
         <div id="alertaCausasPendientes" class="alerta-offline" style="display:none;"></div>
         
         <!-- BOTÓN MÁGICO DE ESCANER -->
-        <button class="btn-secondary" style="margin-bottom: 20px; font-size: 18px;" onclick="abrirEscaner()">📷 Escanear Código (Variedad o Causa)</button>
+        <button class="btn-secondary" style="margin-bottom: 20px; font-size: 18px;" onclick="abrirEscaner()">📷 Escanear (Color, Variedad o Causa)</button>
 
         <div class="form-group"><label>Fecha:</label><input type="date" id="causaFecha"></div>
         <div class="form-group"><label>Bloque:</label><input type="text" id="causaBloque" placeholder="Ej: Bloque A"></div>
         
+        <!-- Ahora el color y variedad NO dependen entre sí -->
         <div class="form-group"><label>Color:</label>
-            <select id="causaColor" onchange="actualizarVariedadesSolomio()"><option value="">-- Seleccione Color --</option></select>
+            <select id="causaColor"><option value="">-- Seleccione Color --</option></select>
         </div>
         
         <div class="form-group"><label>Variedad:</label>
@@ -285,7 +286,7 @@
 </div>
 
 <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // RECUERDA PONER TU URL
     
     const IMAGENES_TEMA = {
         inicio: { logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", fondo: "https://lh3.googleusercontent.com/d/1WcnOojQHCdWDuW55xban73yzszt8A4jM=s800" },
@@ -294,24 +295,25 @@
         sanfelipe: { logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", fondo: "https://lh3.googleusercontent.com/d/1BZuezMAv8Q9sDlopm3DCZ4jHCeVlu71k=s800" }
     };
 
-    // --- BASES DE DATOS CAUSAS NACIONAL SOLOMIO ---
-    const DB_SOLOMIO = {
-        "BICOLOR RED": ["18C909"],
-        "BICOLOR PINCK": ["LALA SABOR", "CARL", "ELEA", "17C888", "SIMPLY BEAUTY", "FIORINNO IRIS"],
-        "BICOLOR PURPLE": ["SOLOMIO SEM", "FIORINO KAMPA", "FIORINO VALUE", "LADYFLY", "RAFFINE MILOU", "RAFFINE PETIT FAYE", "SALOMIO TINO", "LALA EXTRAVAGANZA"],
-        "BICOLOR YELL": ["LALA 23580", "FIREFLY", "LALA BONITA", "LALA PINTA", "LALA SINT"],
-        "BURGUNDY": ["CHERRYFLY", "FIORINO PUPA", "LILLIPUT CRIMSON", "SOLOMIO EDO"],
-        "GREEN": ["SOLOMIO BERN"],
-        "HOT PINK": ["SOLOMIO IMRE", "LOVEFLY", "LALA LAKE", "SOLANDY 9054"],
-        "ORANGE": ["SOLOMIO FEN", "LALA 24048", "SOLOMIO CLIF", "LALA CULT"],
-        "PEACH": ["SIMPLY TWEETY"],
-        "PINK": ["SOLOMIO CAS", "CANDYFLY", "LALA 24022 ROSA", "LALA 24024", "LALA 24030", "LALA EXUMA", "RAFFINE LUCE", "SWEET WATERMELON", "TROPIC BUTTERFLY", "SIMPLY PINK SALMON", "SOLANDY 9191", "SIMPLY CANDY", "SOLOMIO ROSE"],
-        "PURPLE": ["FIORINO PURPLE", "LALA 23862", "LALA RYAN"],
-        "RED": ["SIMPLY LOVE"],
-        "SPECIALTY": ["DUA", "MISTERYFLY", "SOLOMIO BONO"],
-        "WHITE": ["SOLOMIO ARD", "CALMFLY", "FROSTFLY", "LALA ALP", "RAFFINE PETIT LOIS", "SOLOMIO LEX", "SIMPLY SNOW"],
-        "YELLOW": ["BLONDFLY", "LALA LANTERN"]
-    };
+    // --- BASES DE DATOS CAUSAS NACIONAL SOLOMIO SEPARADAS ---
+    const COLORES = [
+        "BICOLOR RED", "BICOLOR PINCK", "BICOLOR PURPLE", "BICOLOR YELL", 
+        "BURGUNDY", "GREEN", "HOT PINK", "ORANGE", "PEACH", "PINK", 
+        "PURPLE", "RED", "SPECIALTY", "WHITE", "YELLOW"
+    ];
+
+    const VARIEDADES = [
+        "18C909", "LALA SABOR", "CARL", "ELEA", "17C888", "SIMPLY BEAUTY", "FIORINNO IRIS",
+        "SOLOMIO SEM", "FIORINO KAMPA", "FIORINO VALUE", "LADYFLY", "RAFFINE MILOU", "RAFFINE PETIT FAYE", "SALOMIO TINO", "LALA EXTRAVAGANZA",
+        "LALA 23580", "FIREFLY", "LALA BONITA", "LALA PINTA", "LALA SINT",
+        "CHERRYFLY", "FIORINO PUPA", "LILLIPUT CRIMSON", "SOLOMIO EDO",
+        "SOLOMIO BERN", "SOLOMIO IMRE", "LOVEFLY", "LALA LAKE", "SOLANDY 9054",
+        "SOLOMIO FEN", "LALA 24048", "SOLOMIO CLIF", "LALA CULT",
+        "SIMPLY TWEETY", "SOLOMIO CAS", "CANDYFLY", "LALA 24022 ROSA", "LALA 24024", "LALA 24030", "LALA EXUMA", "RAFFINE LUCE", "SWEET WATERMELON", "TROPIC BUTTERFLY", "SIMPLY PINK SALMON", "SOLANDY 9191", "SIMPLY CANDY", "SOLOMIO ROSE",
+        "FIORINO PURPLE", "LALA 23862", "LALA RYAN", "SIMPLY LOVE", "DUA", "MISTERYFLY", "SOLOMIO BONO",
+        "SOLOMIO ARD", "CALMFLY", "FROSTFLY", "LALA ALP", "RAFFINE PETIT LOIS", "SOLOMIO LEX", "SIMPLY SNOW",
+        "BLONDFLY", "LALA LANTERN"
+    ];
 
     const DB_CAUSAS = {
         "Física": ["Dos Puntos", "Cortos", "Torcidos", "Rajados", "Tallo Debil", "Ciegos"],
@@ -335,7 +337,7 @@
         
         cargarDatosRendimiento();
         cargarDatosSanFelipe();
-        inicializarSelectsCausas();
+        inicializarSelectsCausas(); // Llena colores y variedades separadas
         actualizarTodasLasAlertasOffline();
         aplicarTema('inicio'); 
 
@@ -344,27 +346,21 @@
         window.addEventListener('online', autoSincronizarRegistros); 
     });
 
-    // --- LÓGICA DE SELECTS CAUSAS NACIONAL ---
+    // --- LÓGICA INDEPENDIENTE DE SELECTS CAUSAS NACIONAL ---
     function inicializarSelectsCausas() {
         let selectColor = document.getElementById('causaColor');
-        for (const color in DB_SOLOMIO) {
-            let opt = document.createElement('option');
-            opt.value = color; opt.textContent = color;
-            selectColor.appendChild(opt);
-        }
-    }
+        COLORES.forEach(c => {
+            let opt = document.createElement('option'); opt.value = c; opt.textContent = c; selectColor.appendChild(opt);
+        });
 
-    function actualizarVariedadesSolomio() {
-        let color = document.getElementById('causaColor').value;
         let selectVar = document.getElementById('causaVariedad');
-        selectVar.innerHTML = '<option value="">-- Seleccione Variedad --</option>';
-        if(color && DB_SOLOMIO[color]) {
-            DB_SOLOMIO[color].forEach(v => {
-                let opt = document.createElement('option'); opt.value = v; opt.textContent = v; selectVar.appendChild(opt);
-            });
-        }
+        // Elimina duplicados si los hay y ordena alfabéticamente para facilidad manual
+        [...new Set(VARIEDADES)].sort().forEach(v => {
+            let opt = document.createElement('option'); opt.value = v; opt.textContent = v; selectVar.appendChild(opt);
+        });
     }
 
+    // La Causa Específica sí depende del Tipo de Causa (Física o Fitosanitaria)
     function actualizarCausasEspecificas() {
         let tipo = document.getElementById('causaTipo').value;
         let selectCausa = document.getElementById('causaEspecifica');
@@ -376,7 +372,7 @@
         }
     }
 
-    // --- LÓGICA DEL ESCÁNER DE CÓDIGOS ---
+    // --- LÓGICA DEL ESCÁNER DE CÓDIGOS INDEPENDIENTE ---
     function abrirEscaner() {
         document.getElementById('scannerModal').style.display = 'flex';
         html5QrcodeScanner = new Html5Qrcode("reader");
@@ -387,7 +383,7 @@
             },
             (errorMessage) => {} 
         ).catch(err => {
-            alert("No se pudo iniciar la cámara. Verifica los permisos.");
+            alert("No se pudo iniciar la cámara. Verifica los permisos de tu navegador.");
             cerrarEscaner();
         });
     }
@@ -402,39 +398,42 @@
     function procesarCodigoEscaneado(texto) {
         let encontrado = false;
         
-        // 1. Buscar si el texto es una VARIEDAD
-        for (const color in DB_SOLOMIO) {
-            if (DB_SOLOMIO[color].map(v=>v.toUpperCase()).includes(texto)) {
-                document.getElementById('causaColor').value = color;
-                actualizarVariedadesSolomio();
-                // Buscar la opción exacta (respetando mayúsculas/minúsculas originales)
-                let variedadOriginal = DB_SOLOMIO[color].find(v => v.toUpperCase() === texto);
-                document.getElementById('causaVariedad').value = variedadOriginal;
-                
-                alert(`¡Éxito! Variedad seleccionada: ${variedadOriginal}`);
-                document.getElementById('causaCantidad').focus();
-                encontrado = true; break;
+        // 1. ¿Es un COLOR?
+        let colorEncontrado = COLORES.find(c => c.toUpperCase() === texto);
+        if (colorEncontrado) {
+            document.getElementById('causaColor').value = colorEncontrado;
+            alert(`¡Éxito! Color registrado: ${colorEncontrado}`);
+            encontrado = true;
+        }
+
+        // 2. ¿Es una VARIEDAD? (Independiente del color)
+        if (!encontrado) {
+            let varEncontrada = VARIEDADES.find(v => v.toUpperCase() === texto);
+            if (varEncontrada) {
+                document.getElementById('causaVariedad').value = varEncontrada;
+                alert(`¡Éxito! Variedad registrada: ${varEncontrada}`);
+                encontrado = true;
             }
         }
         
-        // 2. Buscar si el texto es una CAUSA
+        // 3. ¿Es un TIPO o CAUSA ESPECÍFICA?
         if (!encontrado) {
             for (const tipo in DB_CAUSAS) {
-                if (DB_CAUSAS[tipo].map(c=>c.toUpperCase()).includes(texto)) {
+                let causaOriginal = DB_CAUSAS[tipo].find(c => c.toUpperCase() === texto);
+                if (causaOriginal) {
                     document.getElementById('causaTipo').value = tipo;
                     actualizarCausasEspecificas();
-                    let causaOriginal = DB_CAUSAS[tipo].find(c => c.toUpperCase() === texto);
                     document.getElementById('causaEspecifica').value = causaOriginal;
                     
-                    alert(`¡Éxito! Causa seleccionada: ${causaOriginal}`);
-                    document.getElementById('causaCantidad').focus();
+                    alert(`¡Éxito! Causa registrada: ${causaOriginal}`);
+                    document.getElementById('causaCantidad').focus(); // Mueve el cursor a Cantidad
                     encontrado = true; break;
                 }
             }
         }
 
         if(!encontrado) {
-            alert(`El código "${texto}" no coincide con ninguna variedad ni causa del sistema.`);
+            alert(`El código "${texto}" no está registrado en el sistema. Verifica la etiqueta.`);
         }
     }
 
@@ -537,7 +536,7 @@
         }
 
         guardarDatosUltraRapido(datos, 'causasPendientes', () => {
-            // Limpia solo cantidad y observaciones para dejar listo el siguiente escaneo
+            // Limpia solo cantidad y observaciones para dejar listo el siguiente escaneo rápido
             document.getElementById('causaCantidad').value = "";
             document.getElementById('causaObs').value = "";
             document.getElementById('causaCantidad').focus();
@@ -609,7 +608,7 @@
         sincronizandoAhora = true; 
         await sincronizarColaSegura('sfPendientes'); await sincronizarColaSegura('rendimientosPendientes');
         await sincronizarColaSegura('postcosechaPendientes'); await sincronizarColaSegura('frioPendientes');
-        await sincronizarColaSegura('causasPendientes'); // NUEVO
+        await sincronizarColaSegura('causasPendientes'); // CAUSAS NACIONAL
         actualizarTodasLasAlertasOffline(); sincronizandoAhora = false; 
     }
 
@@ -673,7 +672,7 @@
     }
     function cerrarModal() { document.getElementById('modalDetalles').style.display = 'none'; }
 
-    // (Aquí siguen las funciones de Cargar Personal y Pedidos que ya tenías y no cambiaron para no hacer esto más largo visualmente, pero que están funcionando integradas)
+    // --- CARGAR LISTADOS DE GOOGLE SHEETS ---
     function cargarDatosRendimiento() { fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`).then(res => res.json()).then(data => { if (data.personal) { listaPersonalGlobal = data.personal; procesarGruposArandanos(data.personal); } }); }
     function procesarGruposArandanos(personal) { let gruposUnicos = [...new Set(personal.map(item => item.grupo))]; let select = document.getElementById('rendSelectGrupo'); select.innerHTML = '<option value="">-- Seleccione un grupo --</option>'; gruposUnicos.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.textContent = g; select.appendChild(opt); }); }
     function filtrarPersonalPorGrupo() { let grupo = document.getElementById('rendSelectGrupo').value; let select = document.getElementById('rendSelectEmpleado'); select.innerHTML = '<option value="">-- Seleccione un trabajador --</option>'; if (!grupo) return; listaPersonalGlobal.filter(item => item.grupo === grupo).forEach(emp => { let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt); }); }
@@ -682,6 +681,7 @@
     function procesarSupervisoraSanFelipe(personalSF) { let supervisoras = [...new Set(personalSF.map(item => item.supervisora))]; let select = document.getElementById('sfSelectSupervisora'); select.innerHTML = '<option value="">-- Seleccione supervisor/a --</option>'; supervisoras.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.textContent = s; select.appendChild(opt); }); }
     function filtrarPersonalSanFelipe() { let sup = document.getElementById('sfSelectSupervisora').value; let select = document.getElementById('sfSelectEmpleado'); select.innerHTML = '<option value="">-- Seleccione un trabajador/a --</option>'; if (!sup) return; listaPersonalSFGlobal.filter(item => item.supervisora === sup).forEach(emp => { let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt); }); }
     
+    // --- VALIDACIÓN DE PEDIDOS ---
     function verificarEmpleado() {
         let ced = document.getElementById('inputCedula').value.trim(), seg = document.getElementById('inputSeguridad').value.trim();
         if(!ced || !seg) return alert("Ingrese datos.");
