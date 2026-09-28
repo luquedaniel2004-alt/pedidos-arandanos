@@ -60,6 +60,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         
         #signature-pad { border: 2px dashed #ccc; background-color: #fafafa; width: 100%; height: 200px; border-radius: 4px; }
+        .mensaje-autorizacion { background-color: rgba(255, 243, 205, 0.95); color: #856404; padding: 12px; border-radius: 4px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid #ffeeba; }
         .bienvenida-box { text-align: center; padding: 10px 0; }
         .bienvenida-box p { color: #444; margin-bottom: 20px; font-weight: 500; }
         .grid-fincas { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
@@ -97,6 +98,7 @@
     <div id="vistaInicio" class="vista activa">
         <div class="bienvenida-box">
             <h3>Selección de Finca</h3>
+            <p>Por favor, seleccione el área a la que desea ingresar:</p>
             <div class="grid-fincas">
                 <div class="tarjeta-finca" onclick="cambiarVista('vistaFincaFunza')"><span>🏡</span><h4>Finca Funza</h4></div>
                 <div class="tarjeta-finca" onclick="cambiarVista('vistaSanFelipeMenu')"><span>🌻</span><h4>San Felipe</h4></div>
@@ -108,6 +110,7 @@
     <div id="vistaFincaFunza" class="vista">
         <div class="bienvenida-box">
             <h3>Finca Funza</h3>
+            <p>Seleccione el cultivo o área de trabajo:</p>
             <button class="btn-warning" onclick="cambiarVista('vistaFlores')">🌸 Flores</button>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosMenu')">🫐 Arándanos</button>
             <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver al Inicio</button>
@@ -116,13 +119,15 @@
 
     <div id="vistaFlores" class="vista">
         <h3>Módulo de Flores - Finca Funza</h3>
-        <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">Volver</button>
+        <div class="bienvenida-box"><p>Módulo en desarrollo para la nueva producción de flores.</p></div>
+        <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">Volver a Finca Funza</button>
     </div>
 
     <!-- SAN FELIPE MENÚ -->
     <div id="vistaSanFelipeMenu" class="vista">
         <div class="bienvenida-box">
             <h3>Finca San Felipe</h3>
+            <p>Por favor seleccione el módulo al que desea ingresar:</p>
             <button class="btn-warning" onclick="cambiarVista('vistaCausasNacional')">📋 Causas de Nacional</button>
             <button class="btn-purple" onclick="cambiarVista('vistaSanFelipeRendimiento')">🌱 Rendimientos (San Felipe)</button>
             <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver al Inicio</button>
@@ -134,13 +139,12 @@
         <h3>Causas Nacional - San Felipe</h3>
         <div id="alertaCausasPendientes" class="alerta-offline" style="display:none;"></div>
         
-        <!-- BOTÓN MÁGICO DE ESCANER -->
+        <!-- BOTÓN DE ESCANER -->
         <button class="btn-secondary" style="margin-bottom: 20px; font-size: 18px;" onclick="abrirEscaner()">📷 Escanear (Color, Variedad o Causa)</button>
 
         <div class="form-group"><label>Fecha:</label><input type="date" id="causaFecha"></div>
         <div class="form-group"><label>Bloque:</label><input type="text" id="causaBloque" placeholder="Ej: Bloque A"></div>
         
-        <!-- Ahora el color y variedad NO dependen entre sí -->
         <div class="form-group"><label>Color:</label>
             <select id="causaColor"><option value="">-- Seleccione Color --</option></select>
         </div>
@@ -166,7 +170,7 @@
         </div>
 
         <div class="form-group"><label>Observaciones (Opcional):</label>
-            <textarea id="causaObs" rows="2"></textarea>
+            <textarea id="causaObs" rows="2" placeholder="Escriba aquí cualquier novedad..."></textarea>
         </div>
         
         <button id="btnGuardarCausas" class="btn-warning" onclick="enviarCausasNacional()">Guardar Causa Nacional</button>
@@ -177,28 +181,31 @@
     <div id="vistaSanFelipeRendimiento" class="vista">
         <h3>Rendimientos - San Felipe</h3>
         <div id="alertaSanFelipePendientes" class="alerta-offline" style="display:none;"></div>
+        
         <div class="form-group"><label>Fecha de Labor:</label><input type="date" id="sfFecha"></div>
-        <div class="form-group"><label>Supervisor/a:</label><select id="sfSelectSupervisora" onchange="filtrarPersonalSanFelipe()"></select></div>
-        <div class="form-group"><label>Trabajador/a:</label><select id="sfSelectEmpleado"></select></div>
-        <div class="form-group"><label>Bloque:</label><input type="text" id="sfBloque"></div>
+        <div class="form-group"><label>Seleccionar Supervisor/a:</label><select id="sfSelectSupervisora" onchange="filtrarPersonalSanFelipe()"><option value="">-- Seleccione supervisor/a --</option></select></div>
+        <div class="form-group"><label>Seleccionar Trabajador/a:</label><select id="sfSelectEmpleado"><option value="">-- Primero seleccione una supervisora --</option></select></div>
+        <div class="form-group"><label>Bloque:</label><input type="text" id="sfBloque" placeholder="Ej: Bloque A"></div>
         <div class="form-group"><label>Hora de Inicio:</label><input type="time" id="sfHoraInicio"></div>
         <div class="form-group"><label>Hora Final:</label><input type="time" id="sfHoraFinal"></div>
-        <div class="form-group"><label>Labor:</label><select id="sfSelectLabor"><option value="Corte">Corte</option><option value="Encanaste">Encanaste</option><option value="Descabece">Descabece</option><option value="Peinada">Peinada</option></select></div>
-        <div class="form-group"><label>Rendimiento (Cantidad):</label><input type="text" id="sfRendimiento"></div>
-        <div class="form-group"><label>Observaciones:</label><textarea id="sfObservaciones" rows="2"></textarea></div>
-        <button id="btnGuardarSfRend" class="btn-purple" onclick="enviarRendimientoSanFelipe()">Guardar Rendimiento</button>
-        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">Volver</button>
+        <div class="form-group"><label>Seleccionar Labor:</label><select id="sfSelectLabor"><option value="">-- Seleccione la labor --</option><option value="Corte">Corte</option><option value="Encanaste">Encanaste</option><option value="Descabece">Descabece</option><option value="Peinada">Peinada</option></select></div>
+        <div class="form-group"><label>Rendimiento (Cantidad):</label><input type="text" id="sfRendimiento" placeholder="Ej: 15,5 o 15.5"></div>
+        <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="sfObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad..."></textarea></div>
+        
+        <button id="btnGuardarSfRend" class="btn-purple" onclick="enviarRendimientoSanFelipe()">Guardar Rendimiento San Felipe</button>
+        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️ Volver a San Felipe</button>
     </div>
 
     <!-- MENÚ ARÁNDANOS -->
     <div id="vistaArandanosMenu" class="vista">
         <div class="bienvenida-box">
             <h3>Módulo de Arándanos</h3>
+            <p>Por favor seleccione el proceso que desea realizar:</p>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosApp', 'arandanos')">🫐 Pedido de Arándanos</button>
             <button class="btn-warning" onclick="cambiarVista('vistaArandanosApp', 'postcosecha')">📦 Ingreso a Postcosecha</button>
             <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
             <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver al Inicio de Funza</button>
         </div>
     </div>
 
@@ -207,23 +214,25 @@
         <div id="subModuloArandanos" class="sub-vista" style="display:none;">
             <h3>Pedido de Arándanos</h3>
             <div id="seccionValidacion">
-                <div class="form-group"><label>Cédula:</label><input type="text" id="inputCedula"></div>
-                <div class="form-group"><label>Año de Seguridad:</label><input type="text" id="inputSeguridad"></div>
+                <div class="form-group"><label>Cédula:</label><input type="text" id="inputCedula" placeholder="Ingrese su cédula"></div>
+                <div class="form-group"><label>Año de Seguridad:</label><input type="text" id="inputSeguridad" placeholder="Año de seguridad"></div>
                 <button id="btnValidar" class="btn-secondary" onclick="verificarEmpleado()">Validar Empleado</button>
             </div>
             <div id="seccionProductos" style="display:none;">
-                <p id="saludoEmpleado"></p>
-                <div class="form-group"><label>Promo 3 Kilos:</label><input type="number" id="inputPromoKilos" value="0"></div>
-                <div class="form-group"><label>1 Kilo Regular:</label><input type="number" id="inputKiloNormal" value="0"></div>
-                <div class="form-group"><label>Mermeladas:</label><input type="number" id="inputMermeladas" value="0"></div>
-                <div class="form-group"><label>Frambuesas:</label><input type="number" id="inputFrambuesas" value="0"></div>
-                <button onclick="calcularPedidoYMostrarAutorizacion()">Continuar</button>
+                <p id="saludoEmpleado" style="font-weight: bold; color: #007bff; text-align: center; font-size: 16px;"></p>
+                <div class="form-group"><label>Promoción 3 Kilos ($20.000 c/u):</label><input type="number" id="inputPromoKilos" min="0" value="0"></div>
+                <div class="form-group"><label>1 Kilo Regular ($29.000 c/u):</label><input type="number" id="inputKiloNormal" min="0" value="0"></div>
+                <div class="form-group"><label>Mermeladas ($15.000 c/u):</label><input type="number" id="inputMermeladas" min="0" value="0"></div>
+                <div class="form-group"><label>Frambuesas ($18.000 c/u):</label><input type="number" id="inputFrambuesas" min="0" value="0"></div>
+                <button onclick="calcularPedidoYMostrarAutorizacion()">Continuar para Firmar</button>
             </div>
             <div id="seccionFirma" style="display:none;">
                 <div id="mensajeAutorizacion" class="mensaje-autorizacion"></div>
+                <label>Firma del Empleado:</label>
                 <canvas id="signature-pad"></canvas>
-                <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar</button>
-                <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Enviar Pedido</button>
+                <button type="button" class="btn-danger" onclick="signaturePad.clear()">Borrar Firma</button>
+                <button id="btnEnviarPedido" onclick="enviarPedidoArandanos()">Finalizar y Enviar Pedido</button>
+                <button class="btn-volver" onclick="regresarAProductos()">Regresar y cambiar cantidades</button>
             </div>
         </div>
 
@@ -231,62 +240,84 @@
         <div id="subModuloPostcosecha" class="sub-vista" style="display:none;">
             <h3>Ingreso a Postcosecha</h3>
             <div id="alertaPostPendientes" class="alerta-offline" style="display:none;"></div>
-            <div class="form-group"><label>Fecha:</label><input type="date" id="postFecha"></div>
-            <div class="form-group"><label>Bloque:</label><input type="text" id="postBloque"></div>
-            <div class="form-group"><label>Año:</label><input type="text" id="postAnio"></div>
-            <div class="form-group"><label>Canastillas:</label><input type="text" id="postCanastillas"></div>
-            <div class="form-group"><label>Peso Total (kg):</label><input type="text" id="postPesoTotal"></div>
-            <div class="form-group"><label>Peso Canastilla:</label><input type="text" id="postPesoCanastilla"></div>
-            <div class="form-group"><label>Tipo Fruta:</label><select id="postFruta"><option value="Tipo 1">Tipo 1</option><option value="Tipo 2">Tipo 2</option><option value="Tipo 3">Tipo 3</option></select></div>
-            <div class="form-group"><label>Variedad:</label><select id="postVariedad"><option value="BILOXI">BILOXI</option><option value="SHARPBLU">SHARPBLU</option><option value="EMERALD">EMERALD</option></select></div>
-            <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Postcosecha</button>
+            <div class="form-group"><label>Fecha de Ingreso:</label><input type="date" id="postFecha"></div>
+            <div class="form-group"><label>Bloque:</label><input type="text" id="postBloque" placeholder="Ej: Bloque A"></div>
+            <div class="form-group"><label>Año de Bloque:</label><input type="text" id="postAnio" placeholder="Ej: 2025"></div>
+            <div class="form-group"><label>Número de Canastillas:</label><input type="text" id="postCanastillas" placeholder="Ej: 12,5 o 12.5"></div>
+            <div class="form-group"><label>Peso Total de Canastillas (kg):</label><input type="text" id="postPesoTotal" placeholder="Ej: 150,2 o 150.2"></div>
+            <div class="form-group"><label>Peso de Canastilla (kg):</label><input type="text" id="postPesoCanastilla" placeholder="Ej: 2,5 o 2.5"></div>
+            <div class="form-group"><label>Tipo de Fruta:</label><select id="postFruta"><option value="Tipo 1">Tipo 1</option><option value="Tipo 2">Tipo 2</option><option value="Tipo 3">Tipo 3</option></select></div>
+            <div class="form-group"><label>Variedad:</label>
+                <select id="postVariedad">
+                    <option value="BILOXI">BILOXI</option>
+                    <option value="SHARPBLU">SHARPBLU</option>
+                    <option value="EMERALD">EMERALD</option>
+                    <option value="VICTORIA">VICTORIA</option>
+                    <option value="LEGACY">LEGACY</option>
+                    <option value="RIBBON">RIBBON</option>
+                    <option value="VENTURA">VENTURA</option>
+                    <option value="ATLAS">ATLAS</option>
+                    <option value="BIANCA">BIANCA</option>
+                </select>
+            </div>
+            <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Ingreso Postcosecha</button>
         </div>
 
         <!-- Submódulo Rendimiento -->
         <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
             <h3>Rendimiento por Paradas</h3>
             <div id="seccionPinRendimiento">
-                <div class="form-group"><label>PIN:</label><input type="password" id="inputPinRend"></div>
-                <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar</button>
+                <div class="form-group"><label>PIN de Seguridad Autorizado:</label><input type="password" id="inputPinRend" placeholder="Ingrese el PIN"></div>
+                <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar al Módulo</button>
             </div>
             <div id="seccionFormRendimiento" style="display:none;">
                 <div id="alertaRendPendientes" class="alerta-offline" style="display:none;"></div>
-                <div class="form-group"><label>Fecha:</label><input type="date" id="rendFecha"></div>
-                <div class="form-group"><label>Parada:</label><select id="rendSelectParada"><option value="1ª Parada">1ª Parada</option><option value="2ª Parada">2ª Parada</option></select></div>
-                <div class="form-group"><label>Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"></select></div>
-                <div class="form-group"><label>Trabajador:</label><select id="rendSelectEmpleado"></select></div>
-                <div class="form-group"><label>Bloque:</label><input type="text" id="rendBloque"></div>
-                <div class="form-group"><label>Valdes Tipo 1:</label><input type="text" id="rendValdesT1" value="0"></div>
-                <div class="form-group"><label>Valdes Tipo 2:</label><input type="text" id="rendValdesT2" value="0"></div>
-                <div class="form-group"><label>Valdes Tipo 3:</label><input type="text" id="rendValdesT3" value="0"></div>
-                <div class="form-group"><label>Observaciones:</label><textarea id="rendObservaciones" rows="2"></textarea></div>
-                <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento</button>
+                <div class="form-group"><label>Fecha de Labor:</label><input type="date" id="rendFecha"></div>
+                <div class="form-group"><label>Seleccionar Parada (Horario):</label>
+                    <select id="rendSelectParada">
+                        <option value="">-- Seleccione la parada --</option>
+                        <option value="1ª Parada (6:00 A 7:00)">1ª Parada (6:00 A 7:00)</option>
+                        <option value="2ª Parada (7:00 A 8:00)">2ª Parada (7:00 A 8:00)</option>
+                        <option value="3ª Parada (8:00 A 10:00)">3ª Parada (8:00 A 10:00)</option>
+                        <option value="4ª Parada (10:00 A 12:00)">4ª Parada (10:00 A 12:00)</option>
+                        <option value="5ª Parada (12:00 A 2:00)">5ª Parada (12:00 A 2:00)</option>
+                        <option value="6ª Parada (2:00 PM A 4:00 PM)">6ª Parada (2:00 PM A 4:00 PM)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Seleccionar Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
+                <div class="form-group"><label>Seleccionar Trabajador:</label><select id="rendSelectEmpleado"><option value="">-- Primero seleccione un grupo --</option></select></div>
+                <div class="form-group"><label>Bloque:</label><input type="text" id="rendBloque" placeholder="Ej: Bloque A"></div>
+                <div class="form-group"><label>Valdes Tipo 1:</label><input type="text" id="rendValdesT1" value="0" placeholder="Ej: 1,5 o 1.5"></div>
+                <div class="form-group"><label>Valdes Tipo 2:</label><input type="text" id="rendValdesT2" value="0" placeholder="Ej: 0,5 o 0.5"></div>
+                <div class="form-group"><label>Valdes Tipo 3:</label><input type="text" id="rendValdesT3" value="0" placeholder="Ej: 2,0 o 2.0"></div>
+                <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="rendObservaciones" rows="2" placeholder="Escriba aquí cualquier novedad o nota..."></textarea></div>
+                <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento de Parada</button>
             </div>
         </div>
 
         <!-- Submódulo Horas Frio -->
         <div id="subModuloHorasFrio" class="sub-vista" style="display:none;">
-            <h3>Horas Frío</h3>
+            <h3>Registro de Horas Frío Diarias</h3>
             <div id="alertaFrioPendientes" class="alerta-offline" style="display:none;"></div>
-            <div class="form-group"><label>Fecha:</label><input type="date" id="frioFecha"></div>
-            <div class="form-group"><label>Horas:</label><input type="text" id="frioCantidad"></div>
-            <button id="btnGuardarFrio" class="btn-info" onclick="enviarHorasFrio()">Guardar Horas</button>
+            <div class="form-group"><label>Fecha de Registro:</label><input type="date" id="frioFecha"></div>
+            <div class="form-group"><label>Horas Frío Acumuladas / Del Día:</label><input type="text" id="frioCantidad" placeholder="Ej: 4,5 o 4.5"></div>
+            <button id="btnGuardarFrio" class="btn-info" onclick="enviarHorasFrio()">Guardar Horas Frío</button>
         </div>
 
-        <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">Volver</button>
+        <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver al Menú de Arándanos</button>
     </div>
 </div>
 
 <div id="modalDetalles">
     <div class="modal-contenido">
-        <h3 id="modalTitulo">Detalles</h3>
+        <h3 id="modalTitulo" style="margin-top:0; border-bottom:1px solid #ddd; padding-bottom:10px;">Detalles</h3>
         <div id="listaDetallesPendientes"></div>
-        <button class="btn-volver" onclick="cerrarModal()">Cerrar</button>
+        <button class="btn-volver" onclick="cerrarModal()">Ocultar y Volver</button>
     </div>
 </div>
 
 <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // RECUERDA PONER TU URL
+    const URL_SCRIPT = "TU_URL_DE_WEB_APP_AQUÍ"; // RECUERDA PONER TU URL
     
     const IMAGENES_TEMA = {
         inicio: { logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", fondo: "https://lh3.googleusercontent.com/d/1WcnOojQHCdWDuW55xban73yzszt8A4jM=s800" },
@@ -337,7 +368,7 @@
         
         cargarDatosRendimiento();
         cargarDatosSanFelipe();
-        inicializarSelectsCausas(); // Llena colores y variedades separadas
+        inicializarSelectsCausas(); 
         actualizarTodasLasAlertasOffline();
         aplicarTema('inicio'); 
 
@@ -346,7 +377,7 @@
         window.addEventListener('online', autoSincronizarRegistros); 
     });
 
-    // --- LÓGICA INDEPENDIENTE DE SELECTS CAUSAS NACIONAL ---
+    // --- LÓGICA DE SELECTS CAUSAS NACIONAL ---
     function inicializarSelectsCausas() {
         let selectColor = document.getElementById('causaColor');
         COLORES.forEach(c => {
@@ -354,13 +385,11 @@
         });
 
         let selectVar = document.getElementById('causaVariedad');
-        // Elimina duplicados si los hay y ordena alfabéticamente para facilidad manual
         [...new Set(VARIEDADES)].sort().forEach(v => {
             let opt = document.createElement('option'); opt.value = v; opt.textContent = v; selectVar.appendChild(opt);
         });
     }
 
-    // La Causa Específica sí depende del Tipo de Causa (Física o Fitosanitaria)
     function actualizarCausasEspecificas() {
         let tipo = document.getElementById('causaTipo').value;
         let selectCausa = document.getElementById('causaEspecifica');
@@ -406,7 +435,7 @@
             encontrado = true;
         }
 
-        // 2. ¿Es una VARIEDAD? (Independiente del color)
+        // 2. ¿Es una VARIEDAD? 
         if (!encontrado) {
             let varEncontrada = VARIEDADES.find(v => v.toUpperCase() === texto);
             if (varEncontrada) {
@@ -426,7 +455,7 @@
                     document.getElementById('causaEspecifica').value = causaOriginal;
                     
                     alert(`¡Éxito! Causa registrada: ${causaOriginal}`);
-                    document.getElementById('causaCantidad').focus(); // Mueve el cursor a Cantidad
+                    document.getElementById('causaCantidad').focus(); 
                     encontrado = true; break;
                 }
             }
@@ -536,7 +565,6 @@
         }
 
         guardarDatosUltraRapido(datos, 'causasPendientes', () => {
-            // Limpia solo cantidad y observaciones para dejar listo el siguiente escaneo rápido
             document.getElementById('causaCantidad').value = "";
             document.getElementById('causaObs').value = "";
             document.getElementById('causaCantidad').focus();
