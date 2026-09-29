@@ -84,7 +84,6 @@
 
 <div id="toast-guardado">✅ ¡Guardado en la cola local!</div>
 
-<!-- MODAL DEL ESCÁNER -->
 <div id="scannerModal">
     <h3 style="color:white; margin-bottom:15px;">Escaneando Código...</h3>
     <div id="reader"></div>
@@ -134,7 +133,6 @@
         </div>
     </div>
 
-    <!-- MÓDULO CAUSAS NACIONAL -->
     <div id="vistaCausasNacional" class="vista">
         <h3>Causas Nacional - San Felipe</h3>
         <div id="alertaCausasPendientes" class="alerta-offline" style="display:none;"></div>
@@ -176,7 +174,6 @@
         <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️ Volver</button>
     </div>
 
-    <!-- MENÚ ARÁNDANOS -->
     <div id="vistaArandanosMenu" class="vista">
         <div class="bienvenida-box">
             <h3>Módulo de Arándanos</h3>
@@ -230,7 +227,6 @@
             <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Postcosecha</button>
         </div>
 
-        <!-- RENDIMIENTO ARÁNDANOS -->
         <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
             <h3>Rendimiento por Paradas</h3>
             <div id="seccionPinRendimiento">
@@ -242,12 +238,12 @@
                 <div class="form-group"><label>Fecha:</label><input type="date" id="rendFecha"></div>
                 <div class="form-group"><label>Parada:</label>
                     <select id="rendSelectParada">
-                        <option value="1ª Parada">1ª Parada</option>
-                        <option value="2ª Parada">2ª Parada</option>
-                        <option value="3ª Parada">3ª Parada</option>
-                        <option value="4ª Parada">4ª Parada</option>
-                        <option value="5ª Parada">5ª Parada</option>
-                        <option value="6ª Parada">6ª Parada</option>
+                        <option value="1ª Parada (06:05 a 08:00)">1ª Parada (06:05 a 08:00)</option>
+                        <option value="2ª Parada (08:05 a 10:00)">2ª Parada (08:05 a 10:00)</option>
+                        <option value="3ª Parada (10:15 a 12:00)">3ª Parada (10:15 a 12:00)</option>
+                        <option value="4ª Parada (12:30 a 02:00)">4ª Parada (12:30 a 02:00)</option>
+                        <option value="5ª Parada (02:05 a 04:00)">5ª Parada (02:05 a 04:00)</option>
+                        <option value="6ª Parada (04:05 a 06:00)">6ª Parada (04:05 a 06:00)</option>
                     </select>
                 </div>
                 <div class="form-group"><label>Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
@@ -269,7 +265,7 @@
             <button id="btnGuardarFrio" class="btn-info" onclick="enviarHorasFrio()">Guardar Horas Frío</button>
         </div>
 
-        <!-- SUBMÓDULO CONTRAMUESTRAS CON SINCRONIZACIÓN EN TIEMPO REAL CON SHEETS -->
+        <!-- MÓDULO CONTRAMUESTRAS -->
         <div id="subModuloContramuestras" class="sub-vista" style="display:none;">
             <h3>Seguimiento de Contramuestras</h3>
             <div id="alertaContramuestrasPendientes" class="alerta-offline" style="display:none;"></div>
@@ -316,7 +312,7 @@
 </div>
 
 <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; // PON TU URL DE GOOGLE APPS SCRIPT AQUÍ
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxx7v0p5Cv8Ej_sVqo4uKhrwauKMjm9NNZSEWsz1Wy9eYZV57EXG4UgRiGFB39tLMKFig/exec"; 
     
     const IMAGENES_TEMA = {
         inicio: { logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", fondo: "https://lh3.googleusercontent.com/d/1WcnOojQHCdWDuW55xban73yzszt8A4jM=s800" },
@@ -468,13 +464,14 @@
         fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`).then(res => res.json()).then(data => {
             if (data.personal) {
                 listaPersonalGlobal = data.personal;
-                let grupos = [...new Set(listaPersonalGlobal.map(i => i.grupo))];
+                let grupos = [...new Set(listaPersonalGlobal.map(i => i.grupo))].filter(Boolean);
                 let sel = document.getElementById('rendSelectGrupo');
                 sel.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
                 grupos.forEach(g => { let o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
             }
         }).catch(() => {});
     }
+
     function filtrarPersonalPorGrupo() {
         let grupo = document.getElementById('rendSelectGrupo').value;
         let select = document.getElementById('rendSelectEmpleado');
@@ -496,6 +493,7 @@
             }
         }).catch(() => {});
     }
+
     function filtrarPersonalSanFelipe() {
         let s = document.getElementById('sfSelectSupervisora').value;
         let sel = document.getElementById('sfSelectEmpleado');
@@ -522,7 +520,6 @@
         autoSincronizarRegistros(); 
     }
 
-    // --- FUNCIONES DE ENVÍO ---
     function enviarCausasNacional() {
         let datos = {
             accion: "guardar_causas_nacional", fechaRegistro: document.getElementById('causaFecha').value,
@@ -552,25 +549,52 @@
         let t2 = parsearNumero(document.getElementById('rendValdesT2').value);
         let t3 = parsearNumero(document.getElementById('rendValdesT3').value);
         let datos = {
-            accion: "guardar_rendimiento", fechaRegistro: document.getElementById('rendFecha').value,
-            parada: document.getElementById('rendSelectParada').value, horaReal: new Date().toLocaleTimeString(),
-            grupo: document.getElementById('rendSelectGrupo').value, nombre: document.getElementById('rendSelectEmpleado').value,
-            bloque: document.getElementById('rendBloque').value.trim(), valdesT1: t1, valdesT2: t2, valdesT3: t3,
+            accion: "guardar_rendimiento", 
+            fechaRegistro: document.getElementById('rendFecha').value,
+            parada: document.getElementById('rendSelectParada').value, 
+            horaReal: new Date().toLocaleTimeString(),
+            grupo: document.getElementById('rendSelectGrupo').value, 
+            nombre: document.getElementById('rendSelectEmpleado').value,
+            bloque: document.getElementById('rendBloque').value.trim(), 
+            valdesT1: t1, 
+            valdesT2: t2, 
+            valdesT3: t3,
             observaciones: document.getElementById('rendObservaciones').value.trim()
         };
-        if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) { alert("Complete los campos."); return; }
-        guardarDatosUltraRapido(datos, 'rendimientosPendientes', () => { document.getElementById('rendSelectEmpleado').value = ""; document.getElementById('rendValdesT1').value = "0"; document.getElementById('rendValdesT2').value = "0"; document.getElementById('rendValdesT3').value = "0"; }, 'btnGuardarRend');
+        if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) { 
+            alert("Complete los campos obligatorios."); 
+            return; 
+        }
+        guardarDatosUltraRapido(datos, 'rendimientosPendientes', () => { 
+            document.getElementById('rendSelectEmpleado').value = ""; 
+            document.getElementById('rendValdesT1').value = "0"; 
+            document.getElementById('rendValdesT2').value = "0"; 
+            document.getElementById('rendValdesT3').value = "0"; 
+            document.getElementById('rendObservaciones').value = ""; 
+        }, 'btnGuardarRend');
     }
 
     function enviarPostcosecha() {
         let datos = {
-            accion: "guardar_postcosecha", fechaRegistro: document.getElementById('postFecha').value,
-            bloque: document.getElementById('postBloque').value.trim(), anioBloque: document.getElementById('postAnio').value.trim(),
-            canastillas: parsearNumero(document.getElementById('postCanastillas').value), pesoTotal: parsearNumero(document.getElementById('postPesoTotal').value),
-            pesoCanastilla: parsearNumero(document.getElementById('postPesoCanastilla').value), tipoFruta: document.getElementById('postFruta').value, variedad: document.getElementById('postVariedad').value
+            accion: "guardar_postcosecha", 
+            fechaRegistro: document.getElementById('postFecha').value,
+            bloque: document.getElementById('postBloque').value.trim(), 
+            anioBloque: document.getElementById('postAnio').value.trim(),
+            canastillas: parsearNumero(document.getElementById('postCanastillas').value), 
+            pesoTotal: parsearNumero(document.getElementById('postPesoTotal').value),
+            pesoCanastilla: parsearNumero(document.getElementById('postPesoCanastilla').value), 
+            tipoFruta: document.getElementById('postFruta').value, 
+            variedad: document.getElementById('postVariedad').value
         };
-        if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque) { alert("Complete los campos."); return; }
-        guardarDatosUltraRapido(datos, 'postcosechaPendientes', () => { document.getElementById('postCanastillas').value = ""; document.getElementById('postPesoTotal').value = ""; }, 'btnGuardarPost');
+        if (!datos.fechaRegistro || !datos.bloque || !datos.anioBloque) { 
+            alert("Complete los campos obligatorios."); 
+            return; 
+        }
+        guardarDatosUltraRapido(datos, 'postcosechaPendientes', () => { 
+            document.getElementById('postCanastillas').value = ""; 
+            document.getElementById('postPesoTotal').value = ""; 
+            document.getElementById('postPesoCanastilla').value = ""; 
+        }, 'btnGuardarPost');
     }
 
     function enviarHorasFrio() {
@@ -579,7 +603,6 @@
         guardarDatosUltraRapido(datos, 'frioPendientes', () => { document.getElementById('frioCantidad').value = ""; }, 'btnGuardarFrio');
     }
 
-    // --- LÓGICA DE CONTRAMUESTRAS (CONSULTA Y ACTUALIZACIÓN DIRECTA EN GOOGLE SHEETS) ---
     function cambiarModoContramuestra() {
         let modo = document.getElementById('cmModo').value;
         if(modo === 'nuevo') {
@@ -626,7 +649,6 @@
 
         inputDesh.value = "";
         inputHong.value = "";
-
         if(!idSel) { infoBox.innerText = ""; return; }
 
         let m = muestrasPendientesGlobal.find(x => x.idMuestra === idSel);
@@ -642,7 +664,6 @@
 
     function enviarContramuestra() {
         let modo = document.getElementById('cmModo').value;
-
         if(modo === 'nuevo') {
             let fechaC = document.getElementById('cmFechaCreacion').value;
             let nom = document.getElementById('cmNombre').value.trim();
@@ -662,7 +683,6 @@
                 document.getElementById('cmNombre').value = "";
                 document.getElementById('cmObs').value = "";
             }, 'btnGuardarCm');
-
         } else {
             let idSel = document.getElementById('cmSelectMuestra').value;
             if(!idSel) { alert("Seleccione una muestra de la lista."); return; }
@@ -694,7 +714,6 @@
         }
     }
 
-    // --- SINCRONIZACIÓN AUTOMÁTICA ---
     async function autoSincronizarRegistros() {
         if (!navigator.onLine || sincronizandoAhora) return; 
         sincronizandoAhora = true; 
@@ -749,7 +768,6 @@
     }
     function cerrarModal() { document.getElementById('modalDetalles').style.display = 'none'; }
 
-    // VALIDAR EMPLEADO PEDIDOS
     function verificarEmpleado() {
         let ced = document.getElementById('inputCedula').value.trim(), seg = document.getElementById('inputSeguridad').value.trim();
         if(!ced || !seg) return alert("Ingrese cédula y seguridad.");
