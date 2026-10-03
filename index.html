@@ -176,19 +176,58 @@
         <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️ Volver</button>
     </div>
 
+    <!-- MENÚ PRINCIPAL ARÁNDANOS (Limpio y Seguro) -->
     <div id="vistaArandanosMenu" class="vista">
         <div class="bienvenida-box">
             <h3>Módulo de Arándanos</h3>
-            <p>Por favor seleccione el proceso:</p>
+            <p>Por favor seleccione el área:</p>
+            <button class="btn-warning" onclick="cambiarVista('vistaPinPostcosecha')">📦 Postcosecha</button>
+            <button class="btn-purple" onclick="cambiarVista('vistaPinCultivo')">🌱 Cultivo</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA PIN POSTCOSECHA (3107) -->
+    <div id="vistaPinPostcosecha" class="vista">
+        <div class="bienvenida-box">
+            <h3>Acceso Postcosecha</h3>
+            <div class="form-group"><label>PIN de Seguridad:</label><input type="password" id="inputPinPost" placeholder="Ingrese PIN"></div>
+            <button class="btn-warning" onclick="verificarPinPostcosecha()">Ingresar</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+        </div>
+    </div>
+
+    <!-- SUBMENÚ POSTCOSECHA -->
+    <div id="vistaSubMenuPostcosecha" class="vista">
+        <div class="bienvenida-box">
+            <h3>Submenú Postcosecha</h3>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosApp', 'arandanos')">🫐 Pedido de Arándanos</button>
             <button class="btn-warning" onclick="cambiarVista('vistaArandanosApp', 'postcosecha')">📦 Ingreso a Postcosecha</button>
-            <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
-            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️ Rendimiento de Poda</button>
-            <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
             <button class="btn-info" style="background-color: #20c997;" onclick="cambiarVista('vistaArandanosApp', 'contramuestras')">🧪 Control de Contramuestras</button>
             <button class="btn-secondary" style="background-color: #6610f2;" onclick="cambiarVista('vistaArandanosApp', 'brix')">🍯 Grados Brix</button>
             <button class="btn-secondary" style="background-color: #fd7e14;" onclick="cambiarVista('vistaArandanosApp', 'diametros')">📏 Diámetros</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaFincaFunza')">⬅️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA PIN CULTIVO (2005) -->
+    <div id="vistaPinCultivo" class="vista">
+        <div class="bienvenida-box">
+            <h3>Acceso Cultivo</h3>
+            <div class="form-group"><label>PIN de Seguridad:</label><input type="password" id="inputPinCult" placeholder="Ingrese PIN"></div>
+            <button class="btn-purple" onclick="verificarPinCultivo()">Ingresar</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+        </div>
+    </div>
+
+    <!-- SUBMENÚ CULTIVO -->
+    <div id="vistaSubMenuCultivo" class="vista">
+        <div class="bienvenida-box">
+            <h3>Submenú Cultivo</h3>
+            <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
+            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️ Rendimiento de Poda</button>
+            <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
         </div>
     </div>
 
@@ -234,79 +273,67 @@
 
         <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
             <h3>Rendimiento por Paradas</h3>
-            <div id="seccionPinRendimiento">
-                <div class="form-group"><label>PIN de Seguridad:</label><input type="password" id="inputPinRend" placeholder="Ingrese el PIN"></div>
-                <button class="btn-purple" onclick="verificarPinRendimiento()">Ingresar</button>
+            <div id="alertaRendPendientes" class="alerta-offline" style="display:none;"></div>
+            <div class="form-group"><label>Fecha:</label><input type="date" id="rendFecha"></div>
+            <div class="form-group"><label>Parada:</label>
+                <select id="rendSelectParada">
+                    <option value="1ª Parada (06:05 a 08:00)">1ª Parada (06:05 a 08:00)</option>
+                    <option value="2ª Parada (08:05 a 10:00)">2ª Parada (08:05 a 10:00)</option>
+                    <option value="3ª Parada (10:15 a 12:00)">3ª Parada (10:15 a 12:00)</option>
+                    <option value="4ª Parada (12:30 a 02:00)">4ª Parada (12:30 a 02:00)</option>
+                    <option value="5ª Parada (02:05 a 04:00)">5ª Parada (02:05 a 04:00)</option>
+                    <option value="6ª Parada (04:05 a 06:00)">6ª Parada (04:05 a 06:00)</option>
+                </select>
             </div>
-            <div id="seccionFormRendimiento" style="display:none;">
-                <div id="alertaRendPendientes" class="alerta-offline" style="display:none;"></div>
-                <div class="form-group"><label>Fecha:</label><input type="date" id="rendFecha"></div>
-                <div class="form-group"><label>Parada:</label>
-                    <select id="rendSelectParada">
-                        <option value="1ª Parada (06:05 a 08:00)">1ª Parada (06:05 a 08:00)</option>
-                        <option value="2ª Parada (08:05 a 10:00)">2ª Parada (08:05 a 10:00)</option>
-                        <option value="3ª Parada (10:15 a 12:00)">3ª Parada (10:15 a 12:00)</option>
-                        <option value="4ª Parada (12:30 a 02:00)">4ª Parada (12:30 a 02:00)</option>
-                        <option value="5ª Parada (02:05 a 04:00)">5ª Parada (02:05 a 04:00)</option>
-                        <option value="6ª Parada (04:05 a 06:00)">6ª Parada (04:05 a 06:00)</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
-                <div class="form-group"><label>Trabajador:</label><select id="rendSelectEmpleado"><option value="">-- Primero seleccione un grupo --</option></select></div>
-                <div class="form-group"><label>Bloque:</label><input type="text" id="rendBloque" placeholder="Ej: Bloque A"></div>
-                <div class="form-group"><label>Valdes Tipo 1:</label><input type="text" id="rendValdesT1" value="0"></div>
-                <div class="form-group"><label>Valdes Tipo 2:</label><input type="text" id="rendValdesT2" value="0"></div>
-                <div class="form-group"><label>Valdes Tipo 3:</label><input type="text" id="rendValdesT3" value="0"></div>
-                <div class="form-group"><label>Observaciones:</label><textarea id="rendObservaciones" rows="2"></textarea></div>
-                <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento</button>
-            </div>
+            <div class="form-group"><label>Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
+            <div class="form-group"><label>Trabajador:</label><select id="rendSelectEmpleado"><option value="">-- Primero seleccione un grupo --</option></select></div>
+            <div class="form-group"><label>Bloque:</label><input type="text" id="rendBloque" placeholder="Ej: Bloque A"></div>
+            <div class="form-group"><label>Valdes Tipo 1:</label><input type="text" id="rendValdesT1" value="0"></div>
+            <div class="form-group"><label>Valdes Tipo 2:</label><input type="text" id="rendValdesT2" value="0"></div>
+            <div class="form-group"><label>Valdes Tipo 3:</label><input type="text" id="rendValdesT3" value="0"></div>
+            <div class="form-group"><label>Observaciones:</label><textarea id="rendObservaciones" rows="2"></textarea></div>
+            <button id="btnGuardarRend" class="btn-purple" onclick="enviarRendimiento()">Guardar Rendimiento</button>
         </div>
 
-        <!-- MÓDULO RENDIMIENTO DE PODA (Sin paradas) -->
+        <!-- MÓDULO RENDIMIENTO DE PODA -->
         <div id="subModuloPoda" class="sub-vista" style="display:none;">
             <h3>Rendimiento de Poda</h3>
-            <div id="seccionPinPoda">
-                <div class="form-group"><label>PIN de Seguridad:</label><input type="password" id="inputPinPoda" placeholder="Ingrese el PIN"></div>
-                <button class="btn-purple" style="background-color: #d63384;" onclick="verificarPinPoda()">Ingresar</button>
+            <div id="alertaPodaPendientes" class="alerta-offline" style="display:none;"></div>
+            <div class="form-group"><label>Fecha:</label><input type="date" id="podaFecha"></div>
+            <div class="form-group"><label>Bloque:</label><input type="text" id="podaBloque" placeholder="Ej: Bloque A"></div>
+            <div class="form-group"><label>Variedad:</label>
+                <select id="podaVariedad">
+                    <option value="">-- Seleccione Variedad --</option>
+                    <option value="BILOXI">BILOXI</option>
+                    <option value="SHARPBLUE">SHARPBLUE</option>
+                    <option value="EMERALD">EMERALD</option>
+                    <option value="VICTORIA">VICTORIA</option>
+                    <option value="LEGACY">LEGACY</option>
+                    <option value="RIBBON">RIBBON</option>
+                    <option value="VENTURA">VENTURA</option>
+                    <option value="ATLAS">ATLAS</option>
+                    <option value="BIANCA">BIANCA</option>
+                </select>
             </div>
-            <div id="seccionFormPoda" style="display:none;">
-                <div id="alertaPodaPendientes" class="alerta-offline" style="display:none;"></div>
-                <div class="form-group"><label>Fecha:</label><input type="date" id="podaFecha"></div>
-                <div class="form-group"><label>Bloque:</label><input type="text" id="podaBloque" placeholder="Ej: Bloque A"></div>
-                <div class="form-group"><label>Variedad:</label>
-                    <select id="podaVariedad">
-                        <option value="">-- Seleccione Variedad --</option>
-                        <option value="BILOXI">BILOXI</option>
-                        <option value="SHARPBLUE">SHARPBLUE</option>
-                        <option value="EMERALD">EMERALD</option>
-                        <option value="VICTORIA">VICTORIA</option>
-                        <option value="LEGACY">LEGACY</option>
-                        <option value="RIBBON">RIBBON</option>
-                        <option value="VENTURA">VENTURA</option>
-                        <option value="ATLAS">ATLAS</option>
-                        <option value="BIANCA">BIANCA</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Tipo de Poda:</label>
-                    <select id="podaTipoPoda">
-                        <option value="Renovación">Renovación</option>
-                        <option value="Arreglo Cosecha">Arreglo Cosecha</option>
-                        <option value="Fitosanidad">Fitosanidad</option>
-                        <option value="Formación">Formación</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Operario:</label>
-                    <select id="podaOperario">
-                        <option value="">-- Seleccione Operario --</option>
-                        <option value="ROSA PEREZ">ROSA PEREZ</option>
-                        <option value="EDILMA CUARAN">EDILMA CUARAN</option>
-                        <option value="JUAN RIVAS">JUAN RIVAS</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Dato (Cantidad / Rendimiento):</label><input type="text" id="podaDato" placeholder="Ej: 10"></div>
-                <div class="form-group"><label>Observaciones:</label><textarea id="podaObservaciones" rows="2"></textarea></div>
-                <button id="btnGuardarPoda" class="btn-purple" style="background-color: #d63384;" onclick="enviarRendimientoPoda()">Guardar Rendimiento Poda</button>
+            <div class="form-group"><label>Tipo de Poda:</label>
+                <select id="podaTipoPoda">
+                    <option value="Renovación">Renovación</option>
+                    <option value="Arreglo Cosecha">Arreglo Cosecha</option>
+                    <option value="Fitosanidad">Fitosanidad</option>
+                    <option value="Formación">Formación</option>
+                </select>
             </div>
+            <div class="form-group"><label>Operario:</label>
+                <select id="podaOperario">
+                    <option value="">-- Seleccione Operario --</option>
+                    <option value="ROSA PEREZ">ROSA PEREZ</option>
+                    <option value="EDILMA CUARAN">EDILMA CUARAN</option>
+                    <option value="JUAN RIVAS">JUAN RIVAS</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Dato (Cantidad / Rendimiento):</label><input type="text" id="podaDato" placeholder="Ej: 10"></div>
+            <div class="form-group"><label>Observaciones:</label><textarea id="podaObservaciones" rows="2"></textarea></div>
+            <button id="btnGuardarPoda" class="btn-purple" style="background-color: #d63384;" onclick="enviarRendimientoPoda()">Guardar Rendimiento Poda</button>
         </div>
 
         <div id="subModuloHorasFrio" class="sub-vista" style="display:none;">
@@ -372,11 +399,12 @@
             <button id="btnGuardarDiam" class="btn-secondary" style="background-color: #fd7e14;" onclick="enviarDiametros()">Guardar Diámetros</button>
         </div>
 
-        <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+        <!-- Botón de volver dinámico dependiendo de dónde vino -->
+        <button class="btn-volver" onclick="regresarDesdeSubmodulo()">⬅️ Volver</button>
     </div>
 
-    <!-- Indicador de Versión -->
-    <div class="version-footer">Versión 1.86</div>
+    <!-- Indicador de Versión Actualizado -->
+    <div class="version-footer">Versión 1.89</div>
 </div>
 
 <div id="modalDetalles">
@@ -410,6 +438,7 @@
     let datosPedidoActual = {};
     let sincronizandoAhora = false;
     let html5QrcodeScanner = null;
+    let tipoSeccionActual = ""; // 'postcosecha' o 'cultivo'
 
     window.addEventListener('DOMContentLoaded', () => {
         let hoy = new Date().toISOString().split('T')[0];
@@ -497,24 +526,17 @@
         if (idVista === 'vistaInicio') aplicarTema('inicio');
         else if (['vistaFincaFunza', 'vistaFlores'].includes(idVista)) aplicarTema('funza');
         else if (['vistaSanFelipeMenu', 'vistaCausasNacional', 'vistaSanFelipeRendimiento'].includes(idVista)) aplicarTema('sanfelipe');
-        else if (['vistaArandanosMenu', 'vistaArandanosApp'].includes(idVista)) aplicarTema('arandanos');
+        else if (['vistaArandanosMenu', 'vistaPinPostcosecha', 'vistaSubMenuPostcosecha', 'vistaPinCultivo', 'vistaSubMenuCultivo', 'vistaArandanosApp'].includes(idVista)) aplicarTema('arandanos');
+
+        if (idVista === 'vistaPinPostcosecha') document.getElementById('inputPinPost').value = '';
+        if (idVista === 'vistaPinCultivo') document.getElementById('inputPinCult').value = '';
 
         if (idVista === 'vistaArandanosApp') {
             document.querySelectorAll('.sub-vista').forEach(el => el.style.display = 'none');
             if (subModulo === 'arandanos') document.getElementById('subModuloArandanos').style.display = 'block';
             else if (subModulo === 'postcosecha') document.getElementById('subModuloPostcosecha').style.display = 'block';
-            else if (subModulo === 'rendimiento') {
-                document.getElementById('subModuloRendimiento').style.display = 'block';
-                document.getElementById('seccionPinRendimiento').style.display = 'block';
-                document.getElementById('seccionFormRendimiento').style.display = 'none';
-                document.getElementById('inputPinRend').value = '';
-            }
-            else if (subModulo === 'poda') {
-                document.getElementById('subModuloPoda').style.display = 'block';
-                document.getElementById('seccionPinPoda').style.display = 'block';
-                document.getElementById('seccionFormPoda').style.display = 'none';
-                document.getElementById('inputPinPoda').value = '';
-            }
+            else if (subModulo === 'rendimiento') document.getElementById('subModuloRendimiento').style.display = 'block';
+            else if (subModulo === 'poda') document.getElementById('subModuloPoda').style.display = 'block';
             else if (subModulo === 'horasfrio') document.getElementById('subModuloHorasFrio').style.display = 'block';
             else if (subModulo === 'contramuestras') {
                 document.getElementById('subModuloContramuestras').style.display = 'block';
@@ -523,6 +545,30 @@
             }
             else if (subModulo === 'brix') document.getElementById('subModuloBrix').style.display = 'block';
             else if (subModulo === 'diametros') document.getElementById('subModuloDiametros').style.display = 'block';
+        }
+    }
+
+    function verificarPinPostcosecha() {
+        if (document.getElementById('inputPinPost').value.trim() === "3107") {
+            tipoSeccionActual = 'postcosecha';
+            cambiarVista('vistaSubMenuPostcosecha');
+        } else { alert("PIN incorrecto."); }
+    }
+
+    function verificarPinCultivo() {
+        if (document.getElementById('inputPinCult').value.trim() === "2005") {
+            tipoSeccionActual = 'cultivo';
+            cambiarVista('vistaSubMenuCultivo');
+        } else { alert("PIN incorrecto."); }
+    }
+
+    function regresarDesdeSubmodulo() {
+        if (tipoSeccionActual === 'postcosecha') {
+            cambiarVista('vistaSubMenuPostcosecha');
+        } else if (tipoSeccionActual === 'cultivo') {
+            cambiarVista('vistaSubMenuCultivo');
+        } else {
+            cambiarVista('vistaArandanosMenu');
         }
     }
 
@@ -535,22 +581,6 @@
         let ratio = Math.max(window.devicePixelRatio || 1, 1);
         canvas.width = canvas.offsetWidth * ratio; canvas.height = canvas.offsetHeight * ratio;
         canvas.getContext("2d").scale(ratio, ratio); signaturePad.clear();
-    }
-
-    function verificarPinRendimiento() {
-        if (document.getElementById('inputPinRend').value.trim() === "2005") {
-            document.getElementById('seccionPinRendimiento').style.display = 'none';
-            document.getElementById('seccionFormRendimiento').style.display = 'block';
-            actualizarTodasLasAlertasOffline();
-        } else { alert("PIN incorrecto."); }
-    }
-
-    function verificarPinPoda() {
-        if (document.getElementById('inputPinPoda').value.trim() === "2005") {
-            document.getElementById('seccionPinPoda').style.display = 'none';
-            document.getElementById('seccionFormPoda').style.display = 'block';
-            actualizarTodasLasAlertasOffline();
-        } else { alert("PIN incorrecto."); }
     }
 
     function cargarDatosRendimiento() {
@@ -800,7 +830,7 @@
         if(m) {
             if(m.fechaDeshidratacion) {
                 inputDesh.value = m.fechaDeshidratacion;
-                infoBox.innerText = `ℹ️ Deshidratación registrada el: ${m.fechaDeshidratacion}. Listo para ingresar fecha de hongo.`;
+                infoBox.innerText = `ℹ️️ Deshidratación registrada el: ${m.fechaDeshidratacion}. Listo para ingresar fecha de hongo.`;
             } else {
                 infoBox.innerText = `ℹ️ Pendiente fecha de deshidratación.`;
             }
@@ -938,7 +968,7 @@
     function enviarPedidoArandanos() {
         if(signaturePad.isEmpty())return alert("Firme por favor.");
         let p={accion:"guardar_arandanos",cedula:document.getElementById('inputCedula').value,nombre:nombreEmpleadoGlobal,detallePedido:datosPedidoActual.detallePedido,totalPagar:datosPedidoActual.totalPagar,firma:signaturePad.toDataURL("image/png")};
-        guardarDatosUltraRapido(p,'arandanosPendientes',()=>{alert("Guardado."); cambiarVista('vistaArandanosMenu');},'btnEnviarPedido');
+        guardarDatosUltraRapido(p,'arandanosPendientes',()=>{alert("Guardado."); regresarDesdeSubmodulo();},'btnEnviarPedido');
     }
 </script>
 
