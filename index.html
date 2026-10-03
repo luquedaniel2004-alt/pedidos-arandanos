@@ -116,7 +116,7 @@
             <p>Seleccione el cultivo o área de trabajo:</p>
             <button class="btn-warning" onclick="cambiarVista('vistaFlores')">🌸 Flores</button>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosMenu')">🫐 Arándanos</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver al Inicio</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️️ Volver al Inicio</button>
         </div>
     </div>
 
@@ -173,10 +173,10 @@
         <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="sfObservaciones" rows="2" placeholder="Escriba aquí..."></textarea></div>
         
         <button id="btnGuardarSfRend" class="btn-purple" onclick="enviarRendimientoSanFelipe()">Guardar Rendimiento San Felipe</button>
-        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️ Volver</button>
+        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️️ Volver</button>
     </div>
 
-    <!-- MENÚ PRINCIPAL ARÁNDANOS (Limpio y Seguro) -->
+    <!-- MENÚ PRINCIPAL ARÁNDANOS -->
     <div id="vistaArandanosMenu" class="vista">
         <div class="bienvenida-box">
             <h3>Módulo de Arándanos</h3>
@@ -399,12 +399,12 @@
             <button id="btnGuardarDiam" class="btn-secondary" style="background-color: #fd7e14;" onclick="enviarDiametros()">Guardar Diámetros</button>
         </div>
 
-        <!-- Botón de volver dinámico dependiendo de dónde vino -->
+        <!-- Botón de volver dinámico -->
         <button class="btn-volver" onclick="regresarDesdeSubmodulo()">⬅️ Volver</button>
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.89</div>
+    <div class="version-footer">Versión 1.91</div>
 </div>
 
 <div id="modalDetalles">
@@ -438,7 +438,7 @@
     let datosPedidoActual = {};
     let sincronizandoAhora = false;
     let html5QrcodeScanner = null;
-    let tipoSeccionActual = ""; // 'postcosecha' o 'cultivo'
+    let tipoSeccionActual = ""; 
 
     window.addEventListener('DOMContentLoaded', () => {
         let hoy = new Date().toISOString().split('T')[0];
@@ -446,8 +446,8 @@
             if(document.getElementById(id)) document.getElementById(id).value = hoy;
         });
         
-        cargarDatosRendimiento();
-        cargarDatosSanFelipe();
+        cargarDatosRendimientoConCache();     // Carga Arándanos con Caché
+        cargarDatosSanFelipeConCache();     // Carga San Felipe con Caché
         inicializarSelectsCausas();
         actualizarTodasLasAlertasOffline();
         aplicarTema('inicio'); 
@@ -583,48 +583,94 @@
         canvas.getContext("2d").scale(ratio, ratio); signaturePad.clear();
     }
 
-    function cargarDatosRendimiento() {
-        fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`).then(res => res.json()).then(data => {
-            if (data.personal) {
-                listaPersonalGlobal = data.personal;
-                let grupos = [...new Set(listaPersonalGlobal.map(i => i.grupo))].filter(Boolean);
-                let sel = document.getElementById('rendSelectGrupo');
-                sel.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
-                grupos.forEach(g => { let o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
-            }
-        }).catch(() => {});
+    /* Caché para Personal de Arándanos */
+    function cargarDatosRendimientoConCache() {
+        let cacheLocal = localStorage.getItem('personalCosecha_cache');
+        if (cacheLocal) {
+            try {
+                listaPersonalGlobal = JSON.parse(cacheLocal);
+                poblarSelectGruposCosecha(listaPersonalGlobal);
+            } catch(e){}
+        }
+
+        if (navigator.onLine) {
+            fetch(`${URL_SCRIPT}?accion=obtener_personal_cosecha`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.personal && data.personal.length > 0) {
+                    listaPersonalGlobal = data.personal;
+                    localStorage.setItem('personalCosecha_cache', JSON.stringify(listaPersonalGlobal));
+                    poblarSelectGruposCosecha(listaPersonalGlobal);
+                }
+            })
+            .catch(() => {});
+        }
+    }
+
+    function poblarSelectGruposCosecha(personal) {
+        let grupos = [...new Set(personal.map(i => i.grupo))].filter(Boolean);
+        let sel = document.getElementById('rendSelectGrupo');
+        let valorActual = sel.value;
+        sel.innerHTML = '<option value="">-- Seleccione un grupo --</option>';
+        grupos.forEach(g => { let o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+        if(valorActual) { sel.value = valorActual; filtrarPersonalPorGrupo(); }
     }
 
     function filtrarPersonalPorGrupo() {
         let grupo = document.getElementById('rendSelectGrupo').value;
         let select = document.getElementById('rendSelectEmpleado');
+        let valorActualEmp = select.value;
         select.innerHTML = '<option value="">-- Seleccione un trabajador --</option>';
         if (!grupo) return;
         listaPersonalGlobal.filter(item => item.grupo === grupo).forEach(emp => {
             let opt = document.createElement('option'); opt.value = emp.nombre; opt.textContent = emp.nombre; select.appendChild(opt);
         });
+        if(valorActualEmp) { select.value = valorActualEmp; }
     }
 
-    function cargarDatosSanFelipe() {
-        fetch(`${URL_SCRIPT}?accion=obtener_personal_sanfelipe`).then(res => res.json()).then(data => {
-            if (data.personalSF) {
-                listaPersonalSFGlobal = data.personalSF;
-                let sup = [...new Set(listaPersonalSFGlobal.map(i => i.supervisora))];
-                let sel = document.getElementById('sfSelectSupervisora');
-                sel.innerHTML = '<option value="">-- Seleccione supervisor/a --</option>';
-                sup.forEach(s => { let o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
-            }
-        }).catch(() => {});
+    /* Caché para Personal de San Felipe */
+    function cargarDatosSanFelipeConCache() {
+        let cacheLocal = localStorage.getItem('personalSF_cache');
+        if (cacheLocal) {
+            try {
+                listaPersonalSFGlobal = JSON.parse(cacheLocal);
+                poblarSelectSupervisoresSF(listaPersonalSFGlobal);
+            } catch (e) {}
+        }
+
+        if (navigator.onLine) {
+            fetch(`${URL_SCRIPT}?accion=obtener_personal_sanfelipe`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.personalSF && data.personalSF.length > 0) {
+                    listaPersonalSFGlobal = data.personalSF;
+                    localStorage.setItem('personalSF_cache', JSON.stringify(listaPersonalSFGlobal));
+                    poblarSelectSupervisoresSF(listaPersonalSFGlobal);
+                }
+            })
+            .catch(() => {});
+        }
+    }
+
+    function poblarSelectSupervisoresSF(personal) {
+        let sup = [...new Set(personal.map(i => i.supervisora))].filter(Boolean);
+        let sel = document.getElementById('sfSelectSupervisora');
+        let valorActual = sel.value;
+        sel.innerHTML = '<option value="">-- Seleccione supervisor/a --</option>';
+        sup.forEach(s => { let o = document.createElement('option'); o.value = s; o.textContent = s; sel.appendChild(o); });
+        if(valorActual) { sel.value = valorActual; filtrarPersonalSanFelipe(); }
     }
 
     function filtrarPersonalSanFelipe() {
         let s = document.getElementById('sfSelectSupervisora').value;
         let sel = document.getElementById('sfSelectEmpleado');
+        let valorActualEmp = sel.value;
         sel.innerHTML = '<option value="">-- Seleccione trabajador/a --</option>';
         if (!s) return;
         listaPersonalSFGlobal.filter(i => i.supervisora === s).forEach(e => {
             let o = document.createElement('option'); o.value = e.nombre; o.textContent = e.nombre; sel.appendChild(o);
         });
+        if(valorActualEmp) { sel.value = valorActualEmp; }
     }
 
     function guardarDatosUltraRapido(payload, keyLocalStorage, fnLimpiar, idBoton) {
@@ -830,7 +876,7 @@
         if(m) {
             if(m.fechaDeshidratacion) {
                 inputDesh.value = m.fechaDeshidratacion;
-                infoBox.innerText = `ℹ️️ Deshidratación registrada el: ${m.fechaDeshidratacion}. Listo para ingresar fecha de hongo.`;
+                infoBox.innerText = `ℹ️ Deshidratación registrada el: ${m.fechaDeshidratacion}. Listo para ingresar fecha de hongo.`;
             } else {
                 infoBox.innerText = `ℹ️ Pendiente fecha de deshidratación.`;
             }
