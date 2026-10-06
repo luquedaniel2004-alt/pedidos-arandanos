@@ -129,10 +129,10 @@
         <h3>Causas Nacional - San Felipe</h3>
         <div id="alertaCausasPendientes" class="alerta-offline" style="display:none;"></div>
         
-        <!-- CAMPO EXCLUSIVO PARA EL ESCÁNER FÍSICO 3NSTAR -->
+        <!-- CAMPO PARA EL ESCÁNER FÍSICO 3NSTAR (Keyboard Emulator) -->
         <div class="form-group" style="background: #e2f0d9; padding: 10px; border-radius: 6px; border: 1px dashed #28a745;">
-            <label style="color: #155724; margin-bottom: 3px;">🔫 Escáner Físico 3nStar (Lectura Rápida):</label>
-            <input type="text" id="inputScanner3nStar" placeholder="Haga clic aquí y pistolee el código..." style="background: white; font-weight: bold; border-color: #28a745;" autocomplete="off">
+            <label style="color: #155724; margin-bottom: 3px;">🔫 Escáner 3nStar (Keyboard Emulator):</label>
+            <input type="text" id="inputScanner3nStar" placeholder="Haga clic aquí y pistolee..." style="background: white; font-weight: bold; border-color: #28a745;" autocomplete="off">
         </div>
 
         <div class="form-group"><label>Fecha:</label><input type="date" id="causaFecha"></div>
@@ -201,7 +201,7 @@
             <button class="btn-info" style="background-color: #20c997;" onclick="cambiarVista('vistaArandanosApp', 'contramuestras')">🧪 Control de Contramuestras</button>
             <button class="btn-secondary" style="background-color: #6610f2;" onclick="cambiarVista('vistaArandanosApp', 'brix')">🍯 Grados Brix</button>
             <button class="btn-secondary" style="background-color: #fd7e14;" onclick="cambiarVista('vistaArandanosApp', 'diametros')">📏 Diámetros</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
         </div>
     </div>
 
@@ -220,9 +220,9 @@
         <div class="bienvenida-box">
             <h3>Submenú Cultivo</h3>
             <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
-            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️ Rendimiento de Poda</button>
+            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️️ Rendimiento de Poda</button>
             <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️️ Volver</button>
         </div>
     </div>
 
@@ -399,7 +399,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.92</div>
+    <div class="version-footer">Versión 1.95</div>
 </div>
 
 <div id="modalDetalles">
@@ -443,7 +443,7 @@
         cargarDatosRendimientoConCache();     
         cargarDatosSanFelipeConCache();     
         inicializarSelectsCausas();
-        inicializarEscanner3nStar(); // Inicializa el lector láser físico
+        inicializarEscanner3nStar(); 
         actualizarTodasLasAlertasOffline();
         aplicarTema('inicio'); 
 
@@ -466,21 +466,36 @@
         if(tipo && DB_CAUSAS[tipo]) DB_CAUSAS[tipo].forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.textContent = c; selectCausa.appendChild(opt); });
     }
 
-    /* CONFIGURACIÓN DEL ESCÁNER FÍSICO 3NSTAR */
+    /* ESCUCHA ULTRASENSIBLE PARA ESCÁNER FÍSICO BLUETOOTH / USB */
     function inicializarEscanner3nStar() {
         let inputScanner = document.getElementById('inputScanner3nStar');
         if (!inputScanner) return;
 
-        inputScanner.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+        // Captura cuando el escáner envía el caracter de fin de línea (Enter / Suffix)
+        inputScanner.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
                 e.preventDefault();
-                let codigo = inputScanner.value.trim().toUpperCase();
-                inputScanner.value = ""; // Limpiar inmediato para la siguiente lectura
-                if (codigo) {
-                    procesarCodigoEscaneado3nStar(codigo);
-                }
+                procesarTextoEscanered();
             }
         });
+
+        // Captura directa por si el dispositivo escribe de golpe por portapapeles o emulación rápida
+        inputScanner.addEventListener('input', function(e) {
+            let valor = inputScanner.value;
+            if (valor.length >= 2 && (e.inputType === "insertFromPaste" || valor.includes('\n') || valor.includes('\r'))) {
+                procesarTextoEscanered();
+            }
+        });
+    }
+
+    function procesarTextoEscanered() {
+        let inputScanner = document.getElementById('inputScanner3nStar');
+        if(!inputScanner) return;
+        let codigo = inputScanner.value.trim().toUpperCase().replace(/[\r\n]+/g, "");
+        inputScanner.value = ""; // Limpiar inmediato para la siguiente lectura
+        if (codigo) {
+            procesarCodigoEscaneado3nStar(codigo);
+        }
     }
 
     function procesarCodigoEscaneado3nStar(texto) {
@@ -514,11 +529,13 @@
             }
         }
         if(!encontrado) {
-            alert(`⚠️️ El código "${texto}" no está registrado.`);
+            alert(`⚠ El código "${texto}" no está registrado.`);
         }
-        // Volver a enfocar el input del escáner para que quede listo para la siguiente lectura
         let inputScanner = document.getElementById('inputScanner3nStar');
-        if(inputScanner) inputScanner.focus();
+        if(inputScanner) {
+            inputScanner.value = "";
+            inputScanner.focus();
+        }
     }
 
     function generarIdUnico() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
@@ -546,7 +563,6 @@
         if (idVista === 'vistaPinPostcosecha') document.getElementById('inputPinPost').value = '';
         if (idVista === 'vistaPinCultivo') document.getElementById('inputPinCult').value = '';
 
-        // Si entra a Causas Nacional, poner el foco automático en el escáner 3nStar
         if (idVista === 'vistaCausasNacional') {
             setTimeout(() => {
                 let inp = document.getElementById('inputScanner3nStar');
