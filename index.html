@@ -73,7 +73,7 @@
         .item-detalle { background: #f8f9fa; padding: 10px; border-left: 4px solid #17a2b8; margin-bottom: 10px; border-radius: 4px; font-size: 14px; }
         
         #toast-guardado { visibility: hidden; min-width: 250px; background-color: #28a745; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1001; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        #toast-guardado.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
+        #toast-guardado.show { visibility: hidden; visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
@@ -134,20 +134,20 @@
         
         <!-- CAMPOS INDEPENDIENTES PARA ESCANEAR CADA UNO -->
         <div class="form-group">
-            <label>Color (Toque y escanee aquí):</label>
-            <input type="text" id="causaColor" placeholder="Escanee o escriba color..." autocomplete="off">
+            <label>Color (Escanee aquí):</label>
+            <input type="text" id="causaColor" placeholder="Escanee color..." autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Variedad (Toque y escanee aquí):</label>
-            <input type="text" id="causaVariedad" placeholder="Escanee o escriba variedad..." autocomplete="off">
+            <label>Variedad (Escanee aquí):</label>
+            <input type="text" id="causaVariedad" placeholder="Escanee variedad..." autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Tipo de Causa (Toque y escanee aquí):</label>
-            <input type="text" id="causaTipo" placeholder="Escanee o escriba tipo (Física/Fitosanitaria)..." autocomplete="off">
+            <label>Tipo de Causa (Escanee aquí):</label>
+            <input type="text" id="causaTipo" placeholder="Escanee tipo..." autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Causa Específica (Toque y escanee aquí):</label>
-            <input type="text" id="causaEspecifica" placeholder="Escanee o escriba causa específica..." autocomplete="off">
+            <label>Causa Específica (Escanee aquí):</label>
+            <input type="text" id="causaEspecifica" placeholder="Escanee causa específica..." autocomplete="off">
         </div>
         
         <div class="form-group"><label>Cantidad de Tallos Afectados:</label><input type="number" id="causaCantidad" placeholder="Ingrese cantidad"></div>
@@ -223,9 +223,9 @@
         <div class="bienvenida-box">
             <h3>Submenú Cultivo</h3>
             <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
-            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️ Rendimiento de Poda</button>
+            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️️ Rendimiento de Poda</button>
             <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️️ Volver</button>
         </div>
     </div>
 
@@ -402,7 +402,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.97</div>
+    <div class="version-footer">Versión 1.99</div>
 </div>
 
 <div id="modalDetalles">
@@ -631,14 +631,22 @@
     }
 
     function enviarCausasNacional() {
+        // Nombres ajustados exactamente a los encabezados de tu Google Sheets (Columnas E, F, H)
         let datos = {
-            accion: "guardar_causas_nacional", fechaRegistro: document.getElementById('causaFecha').value,
-            bloque: document.getElementById('causaBloque').value.trim(), color: document.getElementById('causaColor').value.trim().toUpperCase(),
-            variedad: document.getElementById('causaVariedad').value.trim().toUpperCase(), tipoCausa: document.getElementById('causaTipo').value.trim(),
-            causa: document.getElementById('causaEspecifica').value.trim(), cantidad: parsearNumero(document.getElementById('causaCantidad').value),
-            observaciones: document.getElementById('causaObs').value.trim()
+            accion: "guardar_causas_nacional", 
+            fechaRegistro: document.getElementById('causaFecha').value,
+            bloque: document.getElementById('causaBloque').value.trim(), 
+            color: document.getElementById('causaColor').value.trim().toUpperCase(),
+            variedad: document.getElementById('causaVariedad').value.trim().toUpperCase(), 
+            tipoCausa: document.getElementById('causaTipo').value.trim(),
+            causa: document.getElementById('causaEspecifica').value.trim(), 
+            cantidad: parsearNumero(document.getElementById('causaCantidad').value),
+            observacion: document.getElementById('causaObs').value.trim()
         };
-        if (!datos.fechaRegistro || !datos.color || !datos.variedad || !datos.tipoCausa || !datos.causa || datos.cantidad <= 0) { alert("Complete todos los campos de la causa."); return; }
+        if (!datos.fechaRegistro || !datos.color || !datos.variedad || !datos.tipoCausa || !datos.causa || datos.cantidad <= 0) { 
+            alert("Complete todos los campos de la causa antes de guardar."); 
+            return; 
+        }
         
         guardarDatosUltraRapido(datos, 'causasPendientes', () => { 
             document.getElementById('causaColor').value = "";
