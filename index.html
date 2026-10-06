@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema General - Flores de Funza</title>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
         body { 
@@ -50,6 +51,9 @@
         
         .version-footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; font-weight: bold; }
 
+        #scannerModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; box-sizing: border-box; flex-direction: column; justify-content: center; align-items: center;}
+        #reader { width: 100%; max-width: 400px; background: white; border-radius: 8px; overflow: hidden; }
+
         .alerta-offline { background-color: rgba(209, 236, 241, 0.95); color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; font-weight: bold;}
         .alerta-offline button { width: auto; margin: 8px auto 0 auto; display: block; padding: 8px 15px; background-color: #17a2b8; }
         
@@ -73,7 +77,7 @@
         .item-detalle { background: #f8f9fa; padding: 10px; border-left: 4px solid #17a2b8; margin-bottom: 10px; border-radius: 4px; font-size: 14px; }
         
         #toast-guardado { visibility: hidden; min-width: 250px; background-color: #28a745; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1001; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        #toast-guardado.show { visibility: hidden; visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
+        #toast-guardado.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
@@ -81,6 +85,12 @@
 <body>
 
 <div id="toast-guardado">✅ ¡Guardado en la cola local!</div>
+
+<div id="scannerModal">
+    <h3 style="color:white; margin-bottom:15px;">Escaneando Código...</h3>
+    <div id="reader"></div>
+    <button class="btn-danger" style="max-width: 200px; margin-top:20px;" onclick="cerrarEscaner()">❌ Cancelar</button>
+</div>
 
 <div class="container">
     <div class="logo-superior">
@@ -128,28 +138,20 @@
     <div id="vistaCausasNacional" class="vista">
         <h3>Causas Nacional - San Felipe</h3>
         <div id="alertaCausasPendientes" class="alerta-offline" style="display:none;"></div>
-        
+        <button class="btn-secondary" style="margin-bottom: 20px; font-size: 18px;" onclick="abrirEscaner()">📷 Escanear (Color, Variedad o Causa)</button>
+
         <div class="form-group"><label>Fecha:</label><input type="date" id="causaFecha"></div>
         <div class="form-group"><label>Bloque:</label><input type="text" id="causaBloque" placeholder="Ej: Bloque A"></div>
-        
-        <!-- CAMPOS INDEPENDIENTES PARA ESCANEAR CADA UNO -->
-        <div class="form-group">
-            <label>Color (Escanee aquí):</label>
-            <input type="text" id="causaColor" placeholder="Escanee color..." autocomplete="off">
+        <div class="form-group"><label>Color:</label><select id="causaColor"><option value="">-- Seleccione Color --</option></select></div>
+        <div class="form-group"><label>Variedad:</label><select id="causaVariedad"><option value="">-- Seleccione Variedad --</option></select></div>
+        <div class="form-group"><label>Tipo de Causa:</label>
+            <select id="causaTipo" onchange="actualizarCausasEspecificas()">
+                <option value="">-- Seleccione --</option>
+                <option value="Física">Física</option>
+                <option value="Fitosanitaria">Fitosanitaria</option>
+            </select>
         </div>
-        <div class="form-group">
-            <label>Variedad (Escanee aquí):</label>
-            <input type="text" id="causaVariedad" placeholder="Escanee variedad..." autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label>Tipo de Causa (Escanee aquí):</label>
-            <input type="text" id="causaTipo" placeholder="Escanee tipo..." autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label>Causa Específica (Escanee aquí):</label>
-            <input type="text" id="causaEspecifica" placeholder="Escanee causa específica..." autocomplete="off">
-        </div>
-        
+        <div class="form-group"><label>Causa Específica:</label><select id="causaEspecifica"><option value="">-- Seleccione --</option></select></div>
         <div class="form-group"><label>Cantidad de Tallos Afectados:</label><input type="number" id="causaCantidad" placeholder="Ingrese cantidad"></div>
         <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="causaObs" rows="2" placeholder="Escriba aquí..."></textarea></div>
         
@@ -223,9 +225,9 @@
         <div class="bienvenida-box">
             <h3>Submenú Cultivo</h3>
             <button class="btn-purple" onclick="cambiarVista('vistaArandanosApp', 'rendimiento')">🌱 Rendimiento de Cultivo</button>
-            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️️ Rendimiento de Poda</button>
+            <button class="btn-purple" style="background-color: #d63384;" onclick="cambiarVista('vistaArandanosApp', 'poda')">✂️ Rendimiento de Poda</button>
             <button class="btn-info" onclick="cambiarVista('vistaArandanosApp', 'horasfrio')">❄️ Horas Frío Diarias</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
         </div>
     </div>
 
@@ -402,7 +404,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.99</div>
+    <div class="version-footer">Versión 2.00</div>
 </div>
 
 <div id="modalDetalles">
@@ -423,6 +425,10 @@
         sanfelipe: { logo: "https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800", fondo: "https://lh3.googleusercontent.com/d/1BZuezMAv8Q9sDlopm3DCZ4jHCeVlu71k=s800" }
     };
 
+    const COLORES = ["BICOLOR RED", "BICOLOR PINCK", "BICOLOR PURPLE", "BICOLOR YELL", "BURGUNDY", "GREEN", "HOT PINK", "ORANGE", "PEACH", "PINK", "PURPLE", "RED", "SPECIALTY", "WHITE", "YELLOW"];
+    const VARIEDADES = ["18C909", "LALA SABOR", "CARL", "ELEA", "17C888", "SIMPLY BEAUTY", "FIORINNO IRIS", "SOLOMIO SEM", "FIORINO KAMPA", "FIORINO VALUE", "LADYFLY", "RAFFINE MILOU", "RAFFINE PETIT FAYE", "SALOMIO TINO", "LALA EXTRAVAGANZA", "LALA 23580", "FIREFLY", "LALA BONITA", "LALA PINTA", "LALA SINT", "CHERRYFLY", "FIORINO PUPA", "LILLIPUT CRIMSON", "SOLOMIO EDO", "SOLOMIO BERN", "SOLOMIO IMRE", "LOVEFLY", "LALA LAKE", "SOLANDY 9054", "SOLOMIO FEN", "LALA 24048", "SOLOMIO CLIF", "LALA CULT", "SIMPLY TWEETY", "SOLOMIO CAS", "CANDYFLY", "LALA 24022 ROSA", "LALA 24024", "LALA 24030", "LALA EXUMA", "RAFFINE LUCE", "SWEET WATERMELON", "TROPIC BUTTERFLY", "SIMPLY PINK SALMON", "SOLANDY 9191", "SIMPLY CANDY", "SOLOMIO ROSE", "FIORINO PURPLE", "LALA 23862", "LALA RYAN", "SIMPLY LOVE", "DUA", "MISTERYFLY", "SOLOMIO BONO", "SOLOMIO ARD", "CALMFLY", "FROSTFLY", "LALA ALP", "RAFFINE PETIT LOIS", "SOLOMIO LEX", "SIMPLY SNOW", "BLONDFLY", "LALA LANTERN"];
+    const DB_CAUSAS = { "Física": ["Dos Puntos", "Cortos", "Torcidos", "Rajados", "Tallo Debil", "Ciegos"], "Fitosanitaria": ["Acaros", "Botritis", "Thrips", "Cladosporium", "Cogollero"] };
+
     let nombreEmpleadoGlobal = "";
     let listaPersonalGlobal = [];
     let listaPersonalSFGlobal = [];
@@ -431,6 +437,7 @@
     let signaturePad = new SignaturePad(canvas);
     let datosPedidoActual = {};
     let sincronizandoAhora = false;
+    let html5QrcodeScanner = null;
     let tipoSeccionActual = ""; 
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -441,6 +448,7 @@
         
         cargarDatosRendimientoConCache();     
         cargarDatosSanFelipeConCache();     
+        inicializarSelectsCausas();
         actualizarTodasLasAlertasOffline();
         aplicarTema('inicio'); 
 
@@ -448,6 +456,55 @@
         setInterval(autoSincronizarRegistros, 10000); 
         window.addEventListener('online', autoSincronizarRegistros); 
     });
+
+    function inicializarSelectsCausas() {
+        let selectColor = document.getElementById('causaColor');
+        if(selectColor) COLORES.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.textContent = c; selectColor.appendChild(opt); });
+        let selectVar = document.getElementById('causaVariedad');
+        if(selectVar) [...new Set(VARIEDADES)].sort().forEach(v => { let opt = document.createElement('option'); opt.value = v; opt.textContent = v; selectVar.appendChild(opt); });
+    }
+
+    function actualizarCausasEspecificas() {
+        let tipo = document.getElementById('causaTipo').value;
+        let selectCausa = document.getElementById('causaEspecifica');
+        selectCausa.innerHTML = '<option value="">-- Seleccione --</option>';
+        if(tipo && DB_CAUSAS[tipo]) DB_CAUSAS[tipo].forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.textContent = c; selectCausa.appendChild(opt); });
+    }
+
+    function abrirEscaner() {
+        document.getElementById('scannerModal').style.display = 'flex';
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
+            (decodedText) => { cerrarEscaner(); procesarCodigoEscaneado(decodedText.trim().toUpperCase()); },
+            () => {}
+        ).catch(() => { alert("No se pudo iniciar la cámara."); cerrarEscaner(); });
+    }
+
+    function cerrarEscaner() {
+        if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => html5QrcodeScanner.clear()).catch(() => {});
+        document.getElementById('scannerModal').style.display = 'none';
+    }
+
+    function procesarCodigoEscaneado(texto) {
+        let encontrado = false;
+        let cEn = COLORES.find(c => c.toUpperCase() === texto);
+        if (cEn) { document.getElementById('causaColor').value = cEn; alert(`Color registrado: ${cEn}`); encontrado = true; }
+        if (!encontrado) {
+            let vEn = VARIEDADES.find(v => v.toUpperCase() === texto);
+            if (vEn) { document.getElementById('causaVariedad').value = vEn; alert(`Variedad registrada: ${vEn}`); encontrado = true; }
+        }
+        if (!encontrado) {
+            for (const tipo in DB_CAUSAS) {
+                let causaOr = DB_CAUSAS[tipo].find(c => c.toUpperCase() === texto);
+                if (causaOr) {
+                    document.getElementById('causaTipo').value = tipo; actualizarCausasEspecificas();
+                    document.getElementById('causaEspecifica').value = causaOr; alert(`Causa: ${causaOr}`);
+                    document.getElementById('causaCantidad').focus(); encontrado = true; break;
+                }
+            }
+        }
+        if(!encontrado) alert(`El código "${texto}" no está registrado.`);
+    }
 
     function generarIdUnico() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
     function parsearNumero(valor) { let num = parseFloat(String(valor || '0').trim().replace(',', '.')); return isNaN(num) ? 0 : num; }
@@ -631,31 +688,15 @@
     }
 
     function enviarCausasNacional() {
-        // Nombres ajustados exactamente a los encabezados de tu Google Sheets (Columnas E, F, H)
         let datos = {
-            accion: "guardar_causas_nacional", 
-            fechaRegistro: document.getElementById('causaFecha').value,
-            bloque: document.getElementById('causaBloque').value.trim(), 
-            color: document.getElementById('causaColor').value.trim().toUpperCase(),
-            variedad: document.getElementById('causaVariedad').value.trim().toUpperCase(), 
-            tipoCausa: document.getElementById('causaTipo').value.trim(),
-            causa: document.getElementById('causaEspecifica').value.trim(), 
-            cantidad: parsearNumero(document.getElementById('causaCantidad').value),
-            observacion: document.getElementById('causaObs').value.trim()
+            accion: "guardar_causas_nacional", fechaRegistro: document.getElementById('causaFecha').value,
+            bloque: document.getElementById('causaBloque').value.trim(), color: document.getElementById('causaColor').value,
+            variedad: document.getElementById('causaVariedad').value, tipoCausa: document.getElementById('causaTipo').value,
+            causa: document.getElementById('causaEspecifica').value, cantidad: parsearNumero(document.getElementById('causaCantidad').value),
+            observaciones: document.getElementById('causaObs').value.trim()
         };
-        if (!datos.fechaRegistro || !datos.color || !datos.variedad || !datos.tipoCausa || !datos.causa || datos.cantidad <= 0) { 
-            alert("Complete todos los campos de la causa antes de guardar."); 
-            return; 
-        }
-        
-        guardarDatosUltraRapido(datos, 'causasPendientes', () => { 
-            document.getElementById('causaColor').value = "";
-            document.getElementById('causaVariedad').value = "";
-            document.getElementById('causaTipo').value = "";
-            document.getElementById('causaEspecifica').value = "";
-            document.getElementById('causaCantidad').value = ""; 
-            document.getElementById('causaObs').value = ""; 
-        }, 'btnGuardarCausas');
+        if (!datos.fechaRegistro || !datos.color || !datos.variedad || !datos.tipoCausa || !datos.causa || datos.cantidad <= 0) { alert("Complete los campos."); return; }
+        guardarDatosUltraRapido(datos, 'causasPendientes', () => { document.getElementById('causaCantidad').value = ""; document.getElementById('causaObs').value = ""; document.getElementById('causaCantidad').focus(); }, 'btnGuardarCausas');
     }
 
     function enviarRendimientoSanFelipe() {
