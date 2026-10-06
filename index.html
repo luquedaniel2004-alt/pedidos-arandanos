@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema General - Flores de Funza</title>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
         body { 
@@ -51,9 +50,6 @@
         
         .version-footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; font-weight: bold; }
 
-        #scannerModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; box-sizing: border-box; flex-direction: column; justify-content: center; align-items: center;}
-        #reader { width: 100%; max-width: 400px; background: white; border-radius: 8px; overflow: hidden; }
-
         .alerta-offline { background-color: rgba(209, 236, 241, 0.95); color: #0c5460; padding: 12px; border-radius: 4px; text-align: center; margin-bottom: 15px; border: 1px solid #bee5eb; font-size: 15px; font-weight: bold;}
         .alerta-offline button { width: auto; margin: 8px auto 0 auto; display: block; padding: 8px 15px; background-color: #17a2b8; }
         
@@ -86,12 +82,6 @@
 
 <div id="toast-guardado">✅ ¡Guardado en la cola local!</div>
 
-<div id="scannerModal">
-    <h3 style="color:white; margin-bottom:15px;">Escaneando Código...</h3>
-    <div id="reader"></div>
-    <button class="btn-danger" style="max-width: 200px; margin-top:20px;" onclick="cerrarEscaner()">❌ Cancelar</button>
-</div>
-
 <div class="container">
     <div class="logo-superior">
         <img id="logoPrincipal" src="https://lh3.googleusercontent.com/d/18tzLsc_j1JiuV03Ghr3BcdN5p0BoSlbt=s800" alt="Logo">
@@ -116,7 +106,7 @@
             <p>Seleccione el cultivo o área de trabajo:</p>
             <button class="btn-warning" onclick="cambiarVista('vistaFlores')">🌸 Flores</button>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosMenu')">🫐 Arándanos</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️️ Volver al Inicio</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaInicio')">⬅️ Volver al Inicio</button>
         </div>
     </div>
 
@@ -138,7 +128,12 @@
     <div id="vistaCausasNacional" class="vista">
         <h3>Causas Nacional - San Felipe</h3>
         <div id="alertaCausasPendientes" class="alerta-offline" style="display:none;"></div>
-        <button class="btn-secondary" style="margin-bottom: 20px; font-size: 18px;" onclick="abrirEscaner()">📷 Escanear (Color, Variedad o Causa)</button>
+        
+        <!-- CAMPO EXCLUSIVO PARA EL ESCÁNER FÍSICO 3NSTAR -->
+        <div class="form-group" style="background: #e2f0d9; padding: 10px; border-radius: 6px; border: 1px dashed #28a745;">
+            <label style="color: #155724; margin-bottom: 3px;">🔫 Escáner Físico 3nStar (Lectura Rápida):</label>
+            <input type="text" id="inputScanner3nStar" placeholder="Haga clic aquí y pistolee el código..." style="background: white; font-weight: bold; border-color: #28a745;" autocomplete="off">
+        </div>
 
         <div class="form-group"><label>Fecha:</label><input type="date" id="causaFecha"></div>
         <div class="form-group"><label>Bloque:</label><input type="text" id="causaBloque" placeholder="Ej: Bloque A"></div>
@@ -173,7 +168,7 @@
         <div class="form-group"><label>Observaciones (Opcional):</label><textarea id="sfObservaciones" rows="2" placeholder="Escriba aquí..."></textarea></div>
         
         <button id="btnGuardarSfRend" class="btn-purple" onclick="enviarRendimientoSanFelipe()">Guardar Rendimiento San Felipe</button>
-        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️️ Volver</button>
+        <button class="btn-volver" onclick="cambiarVista('vistaSanFelipeMenu')">⬅️ Volver</button>
     </div>
 
     <!-- MENÚ PRINCIPAL ARÁNDANOS -->
@@ -206,7 +201,7 @@
             <button class="btn-info" style="background-color: #20c997;" onclick="cambiarVista('vistaArandanosApp', 'contramuestras')">🧪 Control de Contramuestras</button>
             <button class="btn-secondary" style="background-color: #6610f2;" onclick="cambiarVista('vistaArandanosApp', 'brix')">🍯 Grados Brix</button>
             <button class="btn-secondary" style="background-color: #fd7e14;" onclick="cambiarVista('vistaArandanosApp', 'diametros')">📏 Diámetros</button>
-            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️ Volver</button>
+            <button class="btn-volver" onclick="cambiarVista('vistaArandanosMenu')">⬅️️ Volver</button>
         </div>
     </div>
 
@@ -404,7 +399,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.91</div>
+    <div class="version-footer">Versión 1.92</div>
 </div>
 
 <div id="modalDetalles">
@@ -437,7 +432,6 @@
     let signaturePad = new SignaturePad(canvas);
     let datosPedidoActual = {};
     let sincronizandoAhora = false;
-    let html5QrcodeScanner = null;
     let tipoSeccionActual = ""; 
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -446,9 +440,10 @@
             if(document.getElementById(id)) document.getElementById(id).value = hoy;
         });
         
-        cargarDatosRendimientoConCache();     // Carga Arándanos con Caché
-        cargarDatosSanFelipeConCache();     // Carga San Felipe con Caché
+        cargarDatosRendimientoConCache();     
+        cargarDatosSanFelipeConCache();     
         inicializarSelectsCausas();
+        inicializarEscanner3nStar(); // Inicializa el lector láser físico
         actualizarTodasLasAlertasOffline();
         aplicarTema('inicio'); 
 
@@ -471,39 +466,59 @@
         if(tipo && DB_CAUSAS[tipo]) DB_CAUSAS[tipo].forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.textContent = c; selectCausa.appendChild(opt); });
     }
 
-    function abrirEscaner() {
-        document.getElementById('scannerModal').style.display = 'flex';
-        html5QrcodeScanner = new Html5Qrcode("reader");
-        html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} },
-            (decodedText) => { cerrarEscaner(); procesarCodigoEscaneado(decodedText.trim().toUpperCase()); },
-            () => {}
-        ).catch(() => { alert("No se pudo iniciar la cámara."); cerrarEscaner(); });
+    /* CONFIGURACIÓN DEL ESCÁNER FÍSICO 3NSTAR */
+    function inicializarEscanner3nStar() {
+        let inputScanner = document.getElementById('inputScanner3nStar');
+        if (!inputScanner) return;
+
+        inputScanner.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                let codigo = inputScanner.value.trim().toUpperCase();
+                inputScanner.value = ""; // Limpiar inmediato para la siguiente lectura
+                if (codigo) {
+                    procesarCodigoEscaneado3nStar(codigo);
+                }
+            }
+        });
     }
 
-    function cerrarEscaner() {
-        if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => html5QrcodeScanner.clear()).catch(() => {});
-        document.getElementById('scannerModal').style.display = 'none';
-    }
-
-    function procesarCodigoEscaneado(texto) {
+    function procesarCodigoEscaneado3nStar(texto) {
         let encontrado = false;
         let cEn = COLORES.find(c => c.toUpperCase() === texto);
-        if (cEn) { document.getElementById('causaColor').value = cEn; alert(`Color registrado: ${cEn}`); encontrado = true; }
+        if (cEn) { 
+            document.getElementById('causaColor').value = cEn; 
+            alert(`✅ Color registrado: ${cEn}`); 
+            encontrado = true; 
+        }
         if (!encontrado) {
             let vEn = VARIEDADES.find(v => v.toUpperCase() === texto);
-            if (vEn) { document.getElementById('causaVariedad').value = vEn; alert(`Variedad registrada: ${vEn}`); encontrado = true; }
+            if (vEn) { 
+                document.getElementById('causaVariedad').value = vEn; 
+                alert(`✅ Variedad registrada: ${vEn}`); 
+                encontrado = true; 
+            }
         }
         if (!encontrado) {
             for (const tipo in DB_CAUSAS) {
                 let causaOr = DB_CAUSAS[tipo].find(c => c.toUpperCase() === texto);
                 if (causaOr) {
-                    document.getElementById('causaTipo').value = tipo; actualizarCausasEspecificas();
-                    document.getElementById('causaEspecifica').value = causaOr; alert(`Causa: ${causaOr}`);
-                    document.getElementById('causaCantidad').focus(); encontrado = true; break;
+                    document.getElementById('causaTipo').value = tipo; 
+                    actualizarCausasEspecificas();
+                    document.getElementById('causaEspecifica').value = causaOr; 
+                    alert(`✅ Causa: ${causaOr}`);
+                    document.getElementById('causaCantidad').focus(); 
+                    encontrado = true; 
+                    break;
                 }
             }
         }
-        if(!encontrado) alert(`El código "${texto}" no está registrado.`);
+        if(!encontrado) {
+            alert(`⚠️️ El código "${texto}" no está registrado.`);
+        }
+        // Volver a enfocar el input del escáner para que quede listo para la siguiente lectura
+        let inputScanner = document.getElementById('inputScanner3nStar');
+        if(inputScanner) inputScanner.focus();
     }
 
     function generarIdUnico() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
@@ -530,6 +545,14 @@
 
         if (idVista === 'vistaPinPostcosecha') document.getElementById('inputPinPost').value = '';
         if (idVista === 'vistaPinCultivo') document.getElementById('inputPinCult').value = '';
+
+        // Si entra a Causas Nacional, poner el foco automático en el escáner 3nStar
+        if (idVista === 'vistaCausasNacional') {
+            setTimeout(() => {
+                let inp = document.getElementById('inputScanner3nStar');
+                if(inp) inp.focus();
+            }, 300);
+        }
 
         if (idVista === 'vistaArandanosApp') {
             document.querySelectorAll('.sub-vista').forEach(el => el.style.display = 'none');
@@ -583,7 +606,6 @@
         canvas.getContext("2d").scale(ratio, ratio); signaturePad.clear();
     }
 
-    /* Caché para Personal de Arándanos */
     function cargarDatosRendimientoConCache() {
         let cacheLocal = localStorage.getItem('personalCosecha_cache');
         if (cacheLocal) {
@@ -628,7 +650,6 @@
         if(valorActualEmp) { select.value = valorActualEmp; }
     }
 
-    /* Caché para Personal de San Felipe */
     function cargarDatosSanFelipeConCache() {
         let cacheLocal = localStorage.getItem('personalSF_cache');
         if (cacheLocal) {
@@ -698,7 +719,7 @@
             observaciones: document.getElementById('causaObs').value.trim()
         };
         if (!datos.fechaRegistro || !datos.color || !datos.variedad || !datos.tipoCausa || !datos.causa || datos.cantidad <= 0) { alert("Complete los campos."); return; }
-        guardarDatosUltraRapido(datos, 'causasPendientes', () => { document.getElementById('causaCantidad').value = ""; document.getElementById('causaObs').value = ""; document.getElementById('causaCantidad').focus(); }, 'btnGuardarCausas');
+        guardarDatosUltraRapido(datos, 'causasPendientes', () => { document.getElementById('causaCantidad').value = ""; document.getElementById('causaObs').value = ""; document.getElementById('inputScanner3nStar').focus(); }, 'btnGuardarCausas');
     }
 
     function enviarRendimientoSanFelipe() {
