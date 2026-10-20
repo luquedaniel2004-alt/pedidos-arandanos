@@ -272,19 +272,9 @@
         </div>
 
         <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
-            <h3>Rendimiento por Paradas</h3>
+            <h3>Rendimiento de Cultivo</h3>
             <div id="alertaRendPendientes" class="alerta-offline" style="display:none;"></div>
             <div class="form-group"><label>Fecha:</label><input type="date" id="rendFecha"></div>
-            <div class="form-group"><label>Parada:</label>
-                <select id="rendSelectParada">
-                    <option value="1ª Parada (06:05 a 08:00)">1ª Parada (06:05 a 08:00)</option>
-                    <option value="2ª Parada (08:05 a 10:00)">2ª Parada (08:05 a 10:00)</option>
-                    <option value="3ª Parada (10:15 a 12:00)">3ª Parada (10:15 a 12:00)</option>
-                    <option value="4ª Parada (12:30 a 02:00)">4ª Parada (12:30 a 02:00)</option>
-                    <option value="5ª Parada (02:05 a 04:00)">5ª Parada (02:05 a 04:00)</option>
-                    <option value="6ª Parada (04:05 a 06:00)">6ª Parada (04:05 a 06:00)</option>
-                </select>
-            </div>
             <div class="form-group"><label>Grupo:</label><select id="rendSelectGrupo" onchange="filtrarPersonalPorGrupo()"><option value="">-- Seleccione un grupo --</option></select></div>
             <div class="form-group"><label>Trabajador:</label><select id="rendSelectEmpleado"><option value="">-- Primero seleccione un grupo --</option></select></div>
             <div class="form-group"><label>Bloque:</label><input type="text" id="rendBloque" placeholder="Ej: Bloque A"></div>
@@ -406,7 +396,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.96</div>
+    <div class="version-footer">Versión 1.97</div>
 </div>
 
 <div id="modalDetalles">
@@ -720,7 +710,6 @@
         let datos = {
             accion: "guardar_rendimiento", 
             fechaRegistro: document.getElementById('rendFecha').value,
-            parada: document.getElementById('rendSelectParada').value, 
             horaReal: new Date().toLocaleTimeString(),
             grupo: document.getElementById('rendSelectGrupo').value, 
             nombre: document.getElementById('rendSelectEmpleado').value,
@@ -730,7 +719,7 @@
             valdesT3: t3,
             observaciones: document.getElementById('rendObservaciones').value.trim()
         };
-        if (!datos.fechaRegistro || !datos.parada || !datos.grupo || !datos.nombre || !datos.bloque) { 
+        if (!datos.fechaRegistro || !datos.grupo || !datos.nombre || !datos.bloque) { 
             alert("Complete los campos obligatorios."); 
             return; 
         }
