@@ -353,12 +353,13 @@
                 <label>Modo:</label>
                 <select id="cmModo" onchange="cambiarModoContramuestra()">
                     <option value="nuevo">1. Registrar Nueva Muestra</option>
-                    <option value="actualizar">2. Actualizar Muestra (Deshidratación / Hongo)</option>
+                    <option value="actualizar">2. Actualizar Muestra (Deshidratación / Hongo / Entrega)</option>
                 </select>
             </div>
 
             <div id="cmSeccionNueva">
                 <div class="form-group"><label>Fecha de Creación:</label><input type="date" id="cmFechaCreacion"></div>
+                <div class="form-group"><label>Fecha de Entrega:</label><input type="date" id="cmFechaEntregaNueva"></div>
                 <div class="form-group"><label>Nombre de la Muestra:</label><input type="text" id="cmNombre" placeholder="Ej: Muestra Lote 3"></div>
             </div>
 
@@ -372,6 +373,7 @@
                 <div id="cmDetalleEstadoMuestra" style="margin-bottom:12px; font-weight:bold; color:#007bff; font-size:13px;"></div>
                 <div class="form-group"><label>Fecha de Deshidratación:</label><input type="date" id="cmFechaDeshidratacion"></div>
                 <div class="form-group"><label>Fecha en que apareció Hongo:</label><input type="date" id="cmFechaHongo"></div>
+                <div class="form-group"><label>Fecha de Entrega:</label><input type="date" id="cmFechaEntrega"></div>
             </div>
 
             <div class="form-group"><label>Observaciones:</label><textarea id="cmObs" rows="2" placeholder="Notas adicionales..."></textarea></div>
@@ -404,7 +406,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 2.00</div>
+    <div class="version-footer">Versión 1.96</div>
 </div>
 
 <div id="modalDetalles">
@@ -442,7 +444,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         let hoy = new Date().toISOString().split('T')[0];
-        ['postFecha', 'rendFecha', 'podaFecha', 'frioFecha', 'sfFecha', 'causaFecha', 'cmFechaCreacion', 'brixFecha', 'diamFecha'].forEach(id => {
+        ['postFecha', 'rendFecha', 'podaFecha', 'frioFecha', 'sfFecha', 'causaFecha', 'cmFechaCreacion', 'cmFechaEntregaNueva', 'brixFecha', 'diamFecha'].forEach(id => {
             if(document.getElementById(id)) document.getElementById(id).value = hoy;
         });
         
@@ -865,19 +867,19 @@
         let infoBox = document.getElementById('cmDetalleEstadoMuestra');
         let inputDesh = document.getElementById('cmFechaDeshidratacion');
         let inputHong = document.getElementById('cmFechaHongo');
+        let inputEnt = document.getElementById('cmFechaEntrega');
 
         inputDesh.value = "";
         inputHong.value = "";
+        inputEnt.value = "";
         if(!idSel) { infoBox.innerText = ""; return; }
 
         let m = muestrasPendientesGlobal.find(x => x.idMuestra === idSel);
         if(m) {
-            if(m.fechaDeshidratacion) {
-                inputDesh.value = m.fechaDeshidratacion;
-                infoBox.innerText = `ℹ️ Deshidratación registrada el: ${m.fechaDeshidratacion}. Listo para ingresar fecha de hongo.`;
-            } else {
-                infoBox.innerText = `ℹ️ Pendiente fecha de deshidratación.`;
-            }
+            if(m.fechaDeshidratacion) inputDesh.value = m.fechaDeshidratacion;
+            if(m.fechaHongo) inputHong.value = m.fechaHongo;
+            if(m.fechaEntrega) inputEnt.value = m.fechaEntrega;
+            infoBox.innerText = `ℹ️ Muestra seleccionada cargada correctamente.`;
         }
     }
 
@@ -885,8 +887,9 @@
         let modo = document.getElementById('cmModo').value;
         if(modo === 'nuevo') {
             let fechaC = document.getElementById('cmFechaCreacion').value;
+            let fechaE = document.getElementById('cmFechaEntregaNueva').value;
             let nom = document.getElementById('cmNombre').value.trim();
-            if(!fechaC || !nom) { alert("Complete la fecha y el nombre de la muestra."); return; }
+            if(!fechaC || !nom) { alert("Complete la fecha de creación y el nombre de la muestra."); return; }
 
             let payload = {
                 accion: "guardar_contramuestra",
@@ -895,6 +898,7 @@
                 nombre: nom,
                 fechaDeshidratacion: "",
                 fechaHongo: "",
+                fechaEntrega: fechaE || "",
                 observaciones: document.getElementById('cmObs').value.trim()
             };
 
@@ -909,9 +913,8 @@
             let m = muestrasPendientesGlobal.find(x => x.idMuestra === idSel);
             let fDesh = document.getElementById('cmFechaDeshidratacion').value;
             let fHong = document.getElementById('cmFechaHongo').value;
+            let fEnt = document.getElementById('cmFechaEntrega').value;
             let obs = document.getElementById('cmObs').value.trim();
-
-            if(!fDesh && !fHong) { alert("Ingrese al menos la fecha de deshidratación o la fecha del hongo."); return; }
 
             let payload = {
                 accion: "guardar_contramuestra",
@@ -919,13 +922,15 @@
                 fechaCreacion: m ? m.fechaCreacion : "",
                 nombre: m ? m.nombre : "",
                 fechaDeshidratacion: fDesh || (m ? m.fechaDeshidratacion : ""),
-                fechaHongo: fHong || "",
+                fechaHongo: fHong || (m ? m.fechaHongo : ""),
+                fechaEntrega: fEnt || (m ? m.fechaEntrega : ""),
                 observaciones: obs || (m ? m.observaciones : "")
             };
 
             guardarDatosUltraRapido(payload, 'contramuestrasPendientes', () => {
                 document.getElementById('cmFechaDeshidratacion').value = "";
                 document.getElementById('cmFechaHongo').value = "";
+                document.getElementById('cmFechaEntrega').value = "";
                 document.getElementById('cmObs').value = "";
                 document.getElementById('cmDetalleEstadoMuestra').innerText = "";
                 setTimeout(cargarMuestrasPendientesDesdeServidor, 1500);
