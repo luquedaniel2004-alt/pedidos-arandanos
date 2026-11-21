@@ -349,7 +349,7 @@
 
             <div id="cmSeccionNueva">
                 <div class="form-group"><label>Fecha de Creación:</label><input type="date" id="cmFechaCreacion"></div>
-                <div class="form-group"><label>Fecha de Entrega Del Despacho:</label><input type="date" id="cmFechaEntregaNueva"></div>
+                <div class="form-group"><label>Fecha de Entrega:</label><input type="date" id="cmFechaEntregaNueva"></div>
                 <div class="form-group"><label>Nombre de la Muestra:</label><input type="text" id="cmNombre" placeholder="Ej: Muestra Lote 3"></div>
             </div>
 
@@ -396,7 +396,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 1.99</div>
+    <div class="version-footer">Versión 2.10</div>
 </div>
 
 <div id="modalDetalles">
@@ -839,7 +839,9 @@
                 data.muestras.forEach(m => {
                     let opt = document.createElement('option');
                     opt.value = m.idMuestra;
-                    opt.textContent = `${m.nombre} (Creada: ${m.fechaCreacion})`;
+                    let nomTexto = String(m.nombre || "Muestra sin nombre").trim();
+                    let fechaTexto = String(m.fechaCreacion || "").trim();
+                    opt.textContent = fechaTexto ? `${nomTexto} (Creada: ${fechaTexto})` : nomTexto;
                     select.appendChild(opt);
                 });
             } else {
