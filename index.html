@@ -203,6 +203,7 @@
             <h3>Submenú Postcosecha</h3>
             <button class="btn-secondary" onclick="cambiarVista('vistaArandanosApp', 'arandanos')">🫐 Pedido de Arándanos</button>
             <button class="btn-warning" onclick="cambiarVista('vistaArandanosApp', 'postcosecha')">📦 Ingreso a Postcosecha</button>
+            <button class="btn-danger" onclick="cambiarVista('vistaArandanosApp', 'causastipo3')">⚠️ Causas de Tipo 3</button>
             <button class="btn-info" style="background-color: #20c997;" onclick="cambiarVista('vistaArandanosApp', 'contramuestras')">🧪 Control de Contramuestras</button>
             <button class="btn-secondary" style="background-color: #6610f2;" onclick="cambiarVista('vistaArandanosApp', 'brix')">🍯 Grados Brix</button>
             <button class="btn-secondary" style="background-color: #fd7e14;" onclick="cambiarVista('vistaArandanosApp', 'diametros')">📏 Diámetros</button>
@@ -269,6 +270,30 @@
             <div class="form-group"><label>Tipo de Fruta:</label><select id="postFruta"><option value="Tipo 1">Tipo 1</option><option value="Tipo 2">Tipo 2</option><option value="Tipo 3">Tipo 3</option></select></div>
             <div class="form-group"><label>Variedad:</label><select id="postVariedad"><option value="BILOXI">BILOXI</option><option value="SHARPBLUE">SHARPBLUE</option><option value="EMERALD">EMERALD</option><option value="VICTORIA">VICTORIA</option><option value="LEGACY">LEGACY</option><option value="RIBBON">RIBBON</option><option value="VENTURA">VENTURA</option><option value="ATLAS">ATLAS</option><option value="BIANCA">BIANCA</option></select></div>
             <button id="btnGuardarPost" class="btn-warning" onclick="enviarPostcosecha()">Guardar Postcosecha</button>
+        </div>
+
+        <!-- MÓDULO CAUSAS DE TIPO 3 -->
+        <div id="subModuloCausasTipo3" class="sub-vista" style="display:none;">
+            <h3>Causas de Tipo 3</h3>
+            <div id="alertaCausasTipo3Pendientes" class="alerta-offline" style="display:none;"></div>
+            <div class="form-group"><label>Fecha de Monitoreo:</label><input type="date" id="t3FechaMonitoreo"></div>
+            <div class="form-group"><label>Fecha de Cosecha:</label><input type="date" id="t3FechaCosecha"></div>
+            <div class="form-group"><label>Bloque:</label><input type="text" id="t3Bloque" placeholder="Ej: Bloque A"></div>
+            <div class="form-group"><label># de Canastillas Totales de Tipo 3:</label><input type="text" id="t3CanastillasTotales" placeholder="Ej: 10"></div>
+            <div class="form-group"><label># de Canastillas Monitoreadas:</label><input type="text" id="t3CanastillasMonitoreadas" placeholder="Ej: 4"></div>
+            <div class="form-group"><label>Peso:</label><input type="text" id="t3Peso" placeholder="Ej: 12,5"></div>
+            <div class="form-group"><label>Causas de Tipo 3:</label>
+                <select id="t3Causa">
+                    <option value="">-- Seleccione una causa --</option>
+                    <option value="Blanda">Blanda</option>
+                    <option value="Desvenado">Desvenado</option>
+                    <option value="Fruta Pequeña">Fruta Pequeña</option>
+                    <option value="Desecho">Desecho</option>
+                    <option value="Daño Por Maquina">Daño Por Maquina</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Observaciones:</label><textarea id="t3Observaciones" rows="2" placeholder="Escriba aquí..."></textarea></div>
+            <button id="btnGuardarCausasTipo3" class="btn-danger" onclick="enviarCausasTipo3()">Guardar Causa Tipo 3</button>
         </div>
 
         <div id="subModuloRendimiento" class="sub-vista" style="display:none;">
@@ -396,7 +421,7 @@
     </div>
 
     <!-- Indicador de Versión Actualizado -->
-    <div class="version-footer">Versión 2.10</div>
+    <div class="version-footer">Versión 1.99</div>
 </div>
 
 <div id="modalDetalles">
@@ -434,7 +459,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         let hoy = new Date().toISOString().split('T')[0];
-        ['postFecha', 'rendFecha', 'podaFecha', 'frioFecha', 'sfFecha', 'causaFecha', 'cmFechaCreacion', 'cmFechaEntregaNueva', 'brixFecha', 'diamFecha'].forEach(id => {
+        ['postFecha', 't3FechaMonitoreo', 't3FechaCosecha', 'rendFecha', 'podaFecha', 'frioFecha', 'sfFecha', 'causaFecha', 'cmFechaCreacion', 'cmFechaEntregaNueva', 'brixFecha', 'diamFecha'].forEach(id => {
             if(document.getElementById(id)) document.getElementById(id).value = hoy;
         });
         
@@ -527,6 +552,7 @@
             document.querySelectorAll('.sub-vista').forEach(el => el.style.display = 'none');
             if (subModulo === 'arandanos') document.getElementById('subModuloArandanos').style.display = 'block';
             else if (subModulo === 'postcosecha') document.getElementById('subModuloPostcosecha').style.display = 'block';
+            else if (subModulo === 'causastipo3') document.getElementById('subModuloCausasTipo3').style.display = 'block';
             else if (subModulo === 'rendimiento') document.getElementById('subModuloRendimiento').style.display = 'block';
             else if (subModulo === 'poda') document.getElementById('subModuloPoda').style.display = 'block';
             else if (subModulo === 'horasfrio') document.getElementById('subModuloHorasFrio').style.display = 'block';
@@ -777,6 +803,32 @@
         }, 'btnGuardarPost');
     }
 
+    function enviarCausasTipo3() {
+        let datos = {
+            accion: "guardar_causas_tipo3",
+            fechaMonitoreo: document.getElementById('t3FechaMonitoreo').value,
+            fechaCosecha: document.getElementById('t3FechaCosecha').value,
+            bloque: document.getElementById('t3Bloque').value.trim(),
+            canastillasTotales: parsearNumero(document.getElementById('t3CanastillasTotales').value),
+            canastillasMonitoreadas: parsearNumero(document.getElementById('t3CanastillasMonitoreadas').value),
+            peso: parsearNumero(document.getElementById('t3Peso').value),
+            causaTipo3: document.getElementById('t3Causa').value,
+            observaciones: document.getElementById('t3Observaciones').value.trim()
+        };
+        if (!datos.fechaMonitoreo || !datos.fechaCosecha || !datos.bloque || !datos.causaTipo3) {
+            alert("Complete los campos obligatorios (fecha de monitoreo, fecha de cosecha, bloque y causa de tipo 3).");
+            return;
+        }
+        guardarDatosUltraRapido(datos, 'causastipo3Pendientes', () => {
+            document.getElementById('t3Bloque').value = "";
+            document.getElementById('t3CanastillasTotales').value = "";
+            document.getElementById('t3CanastillasMonitoreadas').value = "";
+            document.getElementById('t3Peso').value = "";
+            document.getElementById('t3Causa').value = "";
+            document.getElementById('t3Observaciones').value = "";
+        }, 'btnGuardarCausasTipo3');
+    }
+
     function enviarHorasFrio() {
         let datos = { accion: "guardar_horas_frio", fechaRegistro: document.getElementById('frioFecha').value, horasFrio: parsearNumero(document.getElementById('frioCantidad').value) };
         if (!datos.fechaRegistro) { alert("Ingrese fecha."); return; }
@@ -934,7 +986,8 @@
         sincronizandoAhora = true; 
         await sincronizarColaSegura('sfPendientes'); await sincronizarColaSegura('rendimientosPendientes');
         await sincronizarColaSegura('podaPendientes');
-        await sincronizarColaSegura('postcosechaPendientes'); await sincronizarColaSegura('frioPendientes');
+        await sincronizarColaSegura('postcosechaPendientes'); await sincronizarColaSegura('causastipo3Pendientes');
+        await sincronizarColaSegura('frioPendientes');
         await sincronizarColaSegura('causasPendientes'); await sincronizarColaSegura('contramuestrasPendientes');
         await sincronizarColaSegura('brixPendientes'); await sincronizarColaSegura('diametrosPendientes');
         actualizarTodasLasAlertasOffline(); sincronizandoAhora = false; 
@@ -960,6 +1013,7 @@
         configurarAlerta('rendimientosPendientes', 'alertaRendPendientes', 'Rendimientos Arándanos', 'rendarandanos');
         configurarAlerta('podaPendientes', 'alertaPodaPendientes', 'Rendimientos Poda', 'poda');
         configurarAlerta('postcosechaPendientes', 'alertaPostPendientes', 'Postcosecha', 'postcosecha');
+        configurarAlerta('causastipo3Pendientes', 'alertaCausasTipo3Pendientes', 'Causas de Tipo 3', 'causastipo3');
         configurarAlerta('frioPendientes', 'alertaFrioPendientes', 'Horas Frío', 'frio');
         configurarAlerta('causasPendientes', 'alertaCausasPendientes', 'Causas Nacional', 'causas');
         configurarAlerta('contramuestrasPendientes', 'alertaContramuestrasPendientes', 'Contramuestras', 'contramuestras');
@@ -980,7 +1034,7 @@
 
     function mostrarModalDetalles(tipo) {
         let titulo = "Detalles Cola Local"; let html = ""; let datos = JSON.parse(localStorage.getItem(tipo + 'Pendientes')) || [];
-        datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1}</strong> - ${d.operario || d.nombre || d.variedad || d.bloque || 'Registro'}</div>`; });
+        datos.forEach((d, i) => { html += `<div class="item-detalle"><strong>#${i+1}</strong> - ${d.causaTipo3 || d.operario || d.nombre || d.variedad || d.bloque || 'Registro'}</div>`; });
         if (datos.length === 0) html = "<p style='text-align:center;'>Vacío</p>";
         document.getElementById('modalTitulo').innerText = titulo;
         document.getElementById('listaDetallesPendientes').innerHTML = html;
